@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center - User Credentials Registry</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        earth: {
+                            50: '#FDFBF7',
+                            100: '#FAEDCD',
+                            200: '#E9D8A6',
+                            600: '#8C6239',
+                            700: '#6F4E37',
+                            800: '#4A3E3D',
+                            900: '#2E2522',
+                            clay: '#A26952',
+                            sand: '#D4A373'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style> body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; } </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Menu (Admin Access) -->
+    <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
+        <div>
+            <div class="p-6 border-b border-earth-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-earth-clay rounded-xl flex items-center justify-center font-bold text-lg text-white shadow-md">AD</div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-wide">ผู้ดูแลระบบสารสนเทศ</h1>
+                    <p class="text-[11px] text-earth-sand uppercase tracking-wider">Naresuan Science</p>
+                </div>
+            </div>
+            <nav class="p-4 space-y-1.5">
+                <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm transition-all font-medium">
+                    <i class="fas fa-users-cog text-sm"></i> บริหารจัดการรายชื่อผู้ใช้
+                </a>
+                <a href="management.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 transition-all text-sm">
+                    <i class="fas fa-chart-pie text-sm"></i> สลับไปมุมมองผู้บริหาร
+                </a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-earth-800">
+            <button onclick="location.href='index.html'" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-red-500/10 rounded-lg transition-all">
+                <i class="fas fa-sign-out-alt"></i> ออกจากระบบหลัก
+            </button>
+        </div>
+    </aside>
+
+    <!-- Content Area -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-16 bg-white border-b border-earth-100 flex items-center justify-between px-8 shrink-0 z-10">
+            <h2 class="text-base font-bold text-earth-900"><i class="fas fa-user-shield text-earth-clay"></i> ระบบจัดการสิทธิ์ บัญชีรายชื่อ และการกรองหน่วยงานคณะ</h2>
+            <button onclick="openUserModal()" class="bg-earth-clay hover:bg-earth-700 text-white text-xs font-semibold px-4 py-2 rounded-xl transition-all shadow-sm">
+                <i class="fas fa-user-plus mr-1"></i> เพิ่มบัญชีผู้ใช้งานใหม่
+            </button>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-6">
+            <!-- Table Container -->
+            <div class="bg-white rounded-2xl border border-earth-100 shadow-sm overflow-hidden">
+                <div class="p-4 border-b bg-earth-50/50 flex justify-between items-center">
+                    <span class="text-xs font-bold text-earth-900">ทะเบียนบัญชีผู้ใช้งานระบบนิเวศ Smart Admin</span>
+                    <button onclick="fetchUsers()" class="text-xs bg-white border px-3 py-1.5 rounded-lg hover:bg-gray-50 text-earth-700 font-medium shadow-sm"><i class="fas fa-sync-alt mr-1"></i> รีเฟรชตาราง</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-earth-50/20 border-b text-xs font-bold text-earth-700">
+                                <th class="p-4">รหัสพนักงาน</th>
+                                <th class="p-4">Username</th>
+                                <th class="p-4">รหัสผ่าน</th>
+                                <th class="p-4">ชื่อ - นามสกุล</th>
+                                <th class="p-4">หน่วยงานหลัก</th>
+                                <th class="p-4">ระดับสิทธิ์ (Role)</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="adminTableBody">
+                            <tr><td colspan="7" class="p-8 text-center text-gray-400">กำลังเชื่อมต่อข้อมูลจาก Google Sheets backend...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- User Modal Dialog (Add / Edit) -->
+    <div id="userModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-white w-[450px] p-6 rounded-2xl shadow-xl space-y-4 border border-earth-100">
+            <h3 class="text-sm font-bold text-earth-900" id="modalTitle">บันทึกข้อมูลและแก้ไขบัญชีผู้ใช้งาน</h3>
+            <input type="hidden" id="userId">
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Username</label>
+                    <input type="text" id="userUsername" class="w-full border rounded-xl p-2.5 bg-gray-50 text-earth-900 focus:outline-none focus:border-earth-clay">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">Password</label>
+                    <input type="text" id="userPassword" class="w-full border rounded-xl p-2.5 bg-gray-50 text-earth-900 focus:outline-none focus:border-earth-clay">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">ชื่อ - นามสกุล บุคลากร</label>
+                    <input type="text" id="userName" class="w-full border rounded-xl p-2.5 bg-gray-50 text-earth-900 focus:outline-none focus:border-earth-clay">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">หน่วยงานสังเคราะห์ในคณะ</label>
+                    <select id="userDepartment" class="w-full border rounded-xl p-2.5 bg-gray-50 text-earth-900 focus:outline-none">
+                        <option value="งานธุรการ">งานธุรการ</option>
+                        <option value="งานการเงินและพัสดุ">งานการเงินและพัสดุ</option>
+                        <option value="โครงการ วมว.">โครงการ วมว.</option>
+                        <option value="งานนโยบายและแผน">งานนโยบายและแผน</option>
+                        <option value="งานบริการการศึกษา">งานบริการการศึกษา</option>
+                        <option value="งานห้องปฏิบัติการ">งานห้องปฏิบัติการ</option>
+                        <option value="งานกิจการนิสิตและศิษย์เก่าสัมพันธ์">งานกิจการนิสิตและศิษย์เก่าสัมพันธ์</option>
+                        <option value="งานกิจการนิสิต">งานกิจการนิสิต</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">ระดับสิทธิ์ (Role)</label>
+                    <select id="userRole" class="w-full border rounded-xl p-2.5 bg-gray-50 text-earth-900 focus:outline-none">
+                        <option value="staff">staff (เจ้าหน้าที่สังเกตการณ์/เข้าเรียน)</option>
+                        <option value="admin">admin (ผู้ดูแลระบบหลังบ้านและฐานข้อมูล)</option>
+                        <option value="management">management (ผู้บริหาร/ดูแดชบอร์ดสรุปภาพรวม)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeUserModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-xs font-medium">ยกเลิก</button>
+                <button onclick="saveUser()" class="px-4 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-xs font-medium">บันทึกข้อมูลหลัก</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let gasUrl = "";
+
+        async function initConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                gasUrl = config.GAS_WEB_APP_URL;
+                fetchUsers();
+            } catch (err) {
+                console.error(err);
+                alert("ระบบขัดข้อง: ไม่สามารถเชื่อมกับ Vercel Env Variables ได้");
+            }
+        }
+
+        async function fetchUsers() {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400"><i class="fas fa-spinner fa-spin mr-2"></i>กำลังดึงข้อมูลฐานข้อมูลผู้ใช้เรียบร้อย...</td></tr>`;
+            try {
+                const response = await fetch(gasUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "getAdminData" })
+                });
+                const resData = await response.json();
+                if(resData.status === "success") {
+                    renderTable(resData.users);
+                } else {
+                    alert(resData.message);
+                }
+            } catch(e) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-red-500">กรุณาอัปโหลดการเชื่อมหลังบ้าน หรือรอการตั้งค่า CORS สิทธิ์ API แบบแอปสำเร็จ</td></tr>`;
+            }
+        }
+
+        function renderTable(users) {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+            users.forEach(u => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-mono font-semibold">${u.id}</td>
+                        <td class="p-4 font-bold text-earth-700">${u.username}</td>
+                        <td class="p-4 text-gray-500">${u.password}</td>
+                        <td class="p-4 font-semibold">${u.name}</td>
+                        <td class="p-4">${u.department}</td>
+                        <td class="p-4"><span class="px-2 py-0.5 rounded-md font-bold uppercase text-[10px] ${u.role==='admin'?'bg-red-100 text-red-700':u.role==='management'?'bg-purple-100 text-purple-700':'bg-blue-100 text-blue-700'}">${u.role}</span></td>
+                        <td class="p-4 text-center">
+                            <button onclick='openUserModal(${JSON.stringify(u)})' class="text-blue-500 hover:text-blue-700 mr-2 shadow-sm border p-1 rounded-md"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteUser('${u.id}')" class="text-red-500 hover:text-red-700 shadow-sm border p-1 rounded-md"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openUserModal(user = null) {
+            if(user) {
+                document.getElementById('modalTitle').innerText = "แก้ไขข้อมูลบุคลากรองค์กร " + user.id;
+                document.getElementById('userId').value = user.id;
+                document.getElementById('userUsername').value = user.username;
+                document.getElementById('userPassword').value = user.password;
+                document.getElementById('userName').value = user.name;
+                document.getElementById('userDepartment').value = user.department;
+                document.getElementById('userRole').value = user.role;
+            } else {
+                document.getElementById('modalTitle').innerText = "ลงทะเบียนเพิ่มบัญชีผู้ใช้งานระบบใหม่";
+                document.getElementById('userId').value = "";
+                document.getElementById('userUsername').value = "";
+                document.getElementById('userPassword').value = "";
+                document.getElementById('userName').value = "";
+                document.getElementById('userDepartment').value = "งานธุรการ";
+                document.getElementById('userRole').value = "staff";
+            }
+            document.getElementById('userModal').classList.remove('hidden');
+        }
+
+        function closeUserModal() { document.getElementById('userModal').classList.add('hidden'); }
+
+        async function saveUser() {
+            let u = {
+                id: document.getElementById('userId').value,
+                username: document.getElementById('userUsername').value,
+                password: document.getElementById('userPassword').value,
+                name: document.getElementById('userName').value,
+                department: document.getElementById('userDepartment').value,
+                role: document.getElementById('userRole').value
+            };
+
+            if(!u.username || !u.password || !u.name) {
+                alert("กรุณากรอกข้อมูลสำคัญให้ครบถ้วนก่อนทำการบันทึกหลัก");
+                return;
+            }
+
+            try {
+                const response = await fetch(gasUrl, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: "saveUser", user: u })
+                });
+                const result = await response.json();
+                if(result.status === "success") {
+                    alert(result.message);
+                    closeUserModal();
+                    fetchUsers();
+                }
+            } catch(e) { alert("เชื่อมต่อบันทึกข้อมูลล้มเหลว"); }
+        }
+
+        async function deleteUser(id) {
+            if(confirm("⚠️ ยืนยันการลบบัญชีผู้ใช้งานรหัส " + id + " หรือไม่? ข้อมูลการเข้าเรียนจะสูญหายถาวร")) {
+                try {
+                    const response = await fetch(gasUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({ action: "deleteUser", id: id })
+                    });
+                    const result = await response.json();
+                    if(result.status === "success") {
+                        alert(result.message);
+                        fetchUsers();
+                    }
+                } catch(e) { alert("ลบข้อมูลไม่สำเร็จ"); }
+            }
+        }
+
+        window.onload = initConfig;
+    </script>
+</body>
+</html>
