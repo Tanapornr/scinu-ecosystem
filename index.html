@@ -45,7 +45,7 @@
         <div class="text-center space-y-2">
             <div class="w-14 h-14 bg-earth-900 text-white font-bold text-xl rounded-2xl flex items-center justify-center mx-auto shadow-md">NU</div>
             <h1 class="text-lg font-bold text-earth-900 tracking-wide">Smart Admin Ecosystem</h1>
-            <p class="text-xs text-earth-700">ระบบพัฒนาทักษะดิจิทัลและการประยุกต์ใช้ AI ในงานประจำวัน</p>
+            <p class="text-xs text-earth-700">ระบบการจัดการเวิร์กโฟลว์และพัฒนาทักษะดิจิทัล</p>
         </div>
 
         <div class="space-y-4">
@@ -102,16 +102,22 @@
             btn.innerText = "กำลังตรวจสอบความปลอดภัย...";
 
             try {
+                // อัปเดต Fetch API เพื่อแก้ปัญหา CORS
                 const res = await fetch(gasUrl, {
                     method: 'POST',
+                    redirect: 'follow', // บังคับให้ตาม Redirect ของ Google
+                    headers: {
+                        "Content-Type": "text/plain;charset=utf-8", // ใช้ text/plain เพื่อเลี่ยงการพรีไฟลต์ (Preflight) ของเบราว์เซอร์
+                    },
                     body: JSON.stringify({ action: "login", username: u, password: p })
                 });
+                
                 const data = await res.json();
 
                 if(data.status === "success") {
                     sessionStorage.setItem('currentUser', JSON.stringify(data.user));
                     
-                    // Client-side redirection path map based on Google Apps Script user role
+                    // แยกเส้นทางตาม Role
                     if(data.user.role === 'staff') window.location.href = "staff.html";
                     else if(data.user.role === 'admin') window.location.href = "admin.html";
                     else if(data.user.role === 'management') window.location.href = "management.html";
@@ -121,7 +127,8 @@
                     btn.innerText = "ลงชื่อเข้าสู่ใช้งานระบบ";
                 }
             } catch(e) {
-                alert("เกิดข้อผิดพลาดในการรับส่งข้อมูลกับ API หลังบ้าน กรุณาตรวจสอบการตั้งค่า CORS");
+                console.error("CORS Error details:", e);
+                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบ ID ของ Google Sheet หรือสิทธิ์การ Deploy ใน Apps Script");
                 btn.disabled = false;
                 btn.innerText = "ลงชื่อเข้าสู่ใช้งานระบบ";
             }
