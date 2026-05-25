@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - เพิ่มบทเรียนและข้อสอบ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { earth: { 50: '#FDFBF7', 100: '#FAEDCD', 600: '#8C6239', 700: '#6F4E37', 800: '#4A3E3D', 900: '#2E2522', clay: '#A26952', sand: '#D4A373' } }
+                }
+            }
+        }
+    </script>
+    <style> body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; } </style>
+</head>
+<body class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar Menu -->
+    <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
+        <div>
+            <div class="p-6 border-b border-earth-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-earth-clay rounded-xl flex items-center justify-center font-bold text-lg text-white shadow-md">AD</div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-wide">ผู้ดูแลระบบ</h1>
+                    <p class="text-[11px] text-earth-sand uppercase tracking-wider">Naresuan Science</p>
+                </div>
+            </div>
+            <nav class="p-4 space-y-1.5">
+                <a href="admin.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
+                    <i class="fas fa-users-cog text-sm"></i> บริหารจัดการรายชื่อผู้ใช้
+                </a>
+                <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm transition-all font-medium">
+                    <i class="fas fa-book-open text-sm"></i> จัดการบทเรียนและข้อสอบ
+                </a>
+                <a href="management.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
+                    <i class="fas fa-chart-pie text-sm"></i> สลับไปมุมมองผู้บริหาร
+                </a>
+            </nav>
+        </div>
+        <div class="p-4 border-t border-earth-800">
+            <button onclick="location.href='index.html'" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 rounded-lg">
+                <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Container -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        <header class="h-16 bg-white border-b border-earth-100 flex items-center justify-between px-8 shrink-0 z-10">
+            <h2 class="text-base font-bold text-earth-900"><i class="fas fa-book-reader text-earth-clay"></i> จัดการเนื้อหาหลักสูตรและคลังข้อสอบ</h2>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-6">
+            <div class="flex border-b border-gray-200">
+                <button onclick="switchTab('lessons')" id="tab-lessons" class="py-2 px-6 border-b-2 border-earth-clay text-earth-900 font-bold">จัดการบทเรียน</button>
+                <button onclick="switchTab('quizzes')" id="tab-quizzes" class="py-2 px-6 border-b-2 border-transparent text-gray-500">จัดการข้อสอบ</button>
+            </div>
+
+            <!-- Lessons Section -->
+            <div id="section-lessons" class="space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-earth-900">รายการบทเรียนทั้งหมด</h3>
+                    <button onclick="openLessonModal()" class="bg-earth-clay text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm"><i class="fas fa-plus mr-1"></i> เพิ่มบทเรียนใหม่</button>
+                </div>
+                <div class="bg-white rounded-2xl border border-earth-100 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-earth-50/20 border-b text-xs font-bold text-earth-700">
+                                <th class="p-4 w-16">ลำดับ</th><th class="p-4">ชื่อบทเรียน</th><th class="p-4">คำอธิบาย</th><th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="lessonTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Quizzes Section -->
+            <div id="section-quizzes" class="hidden space-y-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-earth-900">คลังข้อสอบ (Pre-test / Post-test)</h3>
+                    <button onclick="openQuizModal()" class="bg-earth-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm"><i class="fas fa-plus mr-1"></i> เพิ่มคำถามใหม่</button>
+                </div>
+                <div class="bg-white rounded-2xl border border-earth-100 shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-earth-50/20 border-b text-xs font-bold text-earth-700">
+                                <th class="p-4">ID</th><th class="p-4">คำถาม</th><th class="p-4">ประเภท</th><th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="quizTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Lesson Modal -->
+    <div id="lessonModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white w-[500px] p-6 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-sm font-bold text-earth-900" id="lessonModalTitle">เพิ่มบทเรียน</h3>
+            <input type="hidden" id="lessonId">
+            <div class="space-y-3 text-xs">
+                <div><label class="block font-bold mb-1">ลำดับบทเรียน</label><input type="number" id="lessonOrder" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1">ชื่อบทเรียน</label><input type="text" id="lessonTitle" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1">คำอธิบายย่อ</label><textarea id="lessonDesc" rows="3" class="w-full border rounded-xl p-2.5 bg-gray-50"></textarea></div>
+                <div><label class="block font-bold mb-1">ลิงก์วิดีโอ (YouTube URL)</label><input type="text" id="lessonUrl" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
+            </div>
+            <div class="flex justify-end gap-2"><button onclick="closeLessonModal()" class="px-4 py-2 bg-gray-100 rounded-xl text-xs">ยกเลิก</button><button onclick="saveLesson()" class="px-4 py-2 bg-earth-clay text-white rounded-xl text-xs">บันทึก</button></div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quizModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white w-[500px] p-6 rounded-2xl shadow-xl space-y-4">
+            <h3 class="text-sm font-bold text-earth-900" id="quizModalTitle">เพิ่มคำถาม</h3>
+            <input type="hidden" id="quizId">
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold mb-1">ประเภท</label>
+                    <select id="quizType" class="w-full border rounded-xl p-2.5 bg-gray-50"><option value="both">ทั้งคู่</option><option value="pre">Pre-test</option><option value="post">Post-test</option></select>
+                </div>
+                <div><label class="block font-bold mb-1">คำถาม</label><textarea id="quizQuestion" rows="2" class="w-full border rounded-xl p-2.5 bg-gray-50"></textarea></div>
+                <div><label class="block font-bold mb-1">ตัวเลือก 1</label><input type="text" id="quizOpt1" class="w-full border rounded-xl p-2 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1">ตัวเลือก 2</label><input type="text" id="quizOpt2" class="w-full border rounded-xl p-2 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1">ตัวเลือก 3</label><input type="text" id="quizOpt3" class="w-full border rounded-xl p-2 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1">ตัวเลือก 4</label><input type="text" id="quizOpt4" class="w-full border rounded-xl p-2 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1">ข้อที่ถูก (1-4)</label><input type="number" id="quizAnswer" min="1" max="4" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
+            </div>
+            <div class="flex justify-end gap-2"><button onclick="closeQuizModal()" class="px-4 py-2 bg-gray-100 rounded-xl text-xs">ยกเลิก</button><button onclick="saveQuiz()" class="px-4 py-2 bg-earth-700 text-white rounded-xl text-xs">บันทึก</button></div>
+        </div>
+    </div>
+
+    <script>
+        let gasUrl = "";
+        async function initConfig() {
+            try {
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                gasUrl = config.GAS_WEB_APP_URL;
+                fetchLessons();
+                fetchQuizzes();
+            } catch (err) { console.error(err); }
+        }
+
+        async function fetchLessons() {
+            try {
+                const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getLessons" }) });
+                const data = await res.json();
+                if(data.status === "success") renderLessons(data.lessons);
+            } catch(e){}
+        }
+
+        function renderLessons(lessons) {
+            const tbody = document.getElementById('lessonTableBody');
+            tbody.innerHTML = '';
+            lessons.forEach(l => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-4 text-center font-bold">${l.order}</td>
+                        <td class="p-4 font-semibold">${l.title}</td>
+                        <td class="p-4">${l.desc}</td>
+                        <td class="p-4 text-center">
+                            <button onclick='openLessonModal(${JSON.stringify(l)})' class="text-blue-500 border p-1 rounded mr-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteLesson('${l.id}')" class="text-red-500 border p-1 rounded"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function saveLesson() {
+            let lesson = {
+                id: document.getElementById('lessonId').value,
+                order: document.getElementById('lessonOrder').value,
+                title: document.getElementById('lessonTitle').value,
+                desc: document.getElementById('lessonDesc').value,
+                url: document.getElementById('lessonUrl').value
+            };
+            try {
+                const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "saveLesson", lesson: lesson }) });
+                const data = await res.json();
+                if(data.status === "success") { alert(data.message); closeLessonModal(); fetchLessons(); }
+            } catch(e) {}
+        }
+
+        async function deleteLesson(id) {
+            if(confirm("ลบบทเรียนนี้?")) {
+                try {
+                    const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteLesson", id: id }) });
+                    const data = await res.json();
+                    if(data.status === "success") { alert(data.message); fetchLessons(); }
+                } catch(e) {}
+            }
+        }
+
+        async function fetchQuizzes() {
+            try {
+                const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getQuizzes" }) });
+                const data = await res.json();
+                if(data.status === "success") renderQuizzes(data.quizzes);
+            } catch(e){}
+        }
+
+        function renderQuizzes(quizzes) {
+            const tbody = document.getElementById('quizTableBody');
+            tbody.innerHTML = '';
+            quizzes.forEach(q => {
+                let typeColor = q.type === 'both' ? 'bg-purple-100 text-purple-700' : (q.type === 'pre' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700');
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-4 font-mono">${q.id}</td>
+                        <td class="p-4 font-semibold">${q.question}</td>
+                        <td class="p-4"><span class="px-2 py-0.5 rounded font-bold uppercase text-[10px] ${typeColor}">${q.type}</span></td>
+                        <td class="p-4 text-center">
+                            <button onclick='openQuizModal(${JSON.stringify(q)})' class="text-blue-500 border p-1 rounded mr-2"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteQuiz('${q.id}')" class="text-red-500 border p-1 rounded"><i class="fas fa-trash-alt"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function saveQuiz() {
+            let quiz = {
+                id: document.getElementById('quizId').value,
+                type: document.getElementById('quizType').value,
+                question: document.getElementById('quizQuestion').value,
+                opt1: document.getElementById('quizOpt1').value,
+                opt2: document.getElementById('quizOpt2').value,
+                opt3: document.getElementById('quizOpt3').value,
+                opt4: document.getElementById('quizOpt4').value,
+                answer: document.getElementById('quizAnswer').value
+            };
+            try {
+                const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "saveQuiz", quiz: quiz }) });
+                const data = await res.json();
+                if(data.status === "success") { alert(data.message); closeQuizModal(); fetchQuizzes(); }
+            } catch(e) {}
+        }
+
+        async function deleteQuiz(id) {
+            if(confirm("ลบข้อสอบนี้?")) {
+                try {
+                    const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteQuiz", id: id }) });
+                    const data = await res.json();
+                    if(data.status === "success") { alert(data.message); fetchQuizzes(); }
+                } catch(e) {}
+            }
+        }
+
+        function openLessonModal(lesson = null) {
+            if(lesson) {
+                document.getElementById('lessonModalTitle').innerText = "แก้ไขบทเรียน";
+                document.getElementById('lessonId').value = lesson.id;
+                document.getElementById('lessonOrder').value = lesson.order;
+                document.getElementById('lessonTitle').value = lesson.title;
+                document.getElementById('lessonDesc').value = lesson.desc;
+                document.getElementById('lessonUrl').value = lesson.url;
+            } else {
+                document.getElementById('lessonModalTitle').innerText = "เพิ่มบทเรียนใหม่";
+                document.getElementById('lessonId').value = "";
+                document.getElementById('lessonOrder').value = "";
+                document.getElementById('lessonTitle').value = "";
+                document.getElementById('lessonDesc').value = "";
+                document.getElementById('lessonUrl').value = "";
+            }
+            document.getElementById('lessonModal').classList.remove('hidden');
+        }
+        function closeLessonModal() { document.getElementById('lessonModal').classList.add('hidden'); }
+
+        function openQuizModal(quiz = null) {
+            if(quiz) {
+                document.getElementById('quizModalTitle').innerText = "แก้ไขข้อสอบ";
+                document.getElementById('quizId').value = quiz.id;
+                document.getElementById('quizType').value = quiz.type;
+                document.getElementById('quizQuestion').value = quiz.question;
+                document.getElementById('quizOpt1').value = quiz.opt1;
+                document.getElementById('quizOpt2').value = quiz.opt2;
+                document.getElementById('quizOpt3').value = quiz.opt3;
+                document.getElementById('quizOpt4').value = quiz.opt4;
+                document.getElementById('quizAnswer').value = quiz.answer;
+            } else {
+                document.getElementById('quizModalTitle').innerText = "เพิ่มคำถามใหม่";
+                document.getElementById('quizId').value = "";
+                document.getElementById('quizQuestion').value = "";
+                document.getElementById('quizOpt1').value = "";
+                document.getElementById('quizOpt2').value = "";
+                document.getElementById('quizOpt3').value = "";
+                document.getElementById('quizOpt4').value = "";
+                document.getElementById('quizAnswer').value = "";
+            }
+            document.getElementById('quizModal').classList.remove('hidden');
+        }
+        function closeQuizModal() { document.getElementById('quizModal').classList.add('hidden'); }
+
+        function switchTab(tab) {
+            document.getElementById('section-lessons').classList.add('hidden');
+            document.getElementById('section-quizzes').classList.add('hidden');
+            document.getElementById('section-' + tab).classList.remove('hidden');
+            
+            document.getElementById('tab-lessons').className = "py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700";
+            document.getElementById('tab-quizzes').className = "py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700";
+            document.getElementById('tab-' + tab).className = "py-2 px-6 border-b-2 border-earth-clay text-earth-900 font-bold";
+        }
+        window.onload = initConfig;
+    </script>
+</body>
+</html>
