@@ -12,7 +12,18 @@
             theme: {
                 extend: {
                     colors: {
-                        earth: { 50: '#FDFBF7', 100: '#FAEDCD', 200: '#E9D8A6', 600: '#8C6239', 700: '#6F4E37', 800: '#4A3E3D', 900: '#2E2522', clay: '#A26952', sand: '#D4A373' }
+                        earth: {
+                            50: '#FDFBF7',
+                            100: '#FAEDCD',
+                            200: '#E9D8A6',
+                            600: '#8C6239',
+                            700: '#6F4E37',
+                            800: '#4A3E3D',
+                            900: '#2E2522',
+                            clay: '#A26952',
+                            sand: '#D4A373',
+                            navy: '#0B1A3A'
+                        }
                     }
                 }
             }
@@ -20,167 +31,302 @@
     </script>
     <style>
         html { font-size: 20px; }
-        body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; color: #2E2522; }
-        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.4); }
+        body { font-family: 'Sarabun', sans-serif; background-color: #F8FAFC; color: #2E2522; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(8px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #F8FAFC; }
+        ::-webkit-scrollbar-thumb { background: #D4A373; border-radius: 4px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden relative">
 
     <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
         <div>
-            <div class="p-6 border-b border-earth-800 flex items-center gap-3">
-                <div class="w-10 h-10 bg-earth-sand rounded-xl flex items-center justify-center font-bold text-lg text-earth-900 shadow-md">NU</div>
+            <div class="p-5 border-b border-earth-800 flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#F26522] rounded-xl flex items-center justify-center font-bold text-lg text-white shadow-md">NU</div>
                 <div>
-                    <h1 class="text-sm font-bold tracking-wide">คณะวิทยาศาสตร์</h1>
-                    <p class="text-[11px] text-earth-sand uppercase tracking-wider">Naresuan University</p>
+                    <h1 class="text-xs font-bold tracking-wide">มหาวิทยาลัยนเรศวร</h1>
+                    <p class="text-[10px] text-earth-sand uppercase tracking-wider">Naresuan University</p>
                 </div>
             </div>
-            <nav class="p-4 space-y-1.5" id="navigationTabs">
-                <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium">
-                    <i class="fas fa-home text-sm"></i> หน้าแรก
+            
+            <nav class="p-3 space-y-1" id="navigationTabs">
+                <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-3 p-2.5 bg-earth-clay text-white rounded-xl shadow-sm font-medium text-sm">
+                    <i class="fas fa-home w-5 text-center"></i> หน้าแรก
                 </a>
-                <a href="#" onclick="switchTab('lessons')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
-                    <i class="fas fa-book-open text-sm"></i> เริ่มเรียนบทเรียนสั้น
+                <a href="#" onclick="switchTab('lessons')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
+                    <i class="fas fa-book-open w-5 text-center"></i> เริ่มเรียน
                 </a>
-                <a href="#" onclick="switchTab('forms')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
-                    <i class="fas fa-folder text-sm"></i> คู่มือและแบบฟอร์ม
+                <a href="#" onclick="switchTab('forms')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
+                    <i class="fas fa-folder w-5 text-center"></i> คู่มือและแบบฟอร์ม
                 </a>
-                <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
-                    <i class="fas fa-check-square text-sm"></i> แบบทดสอบประเมินผล
+                <a href="#" onclick="switchTab('ai-assistant')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
+                    <i class="fas fa-comments w-5 text-center"></i> ถาม AI Assistant
+                </a>
+                <a href="#" onclick="switchTab('simulator')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
+                    <i class="fas fa-laptop-code w-5 text-center"></i> ฝึกเคสจำลอง
+                </a>
+                <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
+                    <i class="fas fa-clipboard-check w-5 text-center"></i> แบบทดสอบ
+                </a>
+                <a href="#" onclick="switchTab('results')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
+                    <i class="fas fa-chart-bar w-5 text-center"></i> ผลการเรียนรู้
                 </a>
             </nav>
         </div>
-        <div class="p-4 border-t border-earth-800 bg-earth-900/50">
-            <div class="flex items-center gap-3 mb-3">
+
+        <div class="p-4 border-t border-earth-800 bg-earth-900/40">
+            <div class="flex items-center gap-2.5 mb-3">
                 <div class="w-9 h-9 rounded-xl bg-earth-sand flex items-center justify-center text-earth-900 font-bold" id="profileInitial">U</div>
                 <div class="overflow-hidden">
                     <p class="text-xs font-semibold text-white truncate" id="profileName">กำลังโหลด...</p>
-                    <p class="text-[10px] text-earth-sand/80 truncate" id="profileDept">หน่วยงาน</p>
+                    <p class="text-[10px] text-earth-sand/70 truncate" id="profileDept">กองกลาง</p>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-red-500/10 rounded-lg">
+            <button onclick="logout()" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-red-500/10 rounded-lg transition-colors">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>
         </div>
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        <header class="h-16 bg-white border-b border-earth-100 flex items-center justify-between px-8 shrink-0 z-10">
-            <h2 class="text-base font-bold text-earth-900">NU Smart Admin Learning Ecosystem</h2>
-            <div class="text-xs text-earth-600 font-medium bg-earth-50 px-3 py-1.5 rounded-lg border border-earth-100">
-                <i class="far fa-clock"></i> เข้าสู่ระบบล่าสุด: <span id="lastLoginTime">-</span>
+        
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0 z-10">
+            <h2 class="text-sm font-bold text-gray-800">NU Smart Admin Learning Ecosystem</h2>
+            <div class="flex items-center gap-4">
+                <div class="relative text-gray-500 cursor-pointer hover:text-gray-700">
+                    <i class="far fa-bell text-lg"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">2</span>
+                </div>
+                <div class="text-gray-400 hover:text-gray-600 cursor-pointer"><i class="far fa-question-circle text-lg"></i></div>
+                <div class="flex items-center gap-2.5 pl-4 border-l border-gray-200">
+                    <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden"><img src="https://ui-avatars.com/api/?name=User&background=D4A373&color=fff" id="userHeaderAvatar" alt="Avatar"></div>
+                    <span class="text-xs font-medium text-gray-700" id="userHeaderName">เจ้าหน้าที่</span>
+                </div>
             </div>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8 space-y-6" id="viewContainer">
-            <div id="view-dashboard" class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl shadow-sm">
-                    <h2 class="text-xl font-bold text-earth-900">สวัสดี <span id="welcomeName">เจ้าหน้าที่</span> 👋</h2>
-                    <p class="text-xs text-earth-600 mt-1">ยินดีต้อนรับเข้าสู่ระบบนิเวศการเรียนรู้ดิจิทัลสำหรับการพัฒนาทักษะด้าน AI ในงานประจำวันเพื่อลดภาระงาน</p>
+        <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50 space-y-6" id="viewContainer">
+            
+            <div id="view-dashboard" class="space-y-6 animate-fadeIn">
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900 flex items-center gap-2">สวัสดี <span id="welcomeName">เจ้าหน้าที่บริหารงานทั่วไป</span> 👏</h2>
+                            <p class="text-xs text-gray-500 mt-1">ยินดีต้อนรับเข้าสู่ระบบนิเวศการเรียนรู้ดิจิทัล สำหรับงานบริหารทั่วไป</p>
+                        </div>
+                    </div>
+                    <div class="bg-earth-navy text-white p-4 rounded-2xl flex items-center justify-between gap-4 shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-earth-sand text-lg"><i class="fas fa-briefcase"></i></div>
+                            <div>
+                                <p class="text-[9px] text-gray-400 uppercase tracking-wide">หลักสูตรที่กำลังเรียน</p>
+                                <h4 class="text-xs font-bold truncate">Smart Admin Workflow</h4>
+                                <p class="text-[10px] text-gray-300 mt-0.5">เรียนรู้ขั้นตอนงานด้วยดิจิทัลและ AI อย่างรับผิดชอบ</p>
+                            </div>
+                        </div>
+                        <button onclick="switchTab('lessons')" class="bg-white/10 border border-white/20 hover:bg-white text-white hover:text-earth-navy text-[11px] font-bold px-3 py-2 rounded-xl transition-all shrink-0">ดูรายละเอียดหลักสูตร &rarr;</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Pre-test</p>
+                            <h3 class="text-xl font-bold text-emerald-600 mt-0.5" id="statPreScore">62%</h3>
+                            <p class="text-[10px] text-gray-400 mt-1">ทำเมื่อ 18 พ.ค. 2568</p>
+                        </div>
+                        <div class="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-500 text-lg"><i class="fas fa-clipboard-check"></i></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">Post-test</p>
+                            <h3 class="text-xl font-bold text-amber-500 mt-0.5" id="statPostScore">รอทำ</h3>
+                            <p class="text-[10px] text-gray-400 mt-1">ยังไม่ได้ทำแบบทดสอบหลังเรียน</p>
+                        </div>
+                        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center text-amber-500 text-lg"><i class="far fa-file-alt"></i></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">ความก้าวหน้า</p>
+                            <h3 class="text-xl font-bold text-earth-navy mt-0.5" id="statProgress">45%</h3>
+                            <p class="text-[10px] text-gray-400 mt-1">เรียนรู้ไป 3 จาก 7 ขั้นตอน</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full border-4 border-gray-100 border-t-earth-navy flex items-center justify-center text-xs font-bold text-earth-navy shadow-inner"></div>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-[11px] text-gray-500 font-semibold uppercase tracking-wide">กิจกรรมค้าง</p>
+                            <h3 class="text-xl font-bold text-red-500 mt-0.5" id="statPending">2 <span class="text-xs font-normal text-gray-400">รายการ</span></h3>
+                            <p class="text-[10px] text-gray-400 mt-1">ต้องดำเนินการให้เสร็จ</p>
+                        </div>
+                        <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center text-red-400 text-lg"><i class="far fa-calendar-check"></i></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    
+                    <div class="lg:col-span-2 bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                        <h3 class="text-xs font-bold text-gray-800 tracking-wide mb-4"><i class="fas fa-route text-earth-clay mr-1"></i> เส้นทางการเรียนรู้ (Learning Journey)</h3>
+                        <div class="flex items-center justify-between relative px-2 py-4 overflow-x-auto min-w-full">
+                            <div class="absolute top-9 left-6 right-6 h-0.5 bg-gray-200 -z-0"></div>
+                            
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10">
+                                <div class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow"><i class="fas fa-check"></i></div>
+                                <span class="text-[10px] font-bold text-gray-800">Pre-test</span>
+                                <span class="text-[9px] text-emerald-500">เสร็จสิ้น</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10">
+                                <div class="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow"><i class="fas fa-check"></i></div>
+                                <span class="text-[10px] font-bold text-gray-800 text-center">เรียนบทเรียนสั้น</span>
+                                <span class="text-[9px] text-emerald-500">เสร็จสิ้น</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10">
+                                <div class="w-9 h-9 rounded-full border-2 border-earth-navy bg-white text-earth-navy font-bold flex items-center justify-center text-xs shadow">3</div>
+                                <span class="text-[10px] font-bold text-earth-navy">ฝึกเคสงานจริง</span>
+                                <span class="text-[9px] text-earth-clay font-medium animate-pulse">กำลังดำเนินการ</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10 opacity-50">
+                                <div class="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 text-gray-400 flex items-center justify-center text-xs"><i class="fas fa-robot"></i></div>
+                                <span class="text-[10px] font-medium text-gray-600">ใช้ AI ตรวจ</span>
+                                <span class="text-[9px] text-gray-400">รอทำ</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10 opacity-50">
+                                <div class="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 text-gray-400 flex items-center justify-center text-xs"><i class="fas fa-cloud-upload-alt"></i></div>
+                                <span class="text-[10px] font-medium text-gray-600">ส่ง Project</span>
+                                <span class="text-[9px] text-gray-400">รอทำ</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10 opacity-50">
+                                <div class="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 text-gray-400 flex items-center justify-center text-xs"><i class="fas fa-file-alt"></i></div>
+                                <span class="text-[10px] font-medium text-gray-600">Post-test</span>
+                                <span class="text-[9px] text-gray-400">รอทำ</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1.5 min-w-[70px] relative z-10 opacity-50">
+                                <div class="w-9 h-9 rounded-full bg-gray-100 border border-gray-300 text-gray-400 flex items-center justify-center text-xs"><i class="fas fa-pen-nib"></i></div>
+                                <span class="text-[10px] font-medium text-gray-600">Reflection</span>
+                                <span class="text-[9px] text-gray-400">รอทำ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="text-xs font-bold text-gray-800"><i class="fas fa-robot text-earth-clay mr-1"></i> AI Assistant <span class="text-[10px] font-normal text-gray-400">ผู้ช่วยงานแอดมิน</span></h4>
+                            <span class="text-[10px] text-gray-400"><i class="fas fa-history"></i> ประวัติการสนทนา</span>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 text-amber-800 text-[10px] p-2 rounded-xl flex gap-1.5 items-start mb-2 leading-snug">
+                            <i class="fas fa-exclamation-triangle mt-0.5 shrink-0"></i> <span>ห้ามใส่ข้อมูลส่วนบุคคลหรือเอกสารลับใน AI</span>
+                        </div>
+                        <div class="relative mb-2">
+                            <input type="text" placeholder="ถามขั้นตอนงาน หรือขอให้ช่วยสร้าง Checklist..." class="w-full bg-slate-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2 text-xs focus:outline-none focus:border-earth-clay text-gray-900">
+                            <button class="absolute right-2 top-1.5 text-earth-navy hover:bg-gray-100 p-1 rounded-lg transition-all"><i class="fas fa-paper-plane text-xs"></i></button>
+                        </div>
+                        <div class="flex flex-wrap gap-1 items-center">
+                            <span class="text-[10px] text-gray-400 mr-1">ลองถามดู:</span>
+                            <button class="text-[9px] bg-slate-50 hover:bg-slate-100 border border-gray-200 px-2 py-0.5 rounded-lg text-gray-700 flex items-center gap-1"><i class="fas fa-users text-amber-500 text-[8px]"></i> การจัดประชุม</button>
+                            <button class="text-[9px] bg-slate-50 hover:bg-slate-100 border border-gray-200 px-2 py-0.5 rounded-lg text-gray-700 flex items-center gap-1"><i class="fas fa-pen text-blue-400 text-[8px]"></i> บันทึกข้อความ</button>
+                            <button class="text-[9px] bg-slate-50 hover:bg-slate-100 border border-gray-200 px-2 py-0.5 rounded-lg text-gray-700 flex items-center gap-1"><i class="fas fa-exchange-alt text-green-500 text-[8px]"></i> รับ-ส่งหนังสือ</button>
+                            <button class="text-[9px] bg-slate-50 hover:bg-slate-100 border border-gray-200 px-2 py-0.5 rounded-lg text-gray-700 flex items-center gap-1"><i class="fas fa-gavel text-purple-400 text-[8px]"></i> จริยธรรมข้อมูล</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-xs text-earth-600 font-medium">คะแนน Pre-test</p>
-                            <h3 class="text-2xl font-bold text-earth-700 mt-1" id="statPreScore">รอทำ</h3>
+                    
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                        <h4 class="text-xs font-bold text-gray-800 mb-2"><i class="fas fa-chart-bar text-earth-clay mr-1"></i> ผลการประเมิน ก่อน-หลังเรียน</h4>
+                        <div class="flex items-end justify-center gap-8 h-32 pt-4 border-b border-gray-100 relative">
+                            <div class="flex flex-col items-center gap-1 w-10">
+                                <div class="w-full bg-earth-navy rounded-t-md transition-all" style="height: 62%"></div>
+                                <span class="text-[9px] text-gray-500 text-center leading-tight">ก่อนเรียน (Pre)</span>
+                            </div>
+                            <div class="flex flex-col items-center gap-1 w-10">
+                                <div class="w-full bg-gray-200 rounded-t-md h-2"></div>
+                                <span class="text-[9px] text-gray-500 text-center leading-tight">หลังเรียน (Post)</span>
+                            </div>
+                            <div class="absolute right-2 top-2 bg-slate-50 border border-gray-200 rounded-xl p-1.5 text-center shadow-inner">
+                                <p class="text-[8px] font-medium text-gray-400 uppercase">เป้าหมาย</p>
+                                <p class="text-sm font-bold text-earth-navy">70%</p>
+                            </div>
                         </div>
-                        <div class="w-10 h-10 bg-earth-100 rounded-xl flex items-center justify-center text-earth-clay"><i class="fas fa-clipboard-list"></i></div>
+                        <p class="text-[9px] text-gray-400 mt-2 italic">* เปรียบเทียบผลเฉพาะผู้เรียนคนนี้เท่านั้น</p>
                     </div>
-                    <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-xs text-earth-600 font-medium">คะแนน Post-test</p>
-                            <h3 class="text-2xl font-bold text-earth-700 mt-1" id="statPostScore">รอทำ</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-earth-100 rounded-xl flex items-center justify-center text-earth-clay"><i class="fas fa-file-signature"></i></div>
-                    </div>
-                    <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                        <div>
-                            <p class="text-xs text-earth-600 font-medium">ความก้าวหน้าหลักสูตร</p>
-                            <h3 class="text-2xl font-bold text-earth-900 mt-1" id="statProgress">0%</h3>
-                        </div>
-                        <div class="w-10 h-10 bg-earth-100 rounded-xl flex items-center justify-center text-earth-clay"><i class="fas fa-chart-pie"></i></div>
-                    </div>
-                </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-earth-100 flex flex-col justify-between">
-                        <h3 class="text-sm font-bold text-earth-900 mb-4"><i class="fas fa-route text-earth-clay"></i> เส้นทางการเรียนรู้ (Learning Journey)</h3>
-                        <div class="flex items-center justify-between relative px-4 py-2">
-                            <div class="absolute top-7 left-10 right-10 h-0.5 bg-earth-100 -z-0"></div>
-                            <div class="flex flex-col items-center gap-2 relative z-10">
-                                <div class="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center shadow" id="step1-ico"><i class="fas fa-check text-xs"></i></div>
-                                <span class="text-[11px] font-medium text-earth-800">Pre-test</span>
-                            </div>
-                            <div class="flex flex-col items-center gap-2 relative z-10">
-                                <div class="w-10 h-10 rounded-full bg-earth-100 text-earth-600 flex items-center justify-center shadow font-bold border-2 border-white" id="step2-ico">2</div>
-                                <span class="text-[11px] font-medium text-earth-800">เรียนบทเรียนย่อย</span>
-                            </div>
-                            <div class="flex flex-col items-center gap-2 relative z-10">
-                                <div class="w-10 h-10 rounded-full bg-earth-100 text-earth-600 flex items-center justify-center shadow font-bold border-2 border-white" id="step3-ico">3</div>
-                                <span class="text-[11px] font-medium text-earth-800">ฝึกเคสจำลอง</span>
-                            </div>
-                            <div class="flex flex-col items-center gap-2 relative z-10">
-                                <div class="w-10 h-10 rounded-full bg-earth-100 text-earth-600 flex items-center justify-center shadow font-bold border-2 border-white" id="step4-ico">4</div>
-                                <span class="text-[11px] font-medium text-earth-800">Post-test & บันทึกผล</span>
-                            </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                        <div class="flex justify-between items-start">
+                            <h4 class="text-xs font-bold text-gray-800"><i class="fas fa-folder-open text-amber-500 mr-1"></i> Project งานจริงของฉัน</h4>
+                            <span class="text-[9px] bg-blue-50 text-blue-600 font-bold px-2 py-0.5 rounded-full">กำลังดำเนินการ</span>
+                        </div>
+                        <div class="my-2">
+                            <h5 class="text-xs font-bold text-gray-900">สร้างคู่มือดิจิทัล 1 หน้า</h5>
+                            <p class="text-[10px] text-gray-500 mt-0.5">เลือกงานบริหารทั่วไป 1 เรื่อง แล้วสร้างคู่มือดิจิทัลสั้นๆ สำหรับเจ้าหน้าที่ใหม่</p>
+                        </div>
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[9px] font-bold text-gray-600"><span>ความคืบหน้า</span><span>60%</span></div>
+                            <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full transition-all" style="width: 60%"></div></div>
+                        </div>
+                        <div class="flex gap-2 items-center mt-3 pt-2 border-t border-gray-100">
+                            <div class="flex-1 text-[9px] text-gray-500"><i class="far fa-calendar mr-1"></i> กำหนดส่ง: 25 พ.ค. 2568</div>
+                            <button onclick="switchTab('lessons')" class="bg-earth-navy hover:bg-earth-800 text-white text-[10px] font-medium px-3 py-1.5 rounded-xl transition-all">ไปที่งานของฉัน</button>
                         </div>
                     </div>
 
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-earth-100">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="text-xs font-bold text-earth-900 tracking-wide uppercase"><i class="fas fa-robot text-earth-clay"></i> AI Assistant</h4>
-                            <span class="text-[10px] text-earth-600 font-medium"><i class="fas fa-history"></i> ประวัติสนทนา</span>
-                        </div>
-                        <div class="bg-amber-50 text-amber-800 text-[10px] p-2 rounded-xl mb-3 flex gap-2 items-start border border-amber-200">
-                            <i class="fas fa-exclamation-triangle mt-0.5"></i> ห้ามใส่ข้อมูลส่วนบุคคล คัดลอกเอกสารลับ หรือข้อมูลสำคัญลงในระบบ AI
-                        </div>
-                        <div class="relative mb-3">
-                            <input type="text" placeholder="ถามขั้นตอนงาน..." class="w-full bg-earth-50 border border-earth-100 rounded-xl pl-3 pr-10 py-2 text-xs focus:outline-none focus:border-earth-clay text-earth-900">
-                            <button class="absolute right-2 top-1.5 text-earth-clay hover:bg-white p-1 rounded-lg"><i class="fas fa-paper-plane text-xs"></i></button>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between">
+                        <h4 class="text-xs font-bold text-gray-800 mb-2"><i class="fas fa-tasks text-red-400 mr-1"></i> กิจกรรมค้าง <span class="text-[10px] text-gray-400 font-normal">(2 รายการ)</span></h4>
+                        <div class="space-y-2 flex-1">
+                            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-gray-100 hover:bg-gray-100/50 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 bg-red-50 rounded-lg flex items-center justify-center text-red-400 text-xs"><i class="fas fa-edit"></i></div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-800">ฝึกเคสจำลอง: การจัดประชุม</p>
+                                        <p class="text-[9px] text-gray-400">กำหนดส่ง 20 พ.ค. 2568</p>
+                                    </div>
+                                </div>
+                                <span class="text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold shrink-0">ค้าง</span>
+                            </div>
+                            <div class="flex items-center justify-between p-2 bg-slate-50 rounded-xl border border-gray-100 hover:bg-gray-100/50 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 bg-purple-50 rounded-lg flex items-center justify-center text-purple-400 text-xs"><i class="fas fa-cloud-upload-alt"></i></div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-gray-800">ส่ง Project งานจริง</p>
+                                        <p class="text-[9px] text-gray-400">กำหนดส่ง 25 พ.ค. 2568</p>
+                                    </div>
+                                </div>
+                                <span class="text-[9px] bg-red-100 text-red-700 px-2 py-0.5 rounded font-bold shrink-0">ค้าง</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <div id="view-lessons" class="hidden space-y-4">
-                <div class="border-b border-earth-100 pb-2">
-                    <h3 class="text-base font-bold text-earth-900">หลักสูตร Smart Admin Workflow การใช้ AI จัดการงานประจำวัน</h3>
-                    <p class="text-xs text-earth-600">สิทธิ์พิเศษ: ท่านสามารถเข้าเรียนบทเรียนย่อยบทใดก็ได้และย้อนกลับมาทบทวนซ้ำได้ตลอดเวลา</p>
+            <div id="view-lessons" class="hidden space-y-4 animate-fadeIn">
+                <div class="border-b border-gray-200 pb-2">
+                    <h3 class="text-base font-bold text-gray-900">คอร์สฝึกอบรมการประยุกต์ใช้ AI ในงานประจำวัน</h3>
+                    <p class="text-xs text-gray-500">คุณสามารถเลือกเข้าศึกษาเนื้อหาบทเรียนได้ทันที และย้อนกลับมาดูบทเรียนเก่าได้ตลอดเวลา</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="lessonsGrid">
-                    <p class="text-xs text-gray-500 p-4">กำลังดาวน์โหลดข้อมูลบทเรียนจากฐานข้อมูลกลาง...</p>
+                    <p class="text-xs text-gray-400 p-4">กำลังดึงข้อมูลสารบบบทเรียนจากคลัง Google Sheets หลังบ้าน...</p>
                 </div>
             </div>
 
-            <div id="view-forms" class="hidden class-card p-6 rounded-2xl"><h3>คลังคู่มือปฏิบัติงานและแบบฟอร์มดิจิทัล</h3></div>
-            
-            <div id="view-tests" class="hidden space-y-4">
-                <div class="bg-white p-6 rounded-2xl border border-earth-100 shadow-sm">
-                    <h3 class="font-bold text-earth-900">แบบทดสอบวัดระดับและประเมินสมรรถนะการใช้ AI</h3>
-                    <div class="mt-4 p-4 border rounded-xl bg-earth-50 space-y-4">
-                        <div class="flex justify-between items-center border-b pb-3">
-                            <div><h4 class="text-sm font-bold">แบบทดสอบก่อนเรียน (Pre-test)</h4></div>
-                            <button onclick="takeTest('pre')" id="btnPreTest" class="bg-earth-clay text-white px-4 py-2 rounded-lg text-xs font-medium">เริ่มทำข้อสอบ</button>
-                        </div>
-                        <div class="flex justify-between items-center pt-1">
-                            <div><h4 class="text-sm font-bold">แบบทดสอบหลังเรียน (Post-test)</h4></div>
-                            <button onclick="takeTest('post')" id="btnPostTest" class="bg-earth-700 text-white px-4 py-2 rounded-lg text-xs font-medium">เริ่มทำข้อสอบ</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div id="view-forms" class="hidden glass-card p-6 rounded-2xl text-center"><h3 class="font-bold">คลังคู่มือปฏิบัติงานและแบบฟอร์มดิจิทัล</h3><p class="text-xs text-gray-500 mt-2">กำลังอัปเดตระบบสารสนเทศคลังแบบฟอร์ม</p></div>
+            <div id="view-ai-assistant" class="hidden glass-card p-6 rounded-2xl text-center"><h3 class="font-bold">ระบบสนทนา AI Assistant</h3><p class="text-xs text-gray-500 mt-2">ศูนย์วิเคราะห์คำสั่งงานแอดมินอัตโนมัติ</p></div>
+            <div id="view-simulator" class="hidden glass-card p-6 rounded-2xl text-center"><h3 class="font-bold">จำลองเคสปฏิบัติงานสถานการณ์จริง</h3><p class="text-xs text-gray-500 mt-2">ระบบส่งงานตรวจคำสั่ง Checklist</p></div>
+            <div id="view-tests" class="hidden glass-card p-6 rounded-2xl text-center"><h3 class="font-bold">แบบทดสอบสมรรถนะเทคโนโลยีดิจิทัล</h3><p class="text-xs text-gray-500 mt-2">แบบประเมินก่อนเรียนและหลังเรียน</p></div>
+            <div id="view-results" class="hidden glass-card p-6 rounded-2xl text-center"><h3 class="font-bold">รายงานผลสัมฤทธิ์ทางการเรียนรู้</h3><p class="text-xs text-gray-500 mt-2">หน้าประมวลผล Metrics ภาพรวมรายบุคคล</p></div>
+
         </div>
     </main>
 
-    <!-- Minimal Custom Alert Modal -->
     <div id="customAlert" class="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none">
         <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300 pointer-events-auto" id="customAlertBox">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0" id="alertIconBox"><i id="alertIcon" class="fas fa-info-circle"></i></div>
-                <h3 class="text-base font-bold text-earth-900" id="alertTitle">แจ้งเตือน</h3>
+                <h3 class="text-base font-bold text-gray-900" id="alertTitle">แจ้งเตือน</h3>
             </div>
-            <p class="text-sm text-earth-700 mb-6 leading-relaxed" id="alertMessage">ข้อความ</p>
+            <p class="text-sm text-gray-600 mb-6 leading-relaxed" id="alertMessage">ข้อความแจ้งเตือนระบบ</p>
             <div class="flex justify-end gap-2" id="alertButtons"></div>
         </div>
     </div>
@@ -189,7 +335,9 @@
         let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
         let gasUrl = "";
 
-        if (!currentUser) window.location.href = "index.html";
+        if (!currentUser) {
+            window.location.href = "index.html";
+        }
 
         async function initConfig() {
             try {
@@ -198,90 +346,100 @@
                 gasUrl = config.GAS_WEB_APP_URL;
                 loadUserData();
                 fetchLessons();
-            } catch (err) { console.error(err); }
+            } catch (err) {
+                console.error("Config load error:", err);
+            }
         }
 
         function loadUserData() {
             document.getElementById('profileName').innerText = currentUser.name;
+            document.getElementById('userHeaderName').innerText = currentUser.name;
             document.getElementById('welcomeName').innerText = currentUser.name;
             document.getElementById('profileDept').innerText = currentUser.department;
-            document.getElementById('profileInitial').innerText = currentUser.name.charAt(0);
-            document.getElementById('lastLoginTime').innerText = currentUser.lastLogin || "-";
+            document.getElementById('profileInitial').innerText = currentUser.name.trim().charAt(0);
+            document.getElementById('lastLoginTime').innerText = currentUser.lastLogin || "ลงทะเบียนครั้งแรก";
+            
             document.getElementById('statPreScore').innerText = currentUser.preScore ? currentUser.preScore + "%" : "รอทำ";
             document.getElementById('statPostScore').innerText = currentUser.postScore ? currentUser.postScore + "%" : "รอทำ";
             document.getElementById('statProgress').innerText = (currentUser.progress || 0) + "%";
-
-            if (currentUser.preScore) {
-                document.getElementById('btnPreTest').disabled = true;
-                document.getElementById('btnPreTest').innerText = "ทำเสร็จแล้ว (" + currentUser.preScore + "%)";
-                document.getElementById('btnPreTest').className = "bg-gray-200 text-gray-400 px-4 py-2 rounded-lg text-xs font-medium cursor-not-allowed";
-                document.getElementById('step1-ico').className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow";
-            }
-            if (currentUser.progress >= 50) {
-                document.getElementById('step2-ico').className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow";
-            }
-            if (currentUser.progress == 100) {
-                document.getElementById('step3-ico').className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow";
-            }
-            if (currentUser.postScore) {
-                document.getElementById('step4-ico').className = "w-10 h-10 rounded-full bg-green-500 text-white flex items-center justify-center shadow";
-                document.getElementById('btnPostTest').innerText = "ทำเสร็จแล้ว (" + currentUser.postScore + "%)";
-            }
         }
 
         async function fetchLessons() {
             try {
-                const response = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getLessons" }) });
+                const response = await fetch(gasUrl, {
+                    method: 'POST',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "getLessons" })
+                });
                 const resData = await response.json();
-                if(resData.status === "success") renderLessons(resData.lessons);
-            } catch(e) { console.error(e); }
+                if(resData.status === "success") {
+                    renderLessons(resData.lessons);
+                }
+            } catch(e) {
+                console.error(e);
+            }
         }
 
         function renderLessons(lessons) {
             const grid = document.getElementById('lessonsGrid');
             grid.innerHTML = '';
-            if(lessons.length === 0) {
-                grid.innerHTML = '<p class="text-xs text-gray-400 p-4">ยังไม่มีบทเรียนอัปโหลดในระบบ</p>';
+            if(!lessons || lessons.length === 0) {
+                grid.innerHTML = '<p class="text-xs text-gray-400 p-4">คลังบทเรียนหลังบ้านยังไม่มีการจัดเพิ่มข้อมูล</p>';
                 return;
             }
             lessons.forEach(l => {
                 grid.innerHTML += `
-                    <div class="bg-white p-5 rounded-2xl border border-earth-100 shadow-sm flex flex-col justify-between">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
                         <div>
                             <span class="text-[10px] uppercase font-bold text-earth-clay bg-earth-100 px-2.5 py-1 rounded-full">บทที่ ${l.order}</span>
-                            <h4 class="text-sm font-bold text-earth-900 mt-2">${l.title}</h4>
-                            <p class="text-xs text-earth-600 mt-1">${l.desc}</p>
+                            <h4 class="text-sm font-bold text-gray-900 mt-2">${l.title}</h4>
+                            <p class="text-xs text-gray-500 mt-1">${l.desc}</p>
                         </div>
-                        <button onclick="viewLesson('${l.url}')" class="w-full mt-4 bg-earth-clay hover:bg-earth-700 text-white text-xs font-medium py-2 rounded-xl transition-all">เข้าสู่บทเรียน</button>
+                        <button onclick="viewLesson('${l.url}')" class="w-full mt-4 bg-earth-clay hover:bg-earth-700 text-white text-xs font-semibold py-2 rounded-xl transition-all">เข้าสู่บทเรียน</button>
                     </div>
                 `;
             });
         }
 
         async function viewLesson(url) {
-            if(url) window.open(url, '_blank');
-            else { await showCustomAlert("ไม่มีลิงก์วิดีโอผูกกับบทเรียนนี้", "error"); return; }
-            await simulateStudyProgress();
+            if(url) {
+                window.open(url, '_blank');
+                await simulateStudyProgress();
+            } else {
+                await showCustomAlert("ไม่มีลิงก์วิดีโอผูกกับบทเรียนย่อยนี้", "error");
+            }
         }
 
         async function simulateStudyProgress() {
             let currentProg = currentUser.progress || 0;
-            let newProg = Math.min(100, currentProg + 20);
+            let newProg = Math.min(100, currentProg + 15);
             currentUser.progress = newProg;
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
             try {
-                await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "updateProgress", username: currentUser.username, progress: newProg }) });
+                await fetch(gasUrl, {
+                    method: 'POST',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({ action: "updateProgress", username: currentUser.username, progress: newProg })
+                });
             } catch(e) {}
             loadUserData();
-            await showCustomAlert("ระบบบันทึกความก้าวหน้าการเรียนสำเร็จ", "success");
+            await showCustomAlert("บันทึกความก้าวหน้าการเรียนรู้บทเรียนย่อยสำเร็จ", "success");
         }
 
         async function takeTest(type) {
-            let score = Math.floor(60 + Math.random() * 40);
-            await showCustomAlert("ส่งคำตอบสำเร็จ! ได้คะแนน: " + score + "%", "success");
+            let score = Math.floor(65 + Math.random() * 35);
+            await showCustomAlert("ส่งแบบทดสอบสำเร็จเรียบร้อย! คะแนนวิเคราะห์ผลของคุณคือ: " + score + "%", "success");
+            
             let payload = { action: "updateProgress", username: currentUser.username };
-            if (type === 'pre') { currentUser.preScore = score; payload.preScore = score; }
-            else { currentUser.postScore = score; payload.postScore = score; currentUser.progress = 100; payload.progress = 100; }
+            if (type === 'pre') {
+                currentUser.preScore = score;
+                payload.preScore = score;
+            } else {
+                currentUser.postScore = score;
+                payload.postScore = score;
+                currentUser.progress = 100;
+                payload.progress = 100;
+            }
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
             try {
                 await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
@@ -290,15 +448,20 @@
         }
 
         function switchTab(tabId) {
-            document.getElementById('view-dashboard').classList.add('hidden');
-            document.getElementById('view-lessons').classList.add('hidden');
-            document.getElementById('view-forms').classList.add('hidden');
-            document.getElementById('view-tests').classList.add('hidden');
-            document.getElementById('view-' + tabId).classList.remove('hidden');
+            const tabs = ['dashboard', 'lessons', 'forms', 'ai-assistant', 'simulator', 'tests', 'results'];
+            tabs.forEach(t => {
+                const el = document.getElementById('view-' + t);
+                if (el) el.classList.add('hidden');
+            });
+            
+            const targetView = document.getElementById('view-' + tabId);
+            if (targetView) targetView.classList.remove('hidden');
 
             const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => { btn.className = "tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm"; });
-            event.currentTarget.className = "tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium";
+            buttons.forEach(btn => {
+                btn.className = "tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all";
+            });
+            event.currentTarget.className = "tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium text-sm";
         }
 
         function showCustomAlert(message, type = 'info', title = null) {
@@ -314,7 +477,7 @@
                 messageEl.innerText = message;
                 
                 if(type === 'success') {
-                    titleEl.innerText = title || "สำเร็จ";
+                    titleEl.innerText = title || "ดำเนินการสำเร็จ";
                     iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg shrink-0";
                     icon.className = "fas fa-check";
                     btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-earth-clay">ตกลง</button>`;
@@ -364,14 +527,14 @@
             }, 300);
         }
 
-        async function logout() { 
-            const isConfirmed = await showCustomAlert("ต้องการออกจากระบบใช่หรือไม่?", "warning");
+        async function logout() {
+            const isConfirmed = await showCustomAlert("คุณต้องการลงชื่อออกจากระบบงานใช่หรือไม่?", "warning");
             if(isConfirmed) {
-                sessionStorage.clear(); 
-                window.location.href = "index.html"; 
+                sessionStorage.clear();
+                window.location.href = "index.html";
             }
         }
-        
+
         window.onload = initConfig;
     </script>
 </body>
