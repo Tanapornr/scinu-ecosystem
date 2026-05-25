@@ -17,11 +17,11 @@
         }
     </script>
     <style> 
-        html { font-size: 20px; /* เทียบเท่าการซูม 125% ทั่วทั้งหน้าเว็บ */ }
+        html { font-size: 20px; }
         body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; } 
     </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="flex h-screen overflow-hidden relative">
 
     <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
         <div>
@@ -33,19 +33,19 @@
                 </div>
             </div>
             <nav class="p-4 space-y-1.5">
-                <a href="admin.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
+                <a href="admin.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
                     <i class="fas fa-users-cog text-sm"></i> บริหารจัดการรายชื่อผู้ใช้
                 </a>
-                <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium">
+                <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium transition-all">
                     <i class="fas fa-book-open text-sm"></i> จัดการบทเรียนและข้อสอบ
                 </a>
-                <a href="management.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
+                <a href="management.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
                     <i class="fas fa-chart-pie text-sm"></i> สลับไปมุมมองผู้บริหาร
                 </a>
             </nav>
         </div>
         <div class="p-4 border-t border-earth-800">
-            <button onclick="location.href='index.html'" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300">
+            <button onclick="logout()" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-white/5 rounded-lg transition-all">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>
         </div>
@@ -58,14 +58,14 @@
 
         <div class="flex-1 overflow-y-auto p-8 space-y-6">
             <div class="flex border-b border-gray-200">
-                <button onclick="switchTab('lessons')" id="tab-lessons" class="py-2 px-6 border-b-2 border-earth-clay text-earth-900 font-bold">จัดการบทเรียน</button>
-                <button onclick="switchTab('quizzes')" id="tab-quizzes" class="py-2 px-6 border-b-2 border-transparent text-gray-500">จัดการข้อสอบ</button>
+                <button onclick="switchTab('lessons')" id="tab-lessons" class="py-2 px-6 border-b-2 border-earth-clay text-earth-900 font-bold transition-all focus:outline-none">จัดการบทเรียน</button>
+                <button onclick="switchTab('quizzes')" id="tab-quizzes" class="py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700 transition-all focus:outline-none">จัดการข้อสอบ</button>
             </div>
 
             <div id="section-lessons" class="space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold text-earth-900">รายการบทเรียนทั้งหมด</h3>
-                    <button onclick="openLessonModal()" class="bg-earth-clay text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm"><i class="fas fa-plus mr-1"></i> เพิ่มบทเรียนใหม่</button>
+                    <button onclick="openLessonModal()" class="bg-earth-clay hover:bg-earth-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm transition-all"><i class="fas fa-plus mr-1"></i> เพิ่มบทเรียนใหม่</button>
                 </div>
                 <div class="bg-white rounded-2xl border border-earth-100 shadow-sm overflow-hidden">
                     <table class="w-full text-left border-collapse">
@@ -74,7 +74,9 @@
                                 <th class="p-4 w-16">ลำดับ</th><th class="p-4">ชื่อบทเรียน</th><th class="p-4">คำอธิบาย</th><th class="p-4 text-center">จัดการ</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="lessonTableBody"></tbody>
+                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="lessonTableBody">
+                            <tr><td colspan="4" class="p-8 text-center text-gray-400">กำลังดาวน์โหลดข้อมูลบทเรียน...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -82,16 +84,18 @@
             <div id="section-quizzes" class="hidden space-y-4">
                 <div class="flex justify-between items-center">
                     <h3 class="text-lg font-bold text-earth-900">คลังข้อสอบ (Pre-test / Post-test)</h3>
-                    <button onclick="openQuizModal()" class="bg-earth-700 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm"><i class="fas fa-plus mr-1"></i> เพิ่มคำถามใหม่</button>
+                    <button onclick="openQuizModal()" class="bg-earth-700 hover:bg-earth-800 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-sm transition-all"><i class="fas fa-plus mr-1"></i> เพิ่มคำถามใหม่</button>
                 </div>
                 <div class="bg-white rounded-2xl border border-earth-100 shadow-sm overflow-hidden">
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-earth-50/20 border-b text-xs font-bold text-earth-700">
-                                <th class="p-4">ID</th><th class="p-4">คำถาม</th><th class="p-4">ประเภท</th><th class="p-4 text-center">จัดการ</th>
+                                <th class="p-4 w-16">ID</th><th class="p-4">คำถาม</th><th class="p-4">ประเภท</th><th class="p-4 text-center">จัดการ</th>
                             </tr>
                         </thead>
-                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="quizTableBody"></tbody>
+                        <tbody class="text-xs text-earth-900 divide-y divide-gray-100" id="quizTableBody">
+                            <tr><td colspan="4" class="p-8 text-center text-gray-400">กำลังดาวน์โหลดข้อมูลข้อสอบ...</td></tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -99,46 +103,56 @@
     </main>
 
     <!-- Lesson Modal -->
-    <div id="lessonModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white w-[32rem] p-6 rounded-2xl shadow-xl space-y-4">
+    <div id="lessonModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-white w-[32rem] p-6 rounded-2xl shadow-xl space-y-4 border border-earth-100">
             <h3 class="text-sm font-bold text-earth-900" id="lessonModalTitle">เพิ่มบทเรียน</h3>
             <input type="hidden" id="lessonId">
             <div class="space-y-3 text-xs">
-                <div><label class="block font-bold mb-1">ลำดับบทเรียน</label><input type="number" id="lessonOrder" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
-                <div><label class="block font-bold mb-1">ชื่อบทเรียน</label><input type="text" id="lessonTitle" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
-                <div><label class="block font-bold mb-1">คำอธิบายย่อ</label><textarea id="lessonDesc" rows="3" class="w-full border rounded-xl p-2.5 bg-gray-50"></textarea></div>
-                <div><label class="block font-bold mb-1">ลิงก์วิดีโอ (YouTube URL)</label><input type="text" id="lessonUrl" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1 text-earth-800">ลำดับบทเรียน</label><input type="number" id="lessonOrder" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
+                <div><label class="block font-bold mb-1 text-earth-800">ชื่อบทเรียน</label><input type="text" id="lessonTitle" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
+                <div><label class="block font-bold mb-1 text-earth-800">คำอธิบายย่อ</label><textarea id="lessonDesc" rows="3" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay"></textarea></div>
+                <div><label class="block font-bold mb-1 text-earth-800">ลิงก์วิดีโอ (YouTube URL)</label><input type="text" id="lessonUrl" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
             </div>
-            <div class="flex justify-end gap-2"><button onclick="closeLessonModal()" class="px-4 py-2 bg-gray-100 rounded-xl text-xs">ยกเลิก</button><button onclick="saveLesson()" class="px-4 py-2 bg-earth-clay text-white rounded-xl text-xs">บันทึก</button></div>
+            <div class="flex justify-end gap-2 pt-4">
+                <button onclick="closeLessonModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-earth-800 rounded-xl text-xs font-medium transition-all">ยกเลิก</button>
+                <button onclick="saveLesson()" class="px-4 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-xs font-medium transition-all">บันทึก</button>
+            </div>
         </div>
     </div>
 
     <!-- Quiz Modal -->
-    <div id="quizModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white w-[32rem] p-6 rounded-2xl shadow-xl space-y-4">
+    <div id="quizModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="bg-white w-[32rem] p-6 rounded-2xl shadow-xl space-y-4 border border-earth-100">
             <h3 class="text-sm font-bold text-earth-900" id="quizModalTitle">เพิ่มคำถาม</h3>
             <input type="hidden" id="quizId">
             <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block font-bold mb-1">ประเภท</label>
-                    <select id="quizType" class="w-full border rounded-xl p-2.5 bg-gray-50"><option value="both">ทั้งคู่</option><option value="pre">Pre-test</option><option value="post">Post-test</option></select>
+                    <label class="block font-bold mb-1 text-earth-800">ประเภท</label>
+                    <select id="quizType" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay">
+                        <option value="both">ทั้งคู่</option><option value="pre">Pre-test</option><option value="post">Post-test</option>
+                    </select>
                 </div>
-                <div><label class="block font-bold mb-1">คำถาม</label><textarea id="quizQuestion" rows="2" class="w-full border rounded-xl p-2.5 bg-gray-50"></textarea></div>
-                <div><label class="block font-bold mb-1">ตัวเลือก 1</label><input type="text" id="quizOpt1" class="w-full border rounded-xl p-2 bg-gray-50"></div>
-                <div><label class="block font-bold mb-1">ตัวเลือก 2</label><input type="text" id="quizOpt2" class="w-full border rounded-xl p-2 bg-gray-50"></div>
-                <div><label class="block font-bold mb-1">ตัวเลือก 3</label><input type="text" id="quizOpt3" class="w-full border rounded-xl p-2 bg-gray-50"></div>
-                <div><label class="block font-bold mb-1">ตัวเลือก 4</label><input type="text" id="quizOpt4" class="w-full border rounded-xl p-2 bg-gray-50"></div>
-                <div><label class="block font-bold mb-1">ข้อที่ถูก (1-4)</label><input type="number" id="quizAnswer" min="1" max="4" class="w-full border rounded-xl p-2.5 bg-gray-50"></div>
+                <div><label class="block font-bold mb-1 text-earth-800">คำถาม</label><textarea id="quizQuestion" rows="2" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay"></textarea></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block font-bold mb-1 text-earth-800">ตัวเลือก 1</label><input type="text" id="quizOpt1" class="w-full border border-gray-200 rounded-xl p-2 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
+                    <div><label class="block font-bold mb-1 text-earth-800">ตัวเลือก 2</label><input type="text" id="quizOpt2" class="w-full border border-gray-200 rounded-xl p-2 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
+                    <div><label class="block font-bold mb-1 text-earth-800">ตัวเลือก 3</label><input type="text" id="quizOpt3" class="w-full border border-gray-200 rounded-xl p-2 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
+                    <div><label class="block font-bold mb-1 text-earth-800">ตัวเลือก 4</label><input type="text" id="quizOpt4" class="w-full border border-gray-200 rounded-xl p-2 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
+                </div>
+                <div><label class="block font-bold mb-1 text-earth-800">ข้อที่ถูก (1-4)</label><input type="number" id="quizAnswer" min="1" max="4" class="w-full border border-gray-200 rounded-xl p-2.5 bg-gray-50 focus:outline-none focus:border-earth-clay"></div>
             </div>
-            <div class="flex justify-end gap-2"><button onclick="closeQuizModal()" class="px-4 py-2 bg-gray-100 rounded-xl text-xs">ยกเลิก</button><button onclick="saveQuiz()" class="px-4 py-2 bg-earth-700 text-white rounded-xl text-xs">บันทึก</button></div>
+            <div class="flex justify-end gap-2 pt-4">
+                <button onclick="closeQuizModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-earth-800 rounded-xl text-xs font-medium transition-all">ยกเลิก</button>
+                <button onclick="saveQuiz()" class="px-4 py-2 bg-earth-700 hover:bg-earth-800 text-white rounded-xl text-xs font-medium transition-all">บันทึก</button>
+            </div>
         </div>
     </div>
 
     <!-- Minimal Custom Alert Modal -->
-    <div id="customAlert" class="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0">
-        <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300" id="customAlertBox">
+    <div id="customAlert" class="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300 pointer-events-auto" id="customAlertBox">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" id="alertIconBox"><i id="alertIcon" class="fas fa-info-circle"></i></div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0" id="alertIconBox"><i id="alertIcon" class="fas fa-info-circle"></i></div>
                 <h3 class="text-base font-bold text-earth-900" id="alertTitle">แจ้งเตือน</h3>
             </div>
             <p class="text-sm text-earth-700 mb-6 leading-relaxed" id="alertMessage">ข้อความ</p>
@@ -169,15 +183,19 @@
         function renderLessons(lessons) {
             const tbody = document.getElementById('lessonTableBody');
             tbody.innerHTML = '';
+            if(lessons.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400">ยังไม่มีข้อมูลบทเรียน</td></tr>';
+                return;
+            }
             lessons.forEach(l => {
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="p-4 text-center font-bold">${l.order}</td>
-                        <td class="p-4 font-semibold">${l.title}</td>
-                        <td class="p-4">${l.desc}</td>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 text-center font-bold text-earth-800">${l.order}</td>
+                        <td class="p-4 font-semibold text-earth-900">${l.title}</td>
+                        <td class="p-4 text-earth-800">${l.desc}</td>
                         <td class="p-4 text-center">
-                            <button onclick='openLessonModal(${JSON.stringify(l)})' class="text-blue-500 border p-1 rounded mr-2"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteLesson('${l.id}')" class="text-red-500 border p-1 rounded"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick='openLessonModal(${JSON.stringify(l).replace(/'/g, "&apos;")})' class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all border p-1 rounded-lg mr-2"><i class="fas fa-edit w-5"></i></button>
+                            <button onclick="deleteLesson('${l.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 transition-all border p-1 rounded-lg"><i class="fas fa-trash-alt w-5"></i></button>
                         </td>
                     </tr>
                 `;
@@ -195,18 +213,22 @@
             try {
                 const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "saveLesson", lesson: lesson }) });
                 const data = await res.json();
-                if(data.status === "success") { closeLessonModal(); await showCustomAlert(data.message, "success"); fetchLessons(); }
-            } catch(e) {}
+                if(data.status === "success") { 
+                    closeLessonModal(); 
+                    await showCustomAlert(data.message, "success"); 
+                    fetchLessons(); 
+                }
+            } catch(e) { await showCustomAlert("เกิดข้อผิดพลาด", "error"); }
         }
 
         async function deleteLesson(id) {
-            const isConfirmed = await showCustomAlert("ลบบทเรียนสั้นหน่วยรหัส " + id + "?", "warning");
+            const isConfirmed = await showCustomAlert("ลบบทเรียนสั้นหน่วยรหัส " + id + " ใช่หรือไม่?", "warning");
             if(isConfirmed) {
                 try {
                     const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteLesson", id: id }) });
                     const data = await res.json();
                     if(data.status === "success") { await showCustomAlert(data.message, "success"); fetchLessons(); }
-                } catch(e) {}
+                } catch(e) { await showCustomAlert("เกิดข้อผิดพลาด", "error"); }
             }
         }
 
@@ -221,16 +243,20 @@
         function renderQuizzes(quizzes) {
             const tbody = document.getElementById('quizTableBody');
             tbody.innerHTML = '';
+            if(quizzes.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-gray-400">ยังไม่มีข้อมูลข้อสอบ</td></tr>';
+                return;
+            }
             quizzes.forEach(q => {
                 let typeColor = q.type === 'both' ? 'bg-purple-100 text-purple-700' : (q.type === 'pre' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700');
                 tbody.innerHTML += `
-                    <tr>
-                        <td class="p-4 font-mono">${q.id}</td>
-                        <td class="p-4 font-semibold">${q.question}</td>
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4 font-mono text-earth-800">${q.id}</td>
+                        <td class="p-4 font-semibold text-earth-900">${q.question}</td>
                         <td class="p-4"><span class="px-2 py-0.5 rounded font-bold uppercase text-[10px] ${typeColor}">${q.type}</span></td>
                         <td class="p-4 text-center">
-                            <button onclick='openQuizModal(${JSON.stringify(q)})' class="text-blue-500 border p-1 rounded mr-2"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteQuiz('${q.id}')" class="text-red-500 border p-1 rounded"><i class="fas fa-trash-alt"></i></button>
+                            <button onclick='openQuizModal(${JSON.stringify(q).replace(/'/g, "&apos;")})' class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all border p-1 rounded-lg mr-2"><i class="fas fa-edit w-5"></i></button>
+                            <button onclick="deleteQuiz('${q.id}')" class="text-red-500 hover:text-red-700 hover:bg-red-50 transition-all border p-1 rounded-lg"><i class="fas fa-trash-alt w-5"></i></button>
                         </td>
                     </tr>
                 `;
@@ -251,18 +277,22 @@
             try {
                 const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "saveQuiz", quiz: quiz }) });
                 const data = await res.json();
-                if(data.status === "success") { closeQuizModal(); await showCustomAlert(data.message, "success"); fetchQuizzes(); }
-            } catch(e) {}
+                if(data.status === "success") { 
+                    closeQuizModal(); 
+                    await showCustomAlert(data.message, "success"); 
+                    fetchQuizzes(); 
+                }
+            } catch(e) { await showCustomAlert("เกิดข้อผิดพลาด", "error"); }
         }
 
         async function deleteQuiz(id) {
-            const isConfirmed = await showCustomAlert("ยืนยันต้องการลบข้อสอบรหัส " + id + "?", "warning");
+            const isConfirmed = await showCustomAlert("ยืนยันต้องการลบข้อสอบรหัส " + id + " ใช่หรือไม่?", "warning");
             if(isConfirmed) {
                 try {
                     const res = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "deleteQuiz", id: id }) });
                     const data = await res.json();
                     if(data.status === "success") { await showCustomAlert(data.message, "success"); fetchQuizzes(); }
-                } catch(e) {}
+                } catch(e) { await showCustomAlert("เกิดข้อผิดพลาด", "error"); }
             }
         }
 
@@ -315,11 +345,12 @@
             document.getElementById('section-lessons').classList.add('hidden');
             document.getElementById('section-quizzes').classList.add('hidden');
             document.getElementById('section-' + tab).classList.remove('hidden');
-            document.getElementById('tab-lessons').className = "py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700";
-            document.getElementById('tab-quizzes').className = "py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700";
-            document.getElementById('tab-' + tab).className = "py-2 px-6 border-b-2 border-earth-clay text-earth-900 font-bold";
+            document.getElementById('tab-lessons').className = "py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700 transition-all focus:outline-none";
+            document.getElementById('tab-quizzes').className = "py-2 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-700 transition-all focus:outline-none";
+            document.getElementById('tab-' + tab).className = "py-2 px-6 border-b-2 border-earth-clay text-earth-900 font-bold transition-all focus:outline-none";
         }
 
+        // --- Custom Alert System ---
         function showCustomAlert(message, type = 'info', title = null) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('customAlert');
@@ -329,42 +360,66 @@
                 const iconBox = document.getElementById('alertIconBox');
                 const icon = document.getElementById('alertIcon');
                 const btnContainer = document.getElementById('alertButtons');
+                
                 messageEl.innerText = message;
+                
                 if(type === 'success') {
                     titleEl.innerText = title || "สำเร็จ";
-                    iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg shrink-0";
                     icon.className = "fas fa-check";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full">ตกลง</button>`;
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-earth-clay">ตกลง</button>`;
                 } else if (type === 'error') {
                     titleEl.innerText = title || "เกิดข้อผิดพลาด";
-                    iconBox.className = "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-lg shrink-0";
                     icon.className = "fas fa-exclamation-triangle";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-all w-full">ปิด</button>`;
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-red-400">ปิด</button>`;
                 } else if (type === 'warning') {
                     titleEl.innerText = title || "ยืนยันการดำเนินการ";
-                    iconBox.className = "w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-lg shrink-0";
                     icon.className = "fas fa-question";
                     btnContainer.innerHTML = `
-                        <button onclick="closeCustomAlert(false)" class="flex-1 px-4 py-2 bg-gray-100 text-earth-800 rounded-xl text-sm font-medium">ยกเลิก</button>
-                        <button onclick="closeCustomAlert(true)" class="flex-1 px-4 py-2 bg-earth-clay text-white rounded-xl text-sm font-medium">ยืนยัน</button>
+                        <button onclick="closeCustomAlert(false)" class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-earth-800 rounded-xl text-sm font-medium transition-all focus:outline-none">ยกเลิก</button>
+                        <button onclick="closeCustomAlert(true)" class="flex-1 px-4 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-sm font-medium transition-all focus:outline-none">ยืนยัน</button>
                     `;
                 } else {
                     titleEl.innerText = title || "แจ้งเตือนระบบ";
-                    iconBox.className = "w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg shrink-0";
                     icon.className = "fas fa-info-circle";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-clay text-white rounded-xl text-sm font-medium w-full">รับทราบ</button>`;
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-blue-400">รับทราบ</button>`;
                 }
+                
                 modal.classList.remove('hidden');
-                setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+                modal.classList.remove('pointer-events-none');
+                
+                setTimeout(() => { 
+                    modal.classList.remove('opacity-0'); 
+                    box.classList.remove('scale-95'); 
+                    const btn = btnContainer.querySelector('button:last-child');
+                    if(btn) btn.focus();
+                }, 10);
+                
                 window.currentAlertResolve = resolve;
             });
         }
+        
         function closeCustomAlert(result) {
             const modal = document.getElementById('customAlert');
             const box = document.getElementById('customAlertBox');
             modal.classList.add('opacity-0');
             box.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); if(window.currentAlertResolve) window.currentAlertResolve(result); }, 300);
+            modal.classList.add('pointer-events-none');
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                if(window.currentAlertResolve) window.currentAlertResolve(result); 
+            }, 300);
+        }
+
+        async function logout() { 
+            const isConfirmed = await showCustomAlert("ต้องการออกจากระบบใช่หรือไม่?", "warning");
+            if(isConfirmed) {
+                sessionStorage.clear(); 
+                window.location.href = "index.html"; 
+            }
         }
 
         window.onload = initConfig;
