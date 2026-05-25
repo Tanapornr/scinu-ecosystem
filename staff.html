@@ -25,9 +25,8 @@
         ::-webkit-scrollbar-track { background: #F1F5F9; }
         ::-webkit-scrollbar-thumb { background: #D4A373; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #A26952; }
-        /* สไตล์สำหรับปุ่มวิทยุ (Radio) แบบ iOS */
         .ios-radio input[type="radio"] { display: none; }
-        .ios-radio label { display: flex; items-center; padding: 12px 16px; background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: #475569; }
+        .ios-radio label { display: flex; align-items: center; padding: 12px 16px; background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: #475569; }
         .ios-radio input[type="radio"]:checked + label { background-color: #F0FDF4; border-color: #10B981; color: #047857; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1); }
     </style>
 </head>
@@ -39,7 +38,7 @@
                 <div class="w-12 h-12 bg-[#F26522] rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-md shrink-0">NU</div>
                 <div>
                     <h1 class="text-sm font-bold tracking-wide leading-tight">มหาวิทยาลัยนเรศวร</h1>
-                    <p class="text-[10px] text-earth-sand uppercase tracking-wider mt-0.5">Automation Workflow</p>
+                    <p class="text-[11px] text-earth-sand uppercase tracking-wider mt-0.5">Automation Workflow</p>
                 </div>
             </div>
             
@@ -81,7 +80,6 @@
         <div class="p-8 space-y-8 max-w-7xl mx-auto w-full" id="viewContainer">
             
             <div id="view-dashboard" class="space-y-8 animate-fadeIn">
-                
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex items-center">
                         <div>
@@ -140,7 +138,7 @@
                             <div class="flex flex-col items-center gap-3 relative z-10 w-24">
                                 <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm transition-colors" id="step1-circle"><i class="fas fa-pencil-alt"></i></div>
                                 <span class="text-xs font-bold text-gray-800 text-center">Pre-test</span>
-                                <span class="text-[10px] font-bold text-gray-400" id="step1-tag">รอทำแบบทดสอบ</span>
+                                <span class="text-[10px] font-bold text-gray-400" id="step1-tag">รอทำ</span>
                             </div>
                             <div class="flex flex-col items-center gap-3 relative z-10 w-24">
                                 <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm transition-colors" id="step2-circle"><i class="fas fa-layer-group"></i></div>
@@ -165,63 +163,69 @@
             <div id="view-lessons" class="hidden space-y-6 animate-fadeIn">
                 <div class="border-b pb-4 border-gray-200">
                     <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-layer-group text-earth-clay mr-3"></i> เนื้อหาการอบรมระบบดิจิทัลเวิร์กโฟลว์</h3>
-                    <p class="text-sm text-gray-500 mt-2">ศึกษาเนื้อหาตามลำดับเพื่อพัฒนาความเข้าใจในการใช้เครื่องมืออัตโนมัติลดภาระงาน</p>
+                    <p class="text-sm text-gray-500 mt-2">ประเมินและศึกษาเนื้อหาตามลำดับเพื่อพัฒนาความเข้าใจในการใช้เครื่องมืออัตโนมัติลดภาระงาน</p>
                 </div>
                 
-                <div id="lessonWarning" class="hidden bg-red-50 border border-red-200 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
-                    <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center text-red-500 text-2xl shadow-sm mb-4"><i class="fas fa-lock"></i></div>
-                    <h4 class="text-lg font-bold text-red-600 mb-2">กรุณาทำแบบประเมินก่อนเรียน (Pre-test)</h4>
-                    <p class="text-sm text-red-400 mb-6">คุณต้องประเมินความรู้พื้นฐานให้เสร็จสิ้นก่อน จึงจะสามารถปลดล็อกเนื้อหาบทเรียนได้</p>
-                    <button onclick="switchTab('tests')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-xl shadow-md transition-all">ไปทำ Pre-test ตอนนี้</button>
+                <div id="state-need-pre" class="hidden bg-white p-10 rounded-3xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
+                    <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner"><i class="fas fa-clipboard-list"></i></div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-3">แบบประเมินก่อนเรียน (Pre-test)</h4>
+                    <p class="text-gray-500 mb-8 max-w-lg">คุณจำเป็นต้องทำแบบประเมินก่อนเรียน เพื่อวัดระดับความรู้พื้นฐานก่อนเข้าสู่เนื้อหาบทเรียน</p>
+                    <button onclick="openQuizModal('pre')" class="bg-earth-navy hover:bg-black text-white font-bold py-4 px-10 rounded-2xl shadow-md transition-all">เริ่มทำแบบประเมิน</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="lessonsGrid">
-                    <p class="text-sm text-gray-500 p-4">กำลังโหลดข้อมูล...</p>
+                <div id="state-need-post" class="hidden bg-purple-50 p-10 rounded-3xl border border-purple-200 shadow-sm flex flex-col items-center text-center mb-8">
+                    <div class="w-20 h-20 bg-white text-purple-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm"><i class="fas fa-award"></i></div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-3">ยินดีด้วย! คุณศึกษาเนื้อหาครบ 100% แล้ว</h4>
+                    <p class="text-gray-600 mb-8 max-w-lg">ขั้นตอนสุดท้าย กรุณาทำแบบประเมินหลังเรียน (Post-test) เพื่อวัดผลสัมฤทธิ์และจบหลักสูตรอย่างสมบูรณ์</p>
+                    <button onclick="openQuizModal('post')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-2xl shadow-md transition-all">เริ่มทำแบบประเมิน Post-test</button>
+                </div>
+
+                <div id="lessonsGridWrapper" class="hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="lessonsGrid">
+                        <p class="text-sm text-gray-500 p-4">กำลังโหลดข้อมูล...</p>
+                    </div>
                 </div>
             </div>
 
             <div id="view-tests" class="hidden space-y-6 animate-fadeIn">
                 <div class="border-b pb-4 border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-chart-line text-earth-clay mr-3"></i> การประเมินและสรุปผลพัฒนาการ</h3>
-                    <p class="text-sm text-gray-500 mt-2">ทำแบบทดสอบเพื่อรับผลการประเมินส่วนบุคคลและตรวจสอบพัฒนาการ</p>
+                    <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-chart-line text-earth-clay mr-3"></i> ประเมินและสรุปผล</h3>
+                    <p class="text-sm text-gray-500 mt-2">รายงานสรุปผลสัมฤทธิ์ทางการเรียนรู้ส่วนบุคคลของคุณ</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <div class="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner"><i class="fas fa-clipboard-list"></i></div>
-                            <h4 class="text-xl font-bold text-gray-900">แบบประเมินก่อนเรียน (Pre-test)</h4>
-                            <p class="text-sm text-gray-500 mt-3 leading-relaxed">วัดระดับพื้นฐานก่อนเริ่มศึกษาเนื้อหา เพื่อประเมินความรู้เบื้องต้นก่อนการใช้งานระบบ</p>
-                        </div>
-                        <button onclick="openQuizModal('pre')" id="btnPreTest" class="mt-8 w-full bg-earth-navy hover:bg-black text-white font-bold py-4 rounded-2xl transition-all shadow-md">เริ่มทำแบบประเมิน</button>
-                    </div>
-
-                    <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <div class="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center text-2xl mb-6 shadow-inner"><i class="fas fa-award"></i></div>
-                            <h4 class="text-xl font-bold text-gray-900">แบบประเมินหลังเรียน (Post-test)</h4>
-                            <p class="text-sm text-gray-500 mt-3 leading-relaxed">ทำแบบประเมินเมื่อศึกษาเนื้อหาครบ 100% เพื่อรับผลสัมฤทธิ์หลังการเรียนรู้</p>
-                        </div>
-                        <button onclick="openQuizModal('post')" id="btnPostTest" class="mt-8 w-full bg-purple-600 text-white font-bold py-4 rounded-2xl opacity-50 cursor-not-allowed transition-all shadow-md" disabled>กรุณาเรียนให้จบ 100% ก่อนสอบ</button>
-                    </div>
-                </div>
-
-                <div class="bg-white p-10 rounded-3xl border border-gray-200 shadow-sm mt-8" id="graphSection">
-                    <h4 class="text-lg font-bold text-gray-800 mb-10 text-center"><i class="fas fa-chart-bar text-earth-clay mr-2"></i> กราฟแสดงผลพัฒนาการส่วนบุคคล</h4>
-                    <div class="flex items-end justify-center gap-24 h-64 w-full max-w-lg mx-auto relative border-b-2 border-gray-200 pb-2">
+                <div class="bg-white p-10 rounded-3xl border border-gray-200 shadow-sm">
+                    <h4 class="text-lg font-bold text-gray-800 mb-10 text-center"><i class="fas fa-chart-bar text-earth-clay mr-2"></i> กราฟเปรียบเทียบคะแนนสมรรถนะ ก่อน-หลังเรียน</h4>
+                    <div class="flex items-end justify-center gap-24 h-72 w-full max-w-lg mx-auto relative border-b-2 border-gray-200 pb-2">
                         <div class="absolute top-[30%] left-0 right-0 border-t-2 border-dashed border-gray-300 z-0"></div>
-                        <div class="absolute top-[26%] right-0 bg-slate-100 text-gray-500 font-bold text-xs px-3 py-1 rounded-full z-10 border border-gray-200 shadow-sm">เกณฑ์ 70%</div>
+                        <div class="absolute top-[26%] right-0 bg-slate-100 text-gray-500 font-bold text-xs px-3 py-1 rounded-full z-10 border border-gray-200 shadow-sm">เกณฑ์ผ่าน 70%</div>
                         
                         <div class="flex flex-col items-center gap-3 w-24 relative z-10 group">
-                            <span class="text-xl font-bold text-emerald-600 transition-opacity absolute -top-10" id="chartPreText">0%</span>
-                            <div class="w-full bg-emerald-500 rounded-t-xl transition-all duration-1000 shadow-md" id="chartPreBar" style="height: 0%"></div>
+                            <span class="text-2xl font-bold text-emerald-600 transition-opacity absolute -top-12" id="chartPreTextTab3">0%</span>
+                            <div class="w-full bg-emerald-500 rounded-t-xl transition-all duration-1000 shadow-md" id="chartPreBarTab3" style="height: 0%"></div>
                             <span class="text-sm font-bold text-gray-600 mt-3">ก่อนเรียน</span>
                         </div>
                         <div class="flex flex-col items-center gap-3 w-24 relative z-10 group">
-                            <span class="text-xl font-bold text-purple-600 transition-opacity absolute -top-10" id="chartPostText">0%</span>
-                            <div class="w-full bg-purple-500 rounded-t-xl transition-all duration-1000 shadow-md" id="chartPostBar" style="height: 0%"></div>
+                            <span class="text-2xl font-bold text-purple-600 transition-opacity absolute -top-12" id="chartPostTextTab3">0%</span>
+                            <div class="w-full bg-purple-500 rounded-t-xl transition-all duration-1000 shadow-md" id="chartPostBarTab3" style="height: 0%"></div>
                             <span class="text-sm font-bold text-gray-600 mt-3">หลังเรียน</span>
                         </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-6 mt-6">
+                    <div class="bg-emerald-50 p-6 rounded-3xl border border-emerald-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-bold text-emerald-700">คะแนน Pre-test</p>
+                            <p class="text-xs text-emerald-600/70 mt-1">คะแนนก่อนเรียน</p>
+                        </div>
+                        <h3 class="text-3xl font-bold text-emerald-600" id="summaryPreScore">รอทำ</h3>
+                    </div>
+                    <div class="bg-purple-50 p-6 rounded-3xl border border-purple-100 shadow-sm flex justify-between items-center">
+                        <div>
+                            <p class="text-sm font-bold text-purple-700">คะแนน Post-test</p>
+                            <p class="text-xs text-purple-600/70 mt-1">คะแนนหลังเรียน</p>
+                        </div>
+                        <h3 class="text-3xl font-bold text-purple-600" id="summaryPostScore">รอทำ</h3>
                     </div>
                 </div>
             </div>
@@ -243,7 +247,7 @@
         </div>
         <div class="bg-white border-t border-gray-200 p-6 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
             <div class="max-w-3xl mx-auto flex justify-between items-center">
-                <p class="text-sm text-gray-500 font-medium">กรุณาตอบคำถามให้ครบทุกข้อก่อนส่งคำตอบ</p>
+                <p class="text-sm text-gray-500 font-medium">กรุณาตอบให้ครบทุกข้อก่อนกดส่งคำตอบ</p>
                 <button onclick="submitQuiz()" class="bg-earth-navy hover:bg-black text-white font-bold py-3 px-10 rounded-xl shadow-md transition-all">ส่งคำตอบและดูผลคะแนน</button>
             </div>
         </div>
@@ -277,7 +281,6 @@
                 const config = await res.json();
                 gasUrl = config.GAS_WEB_APP_URL;
                 loadUserData();
-                // โหลดบทเรียนและข้อสอบมาเตรียมไว้พร้อมกัน
                 fetchLessonsAndQuizzes();
             } catch (err) { console.error("Config load error:", err); }
         }
@@ -299,6 +302,8 @@
             document.getElementById('statPreScore').innerText = pre ? pre + "%" : "รอทำ";
             document.getElementById('statPostScore').innerText = post ? post + "%" : "รอทำ";
             document.getElementById('statProgress').innerText = prog + "%";
+            document.getElementById('summaryPreScore').innerText = pre ? pre + "%" : "รอทำ";
+            document.getElementById('summaryPostScore').innerText = post ? post + "%" : "รอทำ";
 
             // Journey Line & Circle Logic
             let linePercent = 0;
@@ -306,48 +311,73 @@
                 linePercent = 50;
                 document.getElementById('step1-circle').className = "w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl border-[5px] border-emerald-100 shadow-md";
                 document.getElementById('step1-tag').innerText = "เสร็จสิ้น";
-                document.getElementById('step1-tag').className = "text-[10px] font-bold text-emerald-500";
-                
-                document.getElementById('btnPreTest').disabled = true;
-                document.getElementById('btnPreTest').innerText = "คุณทำไปแล้ว (" + pre + "%)";
-                document.getElementById('btnPreTest').className = "mt-8 w-full bg-gray-100 text-gray-400 font-bold py-4 rounded-2xl cursor-not-allowed";
+                document.getElementById('step1-tag').className = "text-[10px] font-bold text-emerald-500 mt-1";
             } else {
-                // ถ้ายังไม่ทำ Pre-test ให้แสดงคำเตือนแทนบทเรียน
-                document.getElementById('lessonsGrid').classList.add('hidden');
-                document.getElementById('lessonWarning').classList.remove('hidden');
+                document.getElementById('step1-circle').className = "w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm";
+                document.getElementById('step1-tag').innerText = "รอทำแบบทดสอบ";
+                document.getElementById('step1-tag').className = "text-[10px] font-bold text-gray-400 mt-1";
             }
             
             if (lessonsList.length > 0 && prog >= 100) {
                 linePercent = 100;
                 document.getElementById('step2-circle').className = "w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl border-[5px] border-emerald-100 shadow-md";
                 document.getElementById('step2-tag').innerText = "เสร็จสิ้น";
-                document.getElementById('step2-tag').className = "text-[10px] font-bold text-emerald-500";
-                
-                if(!post) {
-                    document.getElementById('btnPostTest').disabled = false;
-                    document.getElementById('btnPostTest').className = "mt-8 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 rounded-2xl shadow-md transition-all";
-                    document.getElementById('btnPostTest').innerText = "เริ่มทำแบบประเมิน";
-                }
+                document.getElementById('step2-tag').className = "text-[10px] font-bold text-emerald-500 mt-1";
             } else if (prog > 0 && pre) {
                 document.getElementById('step2-tag').innerText = `กำลังเรียน (${prog}%)`;
-                document.getElementById('step2-tag').className = "text-[10px] font-bold text-earth-clay";
+                document.getElementById('step2-tag').className = "text-[10px] font-bold text-earth-clay mt-1";
+            } else {
+                document.getElementById('step2-circle').className = "w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm";
+                document.getElementById('step2-tag').innerText = "รอเข้าเรียน";
+                document.getElementById('step2-tag').className = "text-[10px] font-bold text-gray-400 mt-1";
             }
 
             if (post) {
                 linePercent = 100;
                 document.getElementById('step3-circle').className = "w-14 h-14 rounded-full bg-purple-500 text-white flex items-center justify-center text-xl border-[5px] border-purple-100 shadow-md";
                 document.getElementById('step3-tag').innerText = "เสร็จสิ้น";
-                document.getElementById('step3-tag').className = "text-[10px] font-bold text-purple-500";
-                
-                document.getElementById('btnPostTest').disabled = true;
-                document.getElementById('btnPostTest').innerText = "คุณทำไปแล้ว (" + post + "%)";
-                document.getElementById('btnPostTest').className = "mt-8 w-full bg-gray-100 text-gray-400 font-bold py-4 rounded-2xl cursor-not-allowed";
+                document.getElementById('step3-tag').className = "text-[10px] font-bold text-purple-500 mt-1";
+            } else {
+                document.getElementById('step3-circle').className = "w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm";
+                document.getElementById('step3-tag').innerText = "รอประเมินผล";
+                document.getElementById('step3-tag').className = "text-[10px] font-bold text-gray-400 mt-1";
             }
 
             document.getElementById('journeyLine').style.width = linePercent + "%";
 
+            // Dashboard Chart Updates
             if (pre) { document.getElementById('chartPreBar').style.height = pre + "%"; document.getElementById('chartPreText').innerText = pre + "%"; }
+            else { document.getElementById('chartPreBar').style.height = "0%"; document.getElementById('chartPreText').innerText = "0%"; }
+            
             if (post) { document.getElementById('chartPostBar').style.height = post + "%"; document.getElementById('chartPostText').innerText = post + "%"; }
+            else { document.getElementById('chartPostBar').style.height = "0%"; document.getElementById('chartPostText').innerText = "0%"; }
+
+            // Tests Tab Chart Updates
+            if (pre) { document.getElementById('chartPreBarTab3').style.height = pre + "%"; document.getElementById('chartPreTextTab3').innerText = pre + "%"; }
+            else { document.getElementById('chartPreBarTab3').style.height = "0%"; document.getElementById('chartPreTextTab3').innerText = "0%"; }
+            
+            if (post) { document.getElementById('chartPostBarTab3').style.height = post + "%"; document.getElementById('chartPostTextTab3').innerText = post + "%"; }
+            else { document.getElementById('chartPostBarTab3').style.height = "0%"; document.getElementById('chartPostTextTab3').innerText = "0%"; }
+
+            // Lesson Flow Logistics Updates
+            const statePre = document.getElementById('state-need-pre');
+            const statePost = document.getElementById('state-need-post');
+            const wrapper = document.getElementById('lessonsGridWrapper');
+
+            statePre.classList.add('hidden');
+            statePost.classList.add('hidden');
+            wrapper.classList.add('hidden');
+
+            if (!pre) {
+                statePre.classList.remove('hidden');
+            } else if (prog < 100) {
+                wrapper.classList.remove('hidden');
+            } else if (prog >= 100 && !post) {
+                statePost.classList.remove('hidden');
+                wrapper.classList.remove('hidden'); 
+            } else {
+                wrapper.classList.remove('hidden');
+            }
 
             updatePendingList(pre, prog, post);
         }
@@ -359,7 +389,7 @@
 
             if (!pre) {
                 count++;
-                list.innerHTML += `<div class="flex justify-between items-center p-5 bg-red-50 rounded-2xl border border-red-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-red-100 text-red-500 flex items-center justify-center"><i class="fas fa-clipboard-list text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">ทำ Pre-test</p><p class="text-xs text-gray-500">กรุณาประเมินก่อนเข้าเรียน</p></div></div><button onclick="switchTab('tests')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold">ไปทดสอบ</button></div>`;
+                list.innerHTML += `<div class="flex justify-between items-center p-5 bg-red-50 rounded-2xl border border-red-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-red-100 text-red-500 flex items-center justify-center"><i class="fas fa-clipboard-list text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">ทำ Pre-test</p><p class="text-xs text-gray-500">กรุณาประเมินก่อนเข้าเรียน</p></div></div><button onclick="switchTab('lessons')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold">ดำเนินการ</button></div>`;
             }
             if (prog < 100 && pre && lessonsList.length > 0) {
                 count++;
@@ -367,7 +397,7 @@
             }
             if (prog >= 100 && !post && lessonsList.length > 0) {
                 count++;
-                list.innerHTML += `<div class="flex justify-between items-center p-5 bg-purple-50 rounded-2xl border border-purple-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-award text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">ประเมิน Post-test</p><p class="text-xs text-gray-500">ทดสอบหลังเรียนครบ 100%</p></div></div><button onclick="switchTab('tests')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold">ไปสอบ</button></div>`;
+                list.innerHTML += `<div class="flex justify-between items-center p-5 bg-purple-50 rounded-2xl border border-purple-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center"><i class="fas fa-award text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">ประเมิน Post-test</p><p class="text-xs text-gray-500">ทดสอบหลังเรียนครบ 100%</p></div></div><button onclick="switchTab('lessons')" class="text-xs bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-bold">ทำข้อสอบ</button></div>`;
             }
 
             if (count === 0) {
@@ -378,20 +408,14 @@
 
         async function fetchLessonsAndQuizzes() {
             try {
-                // Fetch Lessons
                 const resL = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getLessons" }) });
                 const dataL = await resL.json();
-                if(dataL.status === "success") {
-                    lessonsList = dataL.lessons;
-                    renderLessons();
-                }
+                if(dataL.status === "success") { lessonsList = dataL.lessons; renderLessons(); }
 
-                // Fetch Quizzes
                 const resQ = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getQuizzes" }) });
                 const dataQ = await resQ.json();
-                if(dataQ.status === "success") {
-                    allQuizzes = dataQ.quizzes;
-                }
+                if(dataQ.status === "success") { allQuizzes = dataQ.quizzes; }
+                
                 updateVisuals();
             } catch(e) { console.error(e); }
         }
@@ -399,11 +423,6 @@
         function renderLessons() {
             const grid = document.getElementById('lessonsGrid');
             grid.innerHTML = '';
-            
-            if(currentUser.preScore) {
-                document.getElementById('lessonWarning').classList.add('hidden');
-                grid.classList.remove('hidden');
-            }
 
             if(!lessonsList || lessonsList.length === 0) {
                 grid.innerHTML = '<p class="text-sm text-gray-400 col-span-3 p-4">แอดมินยังไม่ได้เพิ่มบทเรียนเข้าสู่ระบบ</p>';
@@ -432,11 +451,6 @@
         }
 
         async function viewLesson(url) {
-            if(!currentUser.preScore) {
-                await showCustomAlert("กรุณาทำ Pre-test ให้เสร็จสิ้นก่อนเข้าเรียนครับ", "error");
-                switchTab('tests');
-                return;
-            }
             if(url) {
                 window.open(url, '_blank');
                 let increment = Math.ceil(100 / (lessonsList.length || 4));
@@ -450,14 +464,12 @@
             }
         }
 
-        // --- ระบบทำข้อสอบจริง ---
         function openQuizModal(type) {
             currentTakingType = type;
-            // คัดกรองข้อสอบเฉพาะประเภท (pre, post หรือ both)
             currentQuizData = allQuizzes.filter(q => q.type === type || q.type === 'both');
             
             if(currentQuizData.length === 0) {
-                showCustomAlert("ขออภัย ขณะนี้ยังไม่มีแบบทดสอบในคลังข้อมูล กรุณาติดต่อผู้ดูแลระบบ", "error");
+                showCustomAlert("ขณะนี้แอดมินยังไม่ได้เพิ่มแบบทดสอบเข้าระบบครับ", "error");
                 return;
             }
 
@@ -465,7 +477,6 @@
             const container = document.getElementById('quizQuestionsContainer');
             container.innerHTML = '';
 
-            // วาด HTML ข้อสอบ
             currentQuizData.forEach((q, idx) => {
                 container.innerHTML += `
                     <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm question-block" data-answer="${q.answer}">
@@ -510,12 +521,9 @@
                 return;
             }
 
-            // คำนวณคะแนนเป็นเปอร์เซ็นต์
             const finalScore = Math.round((correctCount / currentQuizData.length) * 100);
             closeQuizModal();
-            await showCustomAlert("ทำการส่งคำตอบสำเร็จ! ตรวจสอบคะแนนประเมินของคุณได้ที่กราฟสรุปผล", "success");
             
-            // ส่งข้อมูลกลับไปบันทึก
             let payload = { action: "updateProgress", username: currentUser.username };
             if (currentTakingType === 'pre') {
                 currentUser.preScore = finalScore;
@@ -526,15 +534,19 @@
             }
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
             try { await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); } catch(e){}
+            
             loadUserData();
+            
+            if(currentTakingType === 'pre') {
+                await showCustomAlert("ส่งแบบประเมิน Pre-test สำเร็จ! คุณได้คะแนน: " + finalScore + "% ตอนนี้สามารถเข้าเรียนบทเรียนได้แล้วครับ", "success");
+            } else {
+                await showCustomAlert("ส่งแบบประเมิน Post-test สำเร็จ! คุณได้คะแนน: " + finalScore + "% ยินดีด้วยครับ คุณจบหลักสูตรแล้ว", "success");
+                switchTab('tests');
+            }
         }
 
         function switchTab(tabId) {
-            const tabs = ['dashboard', 'lessons', 'tests'];
-            tabs.forEach(t => {
-                const el = document.getElementById('view-' + t);
-                if (el) el.classList.add('hidden');
-            });
+            ['dashboard', 'lessons', 'tests'].forEach(t => document.getElementById('view-'+t).classList.add('hidden'));
             document.getElementById('view-' + tabId).classList.remove('hidden');
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
