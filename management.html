@@ -17,12 +17,12 @@
         }
     </script>
     <style>
-        html { font-size: 20px; /* เทียบเท่าการซูม 125% ทั่วทั้งหน้าเว็บ */ }
+        html { font-size: 20px; }
         body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; color: #2E2522; }
         .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden">
+<body class="flex h-screen overflow-hidden relative">
 
     <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
         <div>
@@ -34,16 +34,16 @@
                 </div>
             </div>
             <nav class="p-4 space-y-1.5">
-                <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium">
+                <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium transition-all">
                     <i class="fas fa-chart-pie text-sm"></i> ภาพรวมและแดชบอร์ด
                 </a>
-                <a href="admin.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
+                <a href="admin.html" class="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm transition-all">
                     <i class="fas fa-users-cog text-sm"></i> สลับไปโหมดผู้ดูแลระบบ
                 </a>
             </nav>
         </div>
         <div class="p-4 border-t border-earth-800 bg-earth-900/50">
-            <button onclick="location.href='index.html'" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300">
+            <button onclick="logout()" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-white/5 rounded-lg transition-all">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบบริหาร
             </button>
         </div>
@@ -78,7 +78,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-earth-700 mb-1.5">เลือกกรองหน่วยงาน</label>
-                        <select id="deptFilter" onchange="applyFilters()" class="w-full border border-earth-100 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none">
+                        <select id="deptFilter" onchange="applyFilters()" class="w-full border border-gray-200 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none focus:border-earth-clay">
                             <option value="all">แสดงผลทุกหน่วยงานในคณะวิทยาศาสตร์</option>
                             <option value="งานธุรการ">งานธุรการ</option><option value="งานการเงินและพัสดุ">งานการเงินและพัสดุ</option>
                             <option value="โครงการ วมว.">โครงการ วมว.</option><option value="งานนโยบายและแผน">งานนโยบายและแผน</option>
@@ -88,7 +88,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-earth-700 mb-1.5">ค้นหาชื่อเจ้าหน้าที่</label>
-                        <input type="text" id="nameSearch" onkeyup="applyFilters()" placeholder="พิมพ์เพื่อค้นหา..." class="w-full border border-earth-100 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none">
+                        <input type="text" id="nameSearch" onkeyup="applyFilters()" placeholder="พิมพ์เพื่อค้นหา..." class="w-full border border-gray-200 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none focus:border-earth-clay">
                     </div>
                 </div>
             </div>
@@ -100,17 +100,19 @@
                             <th class="p-4">ชื่อ - นามสกุล เจ้าหน้าที่</th><th class="p-4">หน่วยงานหลัก</th><th class="p-4 text-center">เข้าเรียน (ครั้ง)</th><th class="p-4 text-center">Pre-test</th><th class="p-4 text-center">Post-test</th><th class="p-4">ความก้าวหน้าหลักสูตร</th>
                         </tr>
                     </thead>
-                    <tbody class="text-xs text-earth-900 divide-y divide-earth-50" id="managementTableBody"></tbody>
+                    <tbody class="text-xs text-earth-900 divide-y divide-earth-50" id="managementTableBody">
+                        <tr><td colspan="6" class="p-8 text-center text-gray-400">กำลังดาวน์โหลดข้อมูลผู้เรียน...</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
     </main>
 
     <!-- Minimal Custom Alert Modal -->
-    <div id="customAlert" class="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0">
-        <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300" id="customAlertBox">
+    <div id="customAlert" class="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none">
+        <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300 pointer-events-auto" id="customAlertBox">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" id="alertIconBox"><i id="alertIcon" class="fas fa-info-circle"></i></div>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0" id="alertIconBox"><i id="alertIcon" class="fas fa-info-circle"></i></div>
                 <h3 class="text-base font-bold text-earth-900" id="alertTitle">แจ้งเตือน</h3>
             </div>
             <p class="text-sm text-earth-700 mb-6 leading-relaxed" id="alertMessage">ข้อความ</p>
@@ -161,7 +163,7 @@
             data.forEach(item => {
                 let progColor = item.progress == 100 ? 'bg-green-500' : 'bg-earth-sand';
                 tbody.innerHTML += `
-                    <tr class="hover:bg-earth-50/40 transition-all">
+                    <tr class="hover:bg-earth-50/40 transition-colors">
                         <td class="p-4 font-semibold text-earth-900">${item.name}</td>
                         <td class="p-4 text-earth-700">${item.department}</td>
                         <td class="p-4 text-center font-bold">${item.accessCount} ครั้ง</td>
@@ -189,6 +191,7 @@
             document.getElementById('kpiCompleted').innerText = compCount + " คน";
         }
 
+        // --- Custom Alert System ---
         function showCustomAlert(message, type = 'info', title = null) {
             return new Promise((resolve) => {
                 const modal = document.getElementById('customAlert');
@@ -198,42 +201,66 @@
                 const iconBox = document.getElementById('alertIconBox');
                 const icon = document.getElementById('alertIcon');
                 const btnContainer = document.getElementById('alertButtons');
+                
                 messageEl.innerText = message;
+                
                 if(type === 'success') {
                     titleEl.innerText = title || "สำเร็จ";
-                    iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg shrink-0";
                     icon.className = "fas fa-check";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full">ตกลง</button>`;
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-earth-clay">ตกลง</button>`;
                 } else if (type === 'error') {
                     titleEl.innerText = title || "เกิดข้อผิดพลาด";
-                    iconBox.className = "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-lg shrink-0";
                     icon.className = "fas fa-exclamation-triangle";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-all w-full">ปิด</button>`;
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-red-400">ปิด</button>`;
                 } else if (type === 'warning') {
                     titleEl.innerText = title || "ยืนยันการดำเนินการ";
-                    iconBox.className = "w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-500 text-lg shrink-0";
                     icon.className = "fas fa-question";
                     btnContainer.innerHTML = `
-                        <button onclick="closeCustomAlert(false)" class="flex-1 px-4 py-2 bg-gray-100 text-earth-800 rounded-xl text-sm font-medium">ยกเลิก</button>
-                        <button onclick="closeCustomAlert(true)" class="flex-1 px-4 py-2 bg-earth-clay text-white rounded-xl text-sm font-medium">ยืนยัน</button>
+                        <button onclick="closeCustomAlert(false)" class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-earth-800 rounded-xl text-sm font-medium transition-all focus:outline-none">ยกเลิก</button>
+                        <button onclick="closeCustomAlert(true)" class="flex-1 px-4 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-sm font-medium transition-all focus:outline-none">ยืนยัน</button>
                     `;
                 } else {
                     titleEl.innerText = title || "แจ้งเตือนระบบ";
-                    iconBox.className = "w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg";
+                    iconBox.className = "w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg shrink-0";
                     icon.className = "fas fa-info-circle";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-clay text-white rounded-xl text-sm font-medium w-full">รับทราบ</button>`;
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-sm font-medium transition-all w-full focus:outline-none focus:ring-2 focus:ring-blue-400">รับทราบ</button>`;
                 }
+                
                 modal.classList.remove('hidden');
-                setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+                modal.classList.remove('pointer-events-none');
+                
+                setTimeout(() => { 
+                    modal.classList.remove('opacity-0'); 
+                    box.classList.remove('scale-95'); 
+                    const btn = btnContainer.querySelector('button:last-child');
+                    if(btn) btn.focus();
+                }, 10);
+                
                 window.currentAlertResolve = resolve;
             });
         }
+        
         function closeCustomAlert(result) {
             const modal = document.getElementById('customAlert');
             const box = document.getElementById('customAlertBox');
             modal.classList.add('opacity-0');
             box.classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); if(window.currentAlertResolve) window.currentAlertResolve(result); }, 300);
+            modal.classList.add('pointer-events-none');
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                if(window.currentAlertResolve) window.currentAlertResolve(result); 
+            }, 300);
+        }
+
+        async function logout() { 
+            const isConfirmed = await showCustomAlert("ต้องการออกจากระบบใช่หรือไม่?", "warning");
+            if(isConfirmed) {
+                sessionStorage.clear(); 
+                window.location.href = "index.html"; 
+            }
         }
 
         window.onload = initConfig;
