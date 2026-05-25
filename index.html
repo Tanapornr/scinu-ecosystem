@@ -19,6 +19,7 @@
         }
     </script>
     <style>
+        html { font-size: 20px; /* เทียบเท่าการซูม 125% ทั่วทั้งหน้าเว็บ */ }
         body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #FAEDCD 0%, #FAEDCD 30%, #D4A373 100%); }
         .glass-box { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
     </style>
@@ -58,6 +59,20 @@
         </div>
     </div>
 
+    <!-- Minimal Custom Alert Modal -->
+    <div id="customAlert" class="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300" id="customAlertBox">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" id="alertIconBox">
+                    <i id="alertIcon" class="fas fa-info-circle"></i>
+                </div>
+                <h3 class="text-base font-bold text-earth-900" id="alertTitle">แจ้งเตือน</h3>
+            </div>
+            <p class="text-sm text-earth-700 mb-6 leading-relaxed" id="alertMessage">ข้อความ</p>
+            <div class="flex justify-end gap-2" id="alertButtons"></div>
+        </div>
+    </div>
+
     <script>
         let gasUrl = "";
 
@@ -77,7 +92,7 @@
             const btn = document.getElementById('loginBtn');
 
             if(!u || !p) {
-                alert("กรุณากรอกทั้งชื่อผู้ใช้งานและรหัสผ่าน");
+                await showCustomAlert("กรุณากรอกทั้งชื่อผู้ใช้งานและรหัสผ่านให้ครบถ้วน", "error");
                 return;
             }
 
@@ -99,16 +114,56 @@
                     else if(data.user.role === 'admin') window.location.href = "admin.html";
                     else if(data.user.role === 'management') window.location.href = "management.html";
                 } else {
-                    alert(data.message);
+                    await showCustomAlert(data.message, "error");
                     btn.disabled = false;
                     btn.innerText = "ลงชื่อเข้าสู่ใช้งานระบบ";
                 }
             } catch(e) {
-                alert("เกิดข้อผิดพลาดในการรับส่งข้อมูลกับ API หลังบ้าน กรุณาตรวจสอบการตั้งค่า CORS และสิทธิ์ในสคริปต์");
+                await showCustomAlert("เกิดข้อผิดพลาดในการรับส่งข้อมูลกับ API หลังบ้าน กรุณาตรวจสอบการตั้งค่า CORS และสิทธิ์ในสคริปต์", "error");
                 btn.disabled = false;
                 btn.innerText = "ลงชื่อเข้าสู่ใช้งานระบบ";
             }
         }
+
+        function showCustomAlert(message, type = 'info', title = null) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlert');
+                const box = document.getElementById('customAlertBox');
+                const titleEl = document.getElementById('alertTitle');
+                const messageEl = document.getElementById('alertMessage');
+                const iconBox = document.getElementById('alertIconBox');
+                const icon = document.getElementById('alertIcon');
+                const btnContainer = document.getElementById('alertButtons');
+                messageEl.innerText = message;
+                if(type === 'success') {
+                    titleEl.innerText = title || "สำเร็จ";
+                    iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg";
+                    icon.className = "fas fa-check";
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full">ตกลง</button>`;
+                } else if (type === 'error') {
+                    titleEl.innerText = title || "เกิดข้อผิดพลาด";
+                    iconBox.className = "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-lg";
+                    icon.className = "fas fa-exclamation-triangle";
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-all w-full">ปิด</button>`;
+                } else {
+                    titleEl.innerText = title || "แจ้งเตือนระบบ";
+                    iconBox.className = "w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg";
+                    icon.className = "fas fa-info-circle";
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-sm font-medium transition-all w-full">รับทราบ</button>`;
+                }
+                modal.classList.remove('hidden');
+                setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+                window.currentAlertResolve = resolve;
+            });
+        }
+        function closeCustomAlert(result) {
+            const modal = document.getElementById('customAlert');
+            const box = document.getElementById('customAlertBox');
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); if(window.currentAlertResolve) window.currentAlertResolve(result); }, 300);
+        }
+
         window.onload = initConfig;
     </script>
 </body>
