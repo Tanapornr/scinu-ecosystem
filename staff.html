@@ -19,7 +19,7 @@
         }
     </script>
     <style>
-        html { font-size: 20px; /* ขยาย 125% */ }
+        html { font-size: 20px; }
         body { font-family: 'Sarabun', sans-serif; background-color: #F8FAFC; color: #2E2522; }
         .glass-card { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(226, 232, 240, 0.8); }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -29,6 +29,7 @@
 </head>
 <body class="flex h-screen overflow-hidden relative">
 
+    <!-- Sidebar Menu -->
     <aside class="w-64 bg-earth-navy text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
         <div>
             <div class="p-5 border-b border-white/10 flex items-center gap-3">
@@ -49,9 +50,6 @@
                 <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl text-sm transition-all">
                     <i class="fas fa-clipboard-check w-5 text-center"></i> การประเมินและสรุปผล
                 </a>
-                <a href="#" onclick="switchTab('forms')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl text-sm transition-all">
-                    <i class="fas fa-folder w-5 text-center"></i> คู่มือปฏิบัติงาน
-                </a>
             </nav>
         </div>
 
@@ -69,6 +67,7 @@
         </div>
     </aside>
 
+    <!-- Main Workspace Container -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 shrink-0 z-10 shadow-sm">
             <h2 class="text-sm font-bold text-earth-navy">NU Smart Admin Learning Ecosystem</h2>
@@ -81,13 +80,16 @@
 
         <div class="flex-1 overflow-y-auto p-6 space-y-6" id="viewContainer">
             
+            <!-- VIEW: DASHBOARD -->
             <div id="view-dashboard" class="space-y-6 animate-fadeIn">
                 
+                <!-- Welcome Card -->
                 <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <h2 class="text-xl font-bold text-gray-900">สวัสดี <span id="welcomeName">เจ้าหน้าที่</span> 👋</h2>
                     <p class="text-xs text-gray-500 mt-1">ยินดีต้อนรับเข้าสู่ระบบนิเวศการเรียนรู้ดิจิทัล สำหรับพัฒนาสมรรถนะการปฏิบัติงาน</p>
                 </div>
 
+                <!-- 4 Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex justify-between items-center">
                         <div>
@@ -123,23 +125,30 @@
                     </div>
                 </div>
 
+                <!-- Learning Journey & Charts -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- 3 Step Learning Timeline -->
                     <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-center">
                         <h3 class="text-sm font-bold text-gray-800 tracking-wide mb-8"><i class="fas fa-route text-earth-clay mr-2"></i> เส้นทางการเรียนรู้ (Learning Journey)</h3>
                         <div class="flex items-center justify-between relative px-8 pb-4">
+                            <!-- Background Line -->
                             <div class="absolute top-6 left-16 right-16 h-1 bg-gray-100 rounded-full z-0"></div>
+                            <!-- Progress Line -->
                             <div class="absolute top-6 left-16 h-1 bg-emerald-500 rounded-full z-0 transition-all duration-1000" id="journeyProgressLine" style="width: 0%"></div>
                             
+                            <!-- Step 1 -->
                             <div class="flex flex-col items-center gap-2 relative z-10 w-24">
                                 <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-sm border-4 border-white shadow-sm transition-colors" id="step1-circle"><i class="fas fa-pencil-alt"></i></div>
                                 <span class="text-xs font-bold text-gray-800 text-center">Pre-test</span>
                                 <span class="text-[9px] font-medium text-gray-400" id="step1-status">รอทำแบบทดสอบ</span>
                             </div>
+                            <!-- Step 2 -->
                             <div class="flex flex-col items-center gap-2 relative z-10 w-24">
                                 <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-sm border-4 border-white shadow-sm transition-colors" id="step2-circle"><i class="fas fa-book-reader"></i></div>
                                 <span class="text-xs font-bold text-gray-800 text-center">เรียนบทเรียน</span>
                                 <span class="text-[9px] font-medium text-gray-400" id="step2-status">รอเข้าเรียน</span>
                             </div>
+                            <!-- Step 3 -->
                             <div class="flex flex-col items-center gap-2 relative z-10 w-24">
                                 <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-sm border-4 border-white shadow-sm transition-colors" id="step3-circle"><i class="fas fa-award"></i></div>
                                 <span class="text-xs font-bold text-gray-800 text-center">Post-test</span>
@@ -148,36 +157,43 @@
                         </div>
                     </div>
 
+                    <!-- Pending Tasks List Container -->
                     <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
                         <h4 class="text-sm font-bold text-gray-800 mb-4"><i class="fas fa-tasks text-red-400 mr-2"></i> กิจกรรมค้าง (สิ่งที่ต้องทำ)</h4>
                         <div class="space-y-3 overflow-y-auto pr-2" id="pendingTasksList">
-                            </div>
+                            <!-- Injected via JS -->
+                        </div>
                     </div>
                 </div>
 
+                <!-- Bottom Row: Pre/Post Chart -->
                 <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <h4 class="text-sm font-bold text-gray-800 mb-6"><i class="fas fa-chart-bar text-earth-clay mr-2"></i> ผลประเมินสมรรถนะ ก่อน-หลังเรียน</h4>
                     <div class="flex items-end justify-center gap-16 h-48 pt-4 pb-2 border-b border-gray-100 relative w-full max-w-md mx-auto">
+                        <!-- Target Line 70% -->
                         <div class="absolute top-[30%] left-0 right-0 border-t border-dashed border-gray-300 z-0"></div>
-                        <div class="absolute top-[28%] right-0 bg-slate-100 text-gray-500 font-bold text-[9px] px-2 py-1 rounded-full z-10 border border-gray-200 shadow-sm">เป้าหมาย 70%</div>
+                        <div class="absolute top-[28%] right-0 bg-slate-100 text-gray-500 font-bold text-[9px] px-2 py-1 rounded-full z-10 border border-gray-200 shadow-sm">เกณฑ์ผ่าน 70%</div>
                         
+                        <!-- Pre Bar -->
                         <div class="flex flex-col items-center gap-2 w-16 relative z-10 group">
                             <span class="text-sm font-bold text-earth-navy transition-opacity absolute -top-8" id="chartPreText">0%</span>
                             <div class="w-full bg-earth-navy rounded-t-lg transition-all duration-1000 shadow-md" id="chartPreBar" style="height: 0%"></div>
                             <span class="text-xs font-bold text-gray-700 mt-2">ก่อนเรียน</span>
                         </div>
                         
+                        <!-- Post Bar -->
                         <div class="flex flex-col items-center gap-2 w-16 relative z-10 group">
                             <span class="text-sm font-bold text-purple-600 transition-opacity absolute -top-8" id="chartPostText">0%</span>
                             <div class="w-full bg-purple-500 rounded-t-lg transition-all duration-1000 shadow-md" id="chartPostBar" style="height: 0%"></div>
                             <span class="text-xs font-bold text-gray-700 mt-2">หลังเรียน</span>
                         </div>
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-4 text-center">* กราฟแสดงผลคะแนนการทำแบบทดสอบเปรียบเทียบเฉพาะบุคคล</p>
+                    <p class="text-[10px] text-gray-400 mt-4 text-center">* กราฟแสดงความก้าวหน้าในการทำแบบทดสอบเปรียบเทียบผลสัมฤทธิ์เฉพาะบุคคล</p>
                 </div>
 
             </div>
 
+            <!-- VIEW: LESSONS (บทเรียน e-Learning) -->
             <div id="view-lessons" class="hidden space-y-4 animate-fadeIn">
                 <div class="border-b border-gray-200 pb-3 mb-4">
                     <h3 class="text-lg font-bold text-gray-900"><i class="fas fa-book-open text-earth-clay mr-2"></i> คอร์สเรียนออนไลน์: การประยุกต์ใช้ AI ในงานประจำวัน</h3>
@@ -189,6 +205,7 @@
                 </div>
             </div>
 
+            <!-- VIEW: TESTS (การประเมินและสรุปผล) -->
             <div id="view-tests" class="hidden space-y-4 animate-fadeIn">
                 <div class="border-b border-gray-200 pb-3 mb-4">
                     <h3 class="text-lg font-bold text-gray-900"><i class="fas fa-clipboard-check text-earth-clay mr-2"></i> แบบประเมินและสรุปผลสัมฤทธิ์</h3>
@@ -216,15 +233,10 @@
                 </div>
             </div>
 
-            <div id="view-forms" class="hidden bg-white p-8 rounded-2xl border border-gray-100 text-center shadow-sm animate-fadeIn">
-                <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 text-2xl mx-auto mb-4"><i class="fas fa-folder-open"></i></div>
-                <h3 class="text-lg font-bold text-gray-800">คลังคู่มือปฏิบัติงานและแบบฟอร์ม</h3>
-                <p class="text-xs text-gray-500 mt-2">ขณะนี้แอดมินกำลังรวบรวมไฟล์เอกสาร กรุณากลับมาตรวจสอบอีกครั้งภายหลัง</p>
-            </div>
-
         </div>
     </main>
 
+    <!-- Minimal Custom Alert Modal -->
     <div id="customAlert" class="fixed inset-0 bg-black/40 z-[9999] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0 pointer-events-none">
         <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300 pointer-events-auto" id="customAlertBox">
             <div class="flex items-center gap-3 mb-4">
@@ -464,7 +476,7 @@
         }
 
         function switchTab(tabId) {
-            const tabs = ['dashboard', 'lessons', 'forms', 'tests'];
+            const tabs = ['dashboard', 'lessons', 'tests'];
             tabs.forEach(t => {
                 const el = document.getElementById('view-' + t);
                 if (el) el.classList.add('hidden');
