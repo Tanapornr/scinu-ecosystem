@@ -19,13 +19,13 @@
         }
     </script>
     <style>
+        html { font-size: 20px; /* เทียบเท่าการซูม 125% ทั่วทั้งหน้าเว็บ */ }
         body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; color: #2E2522; }
         .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.4); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- Sidebar Menu -->
     <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
         <div>
             <div class="p-6 border-b border-earth-800 flex items-center gap-3">
@@ -35,23 +35,21 @@
                     <p class="text-[11px] text-earth-sand uppercase tracking-wider">Naresuan University</p>
                 </div>
             </div>
-            
             <nav class="p-4 space-y-1.5" id="navigationTabs">
-                <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm transition-all font-medium">
+                <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium">
                     <i class="fas fa-home text-sm"></i> หน้าแรก
                 </a>
-                <a href="#" onclick="switchTab('lessons')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 transition-all text-sm">
+                <a href="#" onclick="switchTab('lessons')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
                     <i class="fas fa-book-open text-sm"></i> เริ่มเรียนบทเรียนสั้น
                 </a>
-                <a href="#" onclick="switchTab('forms')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 transition-all text-sm">
+                <a href="#" onclick="switchTab('forms')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
                     <i class="fas fa-folder text-sm"></i> คู่มือและแบบฟอร์ม
                 </a>
-                <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 transition-all text-sm">
+                <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm">
                     <i class="fas fa-check-square text-sm"></i> แบบทดสอบประเมินผล
                 </a>
             </nav>
         </div>
-
         <div class="p-4 border-t border-earth-800 bg-earth-900/50">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 rounded-xl bg-earth-sand flex items-center justify-center text-earth-900 font-bold" id="profileInitial">U</div>
@@ -60,13 +58,12 @@
                     <p class="text-[10px] text-earth-sand/80 truncate" id="profileDept">หน่วยงาน</p>
                 </div>
             </div>
-            <button onclick="logout()" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-red-500/10 rounded-lg transition-all">
+            <button onclick="logout()" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-red-500/10 rounded-lg">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>
         </div>
     </aside>
 
-    <!-- Main Content Window -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
         <header class="h-16 bg-white border-b border-earth-100 flex items-center justify-between px-8 shrink-0 z-10">
             <h2 class="text-base font-bold text-earth-900">NU Smart Admin Learning Ecosystem</h2>
@@ -76,17 +73,12 @@
         </header>
 
         <div class="flex-1 overflow-y-auto p-8 space-y-6" id="viewContainer">
-            
-            <!-- VIEW: DASHBOARD -->
             <div id="view-dashboard" class="space-y-6">
-                <div class="glass-card p-6 rounded-2xl shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                    <div>
-                        <h2 class="text-xl font-bold text-earth-900">สวัสดี <span id="welcomeName">เจ้าหน้าที่</span> 👋</h2>
-                        <p class="text-xs text-earth-600 mt-1">ยินดีต้อนรับเข้าสู่ระบบนิเวศการเรียนรู้ดิจิทัลสำหรับการพัฒนาทักษะด้าน AI ในงานประจำวันเพื่อลดภาระงาน</p>
-                    </div>
+                <div class="glass-card p-6 rounded-2xl shadow-sm">
+                    <h2 class="text-xl font-bold text-earth-900">สวัสดี <span id="welcomeName">เจ้าหน้าที่</span> 👋</h2>
+                    <p class="text-xs text-earth-600 mt-1">ยินดีต้อนรับเข้าสู่ระบบนิเวศการเรียนรู้ดิจิทัลสำหรับการพัฒนาทักษะด้าน AI ในงานประจำวันเพื่อลดภาระงาน</p>
                 </div>
 
-                <!-- Stats Summary Row -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
                         <div>
@@ -110,7 +102,7 @@
                         <div class="w-10 h-10 bg-earth-100 rounded-xl flex items-center justify-center text-earth-clay"><i class="fas fa-chart-pie"></i></div>
                     </div>
                 </div>
-                
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-earth-100 flex flex-col justify-between">
                         <h3 class="text-sm font-bold text-earth-900 mb-4"><i class="fas fa-route text-earth-clay"></i> เส้นทางการเรียนรู้ (Learning Journey)</h3>
@@ -151,19 +143,16 @@
                 </div>
             </div>
 
-            <!-- VIEW: LESSONS (REAL-TIME LOADING) -->
             <div id="view-lessons" class="hidden space-y-4">
                 <div class="border-b border-earth-100 pb-2">
                     <h3 class="text-base font-bold text-earth-900">หลักสูตร Smart Admin Workflow การใช้ AI จัดการงานประจำวัน</h3>
                     <p class="text-xs text-earth-600">สิทธิ์พิเศษ: ท่านสามารถเข้าเรียนบทเรียนย่อยบทใดก็ได้และย้อนกลับมาทบทวนซ้ำได้ตลอดเวลา</p>
                 </div>
-                
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="lessonsGrid">
                     <p class="text-xs text-gray-500 p-4">กำลังดาวน์โหลดข้อมูลบทเรียนจากฐานข้อมูลกลาง...</p>
                 </div>
             </div>
 
-            <!-- VIEW: FORMS & TESTS -->
             <div id="view-forms" class="hidden class-card p-6 rounded-2xl"><h3>คลังคู่มือปฏิบัติงานและแบบฟอร์มดิจิทัล</h3></div>
             
             <div id="view-tests" class="hidden space-y-4">
@@ -171,23 +160,30 @@
                     <h3 class="font-bold text-earth-900">แบบทดสอบวัดระดับและประเมินสมรรถนะการใช้ AI</h3>
                     <div class="mt-4 p-4 border rounded-xl bg-earth-50 space-y-4">
                         <div class="flex justify-between items-center border-b pb-3">
-                            <div>
-                                <h4 class="text-sm font-bold">แบบทดสอบก่อนเรียน (Pre-test)</h4>
-                            </div>
+                            <div><h4 class="text-sm font-bold">แบบทดสอบก่อนเรียน (Pre-test)</h4></div>
                             <button onclick="takeTest('pre')" id="btnPreTest" class="bg-earth-clay text-white px-4 py-2 rounded-lg text-xs font-medium">เริ่มทำข้อสอบ</button>
                         </div>
                         <div class="flex justify-between items-center pt-1">
-                            <div>
-                                <h4 class="text-sm font-bold">แบบทดสอบหลังเรียน (Post-test)</h4>
-                            </div>
+                            <div><h4 class="text-sm font-bold">แบบทดสอบหลังเรียน (Post-test)</h4></div>
                             <button onclick="takeTest('post')" id="btnPostTest" class="bg-earth-700 text-white px-4 py-2 rounded-lg text-xs font-medium">เริ่มทำข้อสอบ</button>
                         </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
+
+    <!-- Minimal Custom Alert Modal -->
+    <div id="customAlert" class="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center hidden backdrop-blur-sm transition-opacity duration-300 opacity-0">
+        <div class="bg-white/95 w-[24rem] p-6 rounded-2xl shadow-2xl border border-white/50 transform scale-95 transition-transform duration-300" id="customAlertBox">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg" id="alertIconBox"><i id="alertIcon" class="fas fa-info-circle"></i></div>
+                <h3 class="text-base font-bold text-earth-900" id="alertTitle">แจ้งเตือน</h3>
+            </div>
+            <p class="text-sm text-earth-700 mb-6 leading-relaxed" id="alertMessage">ข้อความ</p>
+            <div class="flex justify-end gap-2" id="alertButtons"></div>
+        </div>
+    </div>
 
     <script>
         let currentUser = JSON.parse(sessionStorage.getItem('currentUser'));
@@ -202,9 +198,7 @@
                 gasUrl = config.GAS_WEB_APP_URL;
                 loadUserData();
                 fetchLessons();
-            } catch (err) {
-                console.error(err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function loadUserData() {
@@ -213,7 +207,6 @@
             document.getElementById('profileDept').innerText = currentUser.department;
             document.getElementById('profileInitial').innerText = currentUser.name.charAt(0);
             document.getElementById('lastLoginTime').innerText = currentUser.lastLogin || "-";
-            
             document.getElementById('statPreScore').innerText = currentUser.preScore ? currentUser.preScore + "%" : "รอทำ";
             document.getElementById('statPostScore').innerText = currentUser.postScore ? currentUser.postScore + "%" : "รอทำ";
             document.getElementById('statProgress').innerText = (currentUser.progress || 0) + "%";
@@ -238,18 +231,10 @@
 
         async function fetchLessons() {
             try {
-                const response = await fetch(gasUrl, {
-                    method: 'POST',
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: "getLessons" })
-                });
+                const response = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getLessons" }) });
                 const resData = await response.json();
-                if(resData.status === "success") {
-                    renderLessons(resData.lessons);
-                }
-            } catch(e) {
-                console.error("Error fetching lessons", e);
-            }
+                if(resData.status === "success") renderLessons(resData.lessons);
+            } catch(e) { console.error(e); }
         }
 
         function renderLessons(lessons) {
@@ -273,10 +258,10 @@
             });
         }
 
-        function viewLesson(url) {
+        async function viewLesson(url) {
             if(url) window.open(url, '_blank');
-            else alert("ไม่มีลิงก์วิดีโอผูกกับบทเรียนนี้");
-            simulateStudyProgress();
+            else { await showCustomAlert("ไม่มีลิงก์วิดีโอผูกกับบทเรียนนี้", "error"); return; }
+            await simulateStudyProgress();
         }
 
         async function simulateStudyProgress() {
@@ -285,18 +270,15 @@
             currentUser.progress = newProg;
             sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
             try {
-                await fetch(gasUrl, {
-                    method: 'POST',
-                    headers: { "Content-Type": "text/plain;charset=utf-8" },
-                    body: JSON.stringify({ action: "updateProgress", username: currentUser.username, progress: newProg })
-                });
+                await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "updateProgress", username: currentUser.username, progress: newProg }) });
             } catch(e) {}
             loadUserData();
+            await showCustomAlert("ระบบบันทึกความก้าวหน้าการเรียนสำเร็จ", "success");
         }
 
         async function takeTest(type) {
             let score = Math.floor(60 + Math.random() * 40);
-            alert("ส่งคำตอบสำเร็จ! ได้คะแนน: " + score + "%");
+            await showCustomAlert("ส่งคำตอบสำเร็จ! ได้คะแนน: " + score + "%", "success");
             let payload = { action: "updateProgress", username: currentUser.username };
             if (type === 'pre') { currentUser.preScore = score; payload.preScore = score; }
             else { currentUser.postScore = score; payload.postScore = score; currentUser.progress = 100; payload.progress = 100; }
@@ -315,10 +297,47 @@
             document.getElementById('view-' + tabId).classList.remove('hidden');
 
             const buttons = document.querySelectorAll('.tab-btn');
-            buttons.forEach(btn => {
-                btn.className = "tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 transition-all text-sm";
+            buttons.forEach(btn => { btn.className = "tab-btn flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-earth-100 text-sm"; });
+            event.currentTarget.className = "tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm font-medium";
+        }
+
+        function showCustomAlert(message, type = 'info', title = null) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('customAlert');
+                const box = document.getElementById('customAlertBox');
+                const titleEl = document.getElementById('alertTitle');
+                const messageEl = document.getElementById('alertMessage');
+                const iconBox = document.getElementById('alertIconBox');
+                const icon = document.getElementById('alertIcon');
+                const btnContainer = document.getElementById('alertButtons');
+                messageEl.innerText = message;
+                if(type === 'success') {
+                    titleEl.innerText = title || "สำเร็จ";
+                    iconBox.className = "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg";
+                    icon.className = "fas fa-check";
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-900 hover:bg-earth-800 text-white rounded-xl text-sm font-medium transition-all w-full">ตกลง</button>`;
+                } else if (type === 'error') {
+                    titleEl.innerText = title || "เกิดข้อผิดพลาด";
+                    iconBox.className = "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-lg";
+                    icon.className = "fas fa-exclamation-triangle";
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-medium transition-all w-full">ปิด</button>`;
+                } else {
+                    titleEl.innerText = title || "แจ้งเตือนระบบ";
+                    iconBox.className = "w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500 text-lg";
+                    icon.className = "fas fa-info-circle";
+                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-5 py-2 bg-earth-clay hover:bg-earth-700 text-white rounded-xl text-sm font-medium transition-all w-full">รับทราบ</button>`;
+                }
+                modal.classList.remove('hidden');
+                setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+                window.currentAlertResolve = resolve;
             });
-            event.currentTarget.className = "tab-btn flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm transition-all font-medium";
+        }
+        function closeCustomAlert(result) {
+            const modal = document.getElementById('customAlert');
+            const box = document.getElementById('customAlertBox');
+            modal.classList.add('opacity-0');
+            box.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); if(window.currentAlertResolve) window.currentAlertResolve(result); }, 300);
         }
 
         function logout() { sessionStorage.clear(); window.location.href = "index.html"; }
