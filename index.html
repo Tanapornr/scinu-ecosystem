@@ -12,31 +12,15 @@
             theme: {
                 extend: {
                     colors: {
-                        earth: {
-                            50: '#FDFBF7',
-                            100: '#FAEDCD',
-                            600: '#8C6239',
-                            700: '#6F4E37',
-                            800: '#4A3E3D',
-                            900: '#2E2522',
-                            clay: '#A26952',
-                            sand: '#D4A373'
-                        }
+                        earth: { 50: '#FDFBF7', 100: '#FAEDCD', 600: '#8C6239', 700: '#6F4E37', 800: '#4A3E3D', 900: '#2E2522', clay: '#A26952', sand: '#D4A373' }
                     }
                 }
             }
         }
     </script>
     <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-            background: linear-gradient(135deg, #FAEDCD 0%, #FAEDCD 30%, #D4A373 100%);
-        }
-        .glass-box {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
+        body { font-family: 'Sarabun', sans-serif; background: linear-gradient(135deg, #FAEDCD 0%, #FAEDCD 30%, #D4A373 100%); }
+        .glass-box { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.5); }
     </style>
 </head>
 <body class="w-screen h-screen flex items-center justify-center p-4 overflow-hidden">
@@ -45,7 +29,7 @@
         <div class="text-center space-y-2">
             <div class="w-14 h-14 bg-earth-900 text-white font-bold text-xl rounded-2xl flex items-center justify-center mx-auto shadow-md">NU</div>
             <h1 class="text-lg font-bold text-earth-900 tracking-wide">Smart Admin Ecosystem</h1>
-            <p class="text-xs text-earth-700">ระบบการจัดการเวิร์กโฟลว์และพัฒนาทักษะดิจิทัล</p>
+            <p class="text-xs text-earth-700">ระบบจัดการเวิร์กโฟลว์และพัฒนาทักษะดิจิทัล</p>
         </div>
 
         <div class="space-y-4">
@@ -83,8 +67,7 @@
                 const config = await res.json();
                 gasUrl = config.GAS_WEB_APP_URL;
             } catch (err) {
-                console.error(err);
-                alert("ระบบขัดข้อง: ไม่สามารถดึงไฟล์ config จาก Vercel ได้");
+                console.error("Config fetch error:", err);
             }
         }
 
@@ -94,7 +77,7 @@
             const btn = document.getElementById('loginBtn');
 
             if(!u || !p) {
-                alert("กรุณากรอกทั้งชื่อผู้ใช้งานและรหัสผ่านให้ถูกต้อง");
+                alert("กรุณากรอกทั้งชื่อผู้ใช้งานและรหัสผ่าน");
                 return;
             }
 
@@ -102,22 +85,16 @@
             btn.innerText = "กำลังตรวจสอบความปลอดภัย...";
 
             try {
-                // อัปเดต Fetch API เพื่อแก้ปัญหา CORS
                 const res = await fetch(gasUrl, {
                     method: 'POST',
-                    redirect: 'follow', // บังคับให้ตาม Redirect ของ Google
-                    headers: {
-                        "Content-Type": "text/plain;charset=utf-8", // ใช้ text/plain เพื่อเลี่ยงการพรีไฟลต์ (Preflight) ของเบราว์เซอร์
-                    },
+                    redirect: 'follow',
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
                     body: JSON.stringify({ action: "login", username: u, password: p })
                 });
-                
                 const data = await res.json();
 
                 if(data.status === "success") {
                     sessionStorage.setItem('currentUser', JSON.stringify(data.user));
-                    
-                    // แยกเส้นทางตาม Role
                     if(data.user.role === 'staff') window.location.href = "staff.html";
                     else if(data.user.role === 'admin') window.location.href = "admin.html";
                     else if(data.user.role === 'management') window.location.href = "management.html";
@@ -127,13 +104,11 @@
                     btn.innerText = "ลงชื่อเข้าสู่ใช้งานระบบ";
                 }
             } catch(e) {
-                console.error("CORS Error details:", e);
-                alert("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบ ID ของ Google Sheet หรือสิทธิ์การ Deploy ใน Apps Script");
+                alert("เกิดข้อผิดพลาดในการรับส่งข้อมูลกับ API หลังบ้าน กรุณาตรวจสอบการตั้งค่า CORS และสิทธิ์ในสคริปต์");
                 btn.disabled = false;
                 btn.innerText = "ลงชื่อเข้าสู่ใช้งานระบบ";
             }
         }
-
         window.onload = initConfig;
     </script>
 </body>
