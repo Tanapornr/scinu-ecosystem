@@ -11,35 +11,19 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        earth: {
-                            50: '#FDFBF7',
-                            100: '#FAEDCD',
-                            200: '#E9D8A6',
-                            600: '#8C6239',
-                            700: '#6F4E37',
-                            800: '#4A3E3D',
-                            900: '#2E2522',
-                            clay: '#A26952',
-                            sand: '#D4A373'
-                        }
-                    }
+                    colors: { earth: { 50: '#FDFBF7', 100: '#FAEDCD', 200: '#E9D8A6', 600: '#8C6239', 700: '#6F4E37', 800: '#4A3E3D', 900: '#2E2522', clay: '#A26952', sand: '#D4A373' } }
                 }
             }
         }
     </script>
     <style>
         body { font-family: 'Sarabun', sans-serif; background-color: #FDFBF7; color: #2E2522; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-        }
+        .glass-card { background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.5); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <!-- Sidebar Menu (Executive View) -->
+    <!-- Sidebar Menu -->
     <aside class="w-64 bg-earth-900 text-white flex flex-col justify-between shrink-0 shadow-xl z-20">
         <div>
             <div class="p-6 border-b border-earth-800 flex items-center gap-3">
@@ -49,9 +33,7 @@
                     <p class="text-[11px] text-earth-sand uppercase tracking-wider">Naresuan University</p>
                 </div>
             </div>
-            
             <nav class="p-4 space-y-1.5">
-                <div class="text-[11px] uppercase tracking-wider text-earth-sand/60 px-3 mb-2 font-semibold">Executive View</div>
                 <a href="#" class="flex items-center gap-3 p-3 bg-earth-clay text-white rounded-xl shadow-sm transition-all font-medium">
                     <i class="fas fa-chart-pie text-sm"></i> ภาพรวมและแดชบอร์ด
                 </a>
@@ -60,9 +42,8 @@
                 </a>
             </nav>
         </div>
-
         <div class="p-4 border-t border-earth-800 bg-earth-900/50">
-            <button onclick="location.href='index.html'" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 hover:bg-red-500/10 rounded-lg transition-all">
+            <button onclick="location.href='index.html'" class="w-full text-left flex items-center gap-2 p-2 text-xs text-red-300 rounded-lg">
                 <i class="fas fa-sign-out-alt"></i> ออกจากระบบบริหาร
             </button>
         </div>
@@ -70,92 +51,62 @@
 
     <!-- Main Container -->
     <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        
-        <!-- Navbar -->
         <header class="h-16 bg-white/80 backdrop-blur-md border-b border-earth-100 flex items-center justify-between px-8 shrink-0 z-10">
-            <h2 class="text-base font-bold text-earth-900 flex items-center gap-2">
-                <i class="fas fa-sliders-h text-earth-clay"></i> แดชบอร์ดวิเคราะห์ผลสัมฤทธิ์และคัดกรองความก้าวหน้าตามหน่วยงาน (Management)
-            </h2>
+            <h2 class="text-base font-bold text-earth-900"><i class="fas fa-sliders-h text-earth-clay"></i> แดชบอร์ดวิเคราะห์สถิติตามหน่วยงาน (Management)</h2>
         </header>
 
-        <!-- Dynamic Content Area -->
         <div class="flex-1 overflow-y-auto p-8 space-y-6">
-            
             <!-- Quick KPI Metrics Grid -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-semibold text-earth-600 uppercase tracking-wider">เจ้าหน้าที่เข้าศึกษา</p>
-                        <h3 class="text-3xl font-bold text-earth-900 mt-1" id="kpiTotalUsers">0 คน</h3>
-                    </div>
-                    <div class="w-12 h-12 bg-earth-100 rounded-xl flex items-center justify-center text-earth-clay text-lg shadow-inner"><i class="fas fa-users"></i></div>
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">เจ้าหน้าที่เข้าศึกษา</p>
+                    <h3 class="text-3xl font-bold text-earth-900 mt-1" id="kpiTotalUsers">0 คน</h3>
                 </div>
-                <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-semibold text-earth-600 uppercase tracking-wider">การเข้าดูบทเรียนเฉลี่ย</p>
-                        <h3 class="text-3xl font-bold text-earth-900 mt-1" id="kpiAvgAccess">0 ครั้ง</h3>
-                    </div>
-                    <div class="w-12 h-12 bg-earth-100 rounded-xl flex items-center justify-center text-earth-clay text-lg shadow-inner"><i class="fas fa-chart-line"></i></div>
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">เข้าดูบทเรียนเฉลี่ย</p>
+                    <h3 class="text-3xl font-bold text-earth-900 mt-1" id="kpiAvgAccess">0 ครั้ง</h3>
                 </div>
-                <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-semibold text-earth-600 uppercase tracking-wider">ความก้าวหน้าเฉลี่ยรวม</p>
-                        <h3 class="text-3xl font-bold text-earth-700 mt-1" id="kpiProgress">0%</h3>
-                    </div>
-                    <div class="w-12 h-12 bg-earth-100 rounded-xl flex items-center justify-center text-earth-700 text-lg shadow-inner"><i class="fas fa-star-half-alt"></i></div>
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">ความก้าวหน้าเฉลี่ย</p>
+                    <h3 class="text-3xl font-bold text-earth-700 mt-1" id="kpiProgress">0%</h3>
                 </div>
-                <div class="glass-card p-5 rounded-2xl shadow-sm flex justify-between items-center">
-                    <div>
-                        <p class="text-xs font-semibold text-earth-600 uppercase tracking-wider">เรียนเสร็จสมบูรณ์</p>
-                        <h3 class="text-3xl font-bold text-green-600 mt-1" id="kpiCompleted">0 คน</h3>
-                    </div>
-                    <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-green-600 text-lg shadow-inner"><i class="fas fa-award"></i></div>
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">เรียนสมบูรณ์ (100%)</p>
+                    <h3 class="text-3xl font-bold text-green-600 mt-1" id="kpiCompleted">0 คน</h3>
                 </div>
             </div>
 
-            <!-- Filters Selection Controls -->
-            <div class="glass-card p-6 rounded-2xl shadow-sm border border-earth-100">
+            <!-- Filters -->
+            <div class="glass-card p-6 rounded-2xl border border-earth-100">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-earth-700 mb-1.5"><i class="fas fa-filter text-earth-sand"></i> เลือกกรองแยกตามหน่วยงานสายสนับสนุน</label>
+                        <label class="block text-xs font-bold text-earth-700 mb-1.5">เลือกกรองหน่วยงาน</label>
                         <select id="deptFilter" onchange="applyFilters()" class="w-full border border-earth-100 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none">
-                            <option value="all">แสดงผลภาพรวมบุคลากรทั้งหมด (ทุกหน่วยงาน)</option>
-                            <option value="งานธุรการ">งานธุรการ</option>
-                            <option value="งานการเงินและพัสดุ">งานการเงินและพัสดุ</option>
-                            <option value="โครงการ วมว.">โครงการ วมว.</option>
-                            <option value="งานนโยบายและแผน">งานนโยบายและแผน</option>
-                            <option value="งานบริการการศึกษา">งานบริการการศึกษา</option>
-                            <option value="งานห้องปฏิบัติการ">งานห้องปฏิบัติการ</option>
-                            <option value="งานกิจการนิสิตและศิษย์เก่าสัมพันธ์">งานกิจการนิสิตและศิษย์เก่าสัมพันธ์</option>
-                            <option value="งานกิจการนิสิต">งานกิจการนิสิต</option>
+                            <option value="all">แสดงผลทุกหน่วยงานในคณะวิทยาศาสตร์</option>
+                            <option value="งานธุรการ">งานธุรการ</option><option value="งานการเงินและพัสดุ">งานการเงินและพัสดุ</option>
+                            <option value="โครงการ วมว.">โครงการ วมว.</option><option value="งานนโยบายและแผน">งานนโยบายและแผน</option>
+                            <option value="งานบริการการศึกษา">งานบริการการศึกษา</option><option value="งานห้องปฏิบัติการ">งานห้องปฏิบัติการ</option>
+                            <option value="งานกิจการนิสิตและศิษย์เก่าสัมพันธ์">งานกิจการนิสิตและศิษย์เก่าสัมพันธ์</option><option value="งานกิจการนิสิต">งานกิจการนิสิต</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-earth-700 mb-1.5"><i class="fas fa-search text-earth-sand"></i> ค้นหาชื่อเจ้าหน้าที่สายวิชาการ</label>
-                        <input type="text" id="nameSearch" onkeyup="applyFilters()" placeholder="พิมพ์คำเพื่อค้นหาชื่อบุคลากร..." class="w-full border border-earth-100 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none">
+                        <label class="block text-xs font-bold text-earth-700 mb-1.5">ค้นหาชื่อเจ้าหน้าที่</label>
+                        <input type="text" id="nameSearch" onkeyup="applyFilters()" placeholder="พิมพ์เพื่อค้นหา..." class="w-full border border-earth-100 bg-white/90 rounded-xl p-2.5 text-xs text-earth-800 focus:outline-none">
                     </div>
                 </div>
             </div>
 
-            <!-- Dynamic Staff Progress Data Table -->
+            <!-- Table -->
             <div class="bg-white rounded-2xl shadow-sm border border-earth-100 overflow-hidden">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-earth-50/30 border-b border-earth-100 text-xs font-bold text-earth-700">
-                            <th class="p-4">ชื่อ - นามสกุล เจ้าหน้าที่</th>
-                            <th class="p-4">หน่วยงานหลัก (ฝ่ายงาน)</th>
-                            <th class="p-4 text-center">เข้าเรียน (ครั้ง)</th>
-                            <th class="p-4 text-center">คะแนน Pre-test</th>
-                            <th class="p-4 text-center">คะแนน Post-test</th>
-                            <th class="p-4">ความก้าวหน้าหลักสูตร</th>
+                            <th class="p-4">ชื่อ - นามสกุล เจ้าหน้าที่</th><th class="p-4">หน่วยงานหลัก</th><th class="p-4 text-center">เข้าเรียน (ครั้ง)</th><th class="p-4 text-center">Pre-test</th><th class="p-4 text-center">Post-test</th><th class="p-4">ความก้าวหน้าหลักสูตร</th>
                         </tr>
                     </thead>
-                    <tbody class="text-xs text-earth-900 divide-y divide-earth-50" id="managementTableBody">
-                        <tr><td colspan="6" class="p-8 text-center text-gray-400">กำลังดาวน์โหลดชุดข้อมูลจาก Sheets API เพื่อแสดงผลภาพก้าวหน้า...</td></tr>
-                    </tbody>
+                    <tbody class="text-xs text-earth-900 divide-y divide-earth-50" id="managementTableBody"></tbody>
                 </table>
             </div>
-
         </div>
     </main>
 
@@ -169,38 +120,28 @@
                 const config = await res.json();
                 gasUrl = config.GAS_WEB_APP_URL;
                 fetchExecutiveData();
-            } catch (err) {
-                console.error(err);
-                alert("ระบบขัดข้อง: ดึงตัวแปร Vercel Environment Variables ผิดพลาด");
-            }
+            } catch (err) { console.error(err); }
         }
 
         async function fetchExecutiveData() {
             try {
-                const response = await fetch(gasUrl, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: "getAdminData" })
-                });
+                const response = await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getAdminData" }) });
                 const resData = await response.json();
                 if(resData.status === "success") {
-                    fullDatabase = resData.users.filter(u => u.role === 'staff'); // เฉพาะผู้เรียน (staff) เท่านั้น
+                    fullDatabase = resData.users.filter(u => u.role === 'staff');
                     applyFilters();
                 }
-            } catch(e) {
-                document.getElementById('managementTableBody').innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-500">กรุณาตั้งค่าความปลอดภัยของแอปสคริปต์ให้สมบูรณ์</td></tr>`;
-            }
+            } catch(e){}
         }
 
         function applyFilters() {
             const deptVal = document.getElementById('deptFilter').value;
             const searchVal = document.getElementById('nameSearch').value.toLowerCase().trim();
-
             let filtered = fullDatabase.filter(user => {
                 let matchDept = (deptVal === 'all' || user.department === deptVal);
                 let matchSearch = (searchVal === '' || user.name.toLowerCase().includes(searchVal));
                 return matchDept && matchSearch;
             });
-
             renderExecutiveTable(filtered);
             calculateKPIs(filtered);
         }
@@ -208,16 +149,9 @@
         function renderExecutiveTable(data) {
             const tbody = document.getElementById('managementTableBody');
             tbody.innerHTML = '';
-            
-            if(data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400 italic">ไม่พบบันทึกข้อมูลความก้าวหน้าตามเงื่อนไข</td></tr>`;
-                return;
-            }
-
+            if(data.length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-gray-400">ไม่พบข้อมูล</td></tr>'; return; }
             data.forEach(item => {
-                let progColor = 'bg-earth-sand';
-                if(item.progress == 100) progColor = 'bg-green-500';
-
+                let progColor = item.progress == 100 ? 'bg-green-500' : 'bg-earth-sand';
                 tbody.innerHTML += `
                     <tr class="hover:bg-earth-50/40 transition-all">
                         <td class="p-4 font-semibold text-earth-900">${item.name}</td>
@@ -227,9 +161,7 @@
                         <td class="p-4 text-center font-semibold text-earth-700">${item.postScore ? item.postScore+'%' : '-'}</td>
                         <td class="p-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-32 bg-earth-100 h-2 rounded-full overflow-hidden shadow-inner">
-                                    <div class="${progColor} h-full" style="width: ${item.progress}%"></div>
-                                </div>
+                                <div class="w-32 bg-earth-100 h-2 rounded-full overflow-hidden shadow-inner"><div class="${progColor} h-full" style="width: ${item.progress}%"></div></div>
                                 <span class="font-bold">${item.progress}%</span>
                             </div>
                         </td>
@@ -240,23 +172,14 @@
 
         function calculateKPIs(data) {
             document.getElementById('kpiTotalUsers').innerText = data.length + " คน";
-            
-            if(data.length === 0) {
-                document.getElementById('kpiAvgAccess').innerText = "0 ครั้ง";
-                document.getElementById('kpiProgress').innerText = "0%";
-                document.getElementById('kpiCompleted').innerText = "0 คน";
-                return;
-            }
-
+            if(data.length === 0) { document.getElementById('kpiAvgAccess').innerText = "0 ครั้ง"; document.getElementById('kpiProgress').innerText = "0%"; document.getElementById('kpiCompleted').innerText = "0 คน"; return; }
             let totalAccess = data.reduce((sum, u) => sum + Number(u.accessCount || 0), 0);
             let totalProg = data.reduce((sum, u) => sum + Number(u.progress || 0), 0);
             let compCount = data.filter(u => u.progress == 100).length;
-
             document.getElementById('kpiAvgAccess').innerText = (totalAccess / data.length).toFixed(1) + " ครั้ง/คน";
             document.getElementById('kpiProgress').innerText = (totalProg / data.length).toFixed(0) + "%";
             document.getElementById('kpiCompleted').innerText = compCount + " คน";
         }
-
         window.onload = initConfig;
     </script>
 </body>
