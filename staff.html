@@ -294,7 +294,7 @@
             updateVisuals();
         }
 
-    function updateVisuals() {
+function updateVisuals() {
 
     let pre = currentUser.preScore || 0;
     let post = currentUser.postScore || 0;
@@ -338,16 +338,24 @@
     document.getElementById('chartPostTextTab3').innerText =
         post ? post + "%" : "0%";
 
-    // lesson section
+    // lesson state
     const wrapper =
         document.getElementById('lessonsGridWrapper');
+
+    const statePre =
+        document.getElementById('state-need-pre');
 
     const statePost =
         document.getElementById('state-need-post');
 
     wrapper.classList.remove('hidden');
 
+    statePre.classList.add('hidden');
     statePost.classList.add('hidden');
+
+    if (!pre) {
+        statePre.classList.remove('hidden');
+    }
 
     if (prog >= 100 && !post) {
         statePost.classList.remove('hidden');
