@@ -1,6 +1,11 @@
 (function () {
     const MIN_STUDY_SECONDS = 60;
     const COURSE_PROGRESS_KEY = `scinuLessonProgress:${currentUser?.username || "guest"}`;
+    const LESSONS_CACHE_KEY = "scinuLessonsCache";
+    const QUIZZES_CACHE_KEY = "scinuQuizzesCache";
+    let youtubeApiPromise = null;
+    let youtubePlayer = null;
+    let lessonFinished = false;
 
     function hasScore(value) {
         return value !== undefined && value !== null && value !== "";
@@ -75,9 +80,9 @@
     }
 
     function pendingCount() {
-        if (!lessonsList.length) return hasScore(currentUser.preScore) ? 0 : 1;
+        if (!lessonsList.length) return 0;
         const unfinishedLessons = lessonsList.length - completedLessonCount();
-        return hasScore(currentUser.preScore) ? unfinishedLessons : unfinishedLessons + 1;
+        return unfinishedLessons;
     }
 
     function isLessonUnlocked(lesson, index) {
@@ -86,11 +91,54 @@
         return Boolean(previousLesson && stateFor(previousLesson).postDone);
     }
 
+    function currentDashboardLesson() {
+        const activeLesson = getActiveLesson();
+        const lessons = sortedLessons();
+        if (activeLesson) {
+            const found = lessons.find((lesson) => String(lesson.id) === String(activeLesson.id));
+            if (found) return found;
+        }
+
+        return lessons.find((lesson, index) => isLessonUnlocked(lesson, index) && !stateFor(lesson).postDone) || lessons[0] || null;
+    }
+
+    function loadCachedData() {
+        try {
+            const cachedLessons = JSON.parse(sessionStorage.getItem(LESSONS_CACHE_KEY) || "[]");
+            const cachedQuizzes = JSON.parse(sessionStorage.getItem(QUIZZES_CACHE_KEY) || "[]");
+            if (cachedLessons.length) lessonsList = cachedLessons;
+            if (cachedQuizzes.length) allQuizzes = cachedQuizzes;
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
     function formatTime(totalSeconds) {
         const seconds = Math.max(0, Number(totalSeconds || 0));
         const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
         const remainder = Math.floor(seconds % 60).toString().padStart(2, "0");
         return `${minutes}:${remainder}`;
+    }
+
+    function loadYouTubeApi() {
+        if (window.YT?.Player) return Promise.resolve(window.YT);
+        if (youtubeApiPromise) return youtubeApiPromise;
+
+        youtubeApiPromise = new Promise((resolve) => {
+            const previousCallback = window.onYouTubeIframeAPIReady;
+            window.onYouTubeIframeAPIReady = function () {
+                if (typeof previousCallback === "function") previousCallback();
+                resolve(window.YT);
+            };
+
+            if (!document.querySelector('script[src="https://www.youtube.com/iframe_api"]')) {
+                const script = document.createElement("script");
+                script.src = "https://www.youtube.com/iframe_api";
+                document.head.appendChild(script);
+            }
+        });
+
+        return youtubeApiPromise;
     }
 
     function updateScoreCards(preDone, postDone, pre, post, progress) {
@@ -109,7 +157,7 @@
     function lessonStageLabel(lesson, index) {
         const state = stateFor(lesson);
         if (!isLessonUnlocked(lesson, index)) return "ล็อก";
-        if (!hasScore(currentUser.preScore)) return "รอ Pre";
+        if (!state.preDone) return "รอ Pre";
         if (!state.videoDone) return state.started ? "เรียนค้างไว้" : "พร้อมเรียน";
         if (!state.postDone) return "รอ Post";
         return "เสร็จแล้ว";
@@ -129,7 +177,7 @@
         lessons.forEach((lesson, index) => {
             const state = stateFor(lesson);
             const locked = !isLessonUnlocked(lesson, index);
-            const preDone = hasScore(currentUser.preScore);
+            const preDone = Boolean(state.preDone);
             const videoDone = Boolean(state.videoDone);
             const postDone = Boolean(state.postDone);
 
@@ -162,8 +210,10 @@
     }
 
     updateVisuals = function () {
-        const pre = currentUser.preScore;
-        const post = currentUser.postScore;
+        const dashboardLesson = currentDashboardLesson();
+        const dashboardState = dashboardLesson ? stateFor(dashboardLesson) : {};
+        const pre = dashboardLesson ? dashboardState.preScore : currentUser.preScore;
+        const post = dashboardLesson ? dashboardState.postScore : currentUser.postScore;
         const preDone = hasScore(pre);
         const postDone = hasScore(post);
         const progress = courseProgress();
@@ -178,21 +228,17 @@
         if (lessonsList.length > 0) renderLessons();
     };
 
-    updatePendingList = function (preDone) {
+    updatePendingList = function () {
         const list = document.getElementById("pendingTasksList");
         const lessons = sortedLessons();
         const count = pendingCount();
         list.innerHTML = "";
 
-        if (!preDone) {
-            list.innerHTML += `<div class="flex justify-between items-center p-5 bg-red-50 rounded-2xl border border-red-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-red-100 text-red-500 flex items-center justify-center"><i class="fas fa-clipboard-list text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">ทำ Pre-test</p><p class="text-xs text-gray-500">เริ่มจากบทที่ 1 เพื่อทำแบบทดสอบก่อนเรียน</p></div></div><button onclick="switchTab('lessons')" class="text-xs bg-red-500 hover:bg-red-600 text-white px-5 py-2.5 rounded-xl font-bold">ไปบทเรียน</button></div>`;
-        }
-
         const nextLesson = lessons.find((lesson, index) => isLessonUnlocked(lesson, index) && !stateFor(lesson).postDone);
-        if (preDone && nextLesson) {
+        if (nextLesson) {
             const state = stateFor(nextLesson);
-            const label = state.videoDone ? "ทำ Post-test" : state.started ? "เรียนค้างไว้" : "เรียนบทถัดไป";
-            const sub = state.videoDone ? "วิดีโอครบแล้ว เหลือ Post-test" : `เหลือ ${lessons.length - completedLessonCount()} บท`;
+            const label = !state.preDone ? "ทำ Pre-test" : state.videoDone ? "ทำ Post-test" : state.started ? "เรียนค้างไว้" : "เรียนบทถัดไป";
+            const sub = !state.preDone ? `บทที่ ${nextLesson.order} ยังไม่ได้ทำ Pre-test` : state.videoDone ? "วิดีโอครบแล้ว เหลือ Post-test" : `เหลือ ${lessons.length - completedLessonCount()} บท`;
             list.innerHTML += `<div class="flex justify-between items-center p-5 bg-amber-50 rounded-2xl border border-amber-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fas fa-layer-group text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">${label}</p><p class="text-xs text-gray-500">${sub}</p></div></div><button onclick="switchTab('lessons')" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold">ไปต่อ</button></div>`;
         }
 
@@ -227,21 +273,43 @@
         }
 
         if (!videoId) return url;
-        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&controls=1`;
+        const origin = encodeURIComponent(window.location.origin);
+        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&controls=1&enablejsapi=1&origin=${origin}`;
     }
 
-    function lessonButtonLabel(preDone, locked, state) {
+    async function watchYouTubeEnd(lesson, embedUrl) {
+        if (!embedUrl.includes("youtube.com/embed/")) return;
+
+        try {
+            const YT = await loadYouTubeApi();
+            if (youtubePlayer?.destroy) youtubePlayer.destroy();
+
+            youtubePlayer = new YT.Player("lessonVideoFrame", {
+                events: {
+                    onStateChange(event) {
+                        if (event.data === YT.PlayerState.ENDED && !lessonFinished) {
+                            finishLessonVideo(lesson);
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function lessonButtonLabel(locked, state) {
         if (locked) return "ล็อกบทเรียน";
-        if (!preDone) return "ทำ Pre-test ก่อนเรียน";
+        if (!state.preDone) return "ทำ Pre-test ก่อนเรียน";
         if (state.videoDone && !state.postDone) return "ทำ Post-test";
         if (state.started && !state.videoDone) return "เรียนค้างไว้";
         if (state.postDone) return "เปิดดูบทเรียน";
         return "เปิดบทเรียน";
     }
 
-    function lessonButtonClass(preDone, locked, state) {
+    function lessonButtonClass(locked, state) {
         if (locked) return "bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-200";
-        if (!preDone) return "bg-emerald-600 hover:bg-emerald-700 text-white";
+        if (!state.preDone) return "bg-emerald-600 hover:bg-emerald-700 text-white";
         if (state.videoDone && !state.postDone) return "bg-purple-600 hover:bg-purple-700 text-white";
         if (state.started && !state.videoDone) return "bg-amber-600 hover:bg-amber-700 text-white";
         return "bg-earth-900 hover:bg-earth-800 text-white";
@@ -257,15 +325,14 @@
             return;
         }
 
-        const preDone = hasScore(currentUser.preScore);
         const activeLesson = getActiveLesson();
 
         lessons.forEach((lesson, index) => {
             const state = stateFor(lesson);
             const locked = !isLessonUnlocked(lesson, index);
             const isActive = activeLesson && String(activeLesson.id) === String(lesson.id);
-            const preBadge = preDone
-                ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">Pre-test ${currentUser.preScore}%</span>`
+            const preBadge = state.preDone
+                ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">Pre-test ${hasScore(state.preScore) ? state.preScore + "%" : "ทำแล้ว"}</span>`
                 : `<span class="bg-red-50 text-red-600 border border-red-100 px-3 py-1 rounded-lg text-[11px] font-bold">รอ Pre-test</span>`;
             const lessonBadge = state.videoDone
                 ? `<span class="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนวิดีโอแล้ว</span>`
@@ -273,7 +340,7 @@
                     ? `<span class="bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนค้างไว้</span>`
                     : `<span class="bg-gray-50 text-gray-500 border border-gray-100 px-3 py-1 rounded-lg text-[11px] font-bold">ยังไม่เริ่มเรียน</span>`;
             const postBadge = state.postDone
-                ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ${hasScore(currentUser.postScore) ? currentUser.postScore + "%" : "ทำแล้ว"}</span>`
+                ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ${hasScore(state.postScore) ? state.postScore + "%" : "ทำแล้ว"}</span>`
                 : state.videoDone
                     ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">พร้อม Post-test</span>`
                     : `<span class="bg-gray-50 text-gray-500 border border-gray-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ยังล็อก</span>`;
@@ -291,8 +358,8 @@
                             <p class="text-sm text-gray-500 leading-relaxed">${lesson.desc || ""}</p>
                             <div class="flex flex-wrap gap-2 mt-5">${preBadge}${lessonBadge}${postBadge}${lockBadge}</div>
                         </div>
-                        <button data-lesson-id="${lesson.id}" ${locked ? "disabled" : ""} class="${lessonButtonClass(preDone, locked, state)} mt-6 w-full font-bold py-3 rounded-2xl text-sm transition-all shadow-sm">
-                            ${lessonButtonLabel(preDone, locked, state)}
+                        <button data-lesson-id="${lesson.id}" ${locked ? "disabled" : ""} class="${lessonButtonClass(locked, state)} mt-6 w-full font-bold py-3 rounded-2xl text-sm transition-all shadow-sm">
+                            ${lessonButtonLabel(locked, state)}
                         </button>
                     </div>
                 </div>
@@ -321,7 +388,7 @@
         setActiveLesson(lesson);
         const state = stateFor(lesson);
 
-        if (!hasScore(currentUser.preScore)) {
+        if (!state.preDone) {
             patchLessonState(lesson, { preStarted: true });
             openQuizModal("pre");
             return;
@@ -349,9 +416,11 @@
         const timerText = document.getElementById("lessonTimerText");
         const countdown = document.getElementById("lessonCountdown");
         const progressBar = document.getElementById("lessonProgressBar");
+        const embedUrl = convertToEmbedUrl(lesson.url);
+        lessonFinished = false;
 
         document.getElementById("playerLessonTitle").innerText = lesson.title;
-        document.getElementById("lessonVideoFrame").src = convertToEmbedUrl(lesson.url);
+        document.getElementById("lessonVideoFrame").src = embedUrl;
         badge.innerText = "เรียนค้างไว้";
         badge.className = "bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold";
         player.classList.remove("hidden");
@@ -382,6 +451,7 @@
         };
 
         updateVisuals();
+        watchYouTubeEnd(lesson, embedUrl);
         tick();
         player.scrollIntoView({ behavior: "smooth", block: "start" });
     };
@@ -418,6 +488,9 @@
     }
 
     finishLessonVideo = async function (lesson) {
+        if (lessonFinished) return;
+        lessonFinished = true;
+        window.clearTimeout(window.lessonStudyTimer);
         patchLessonState(lesson, { videoDone: true });
         document.getElementById("lessonStatusBadge").innerText = "พร้อม Post-test";
         document.getElementById("lessonStatusBadge").className = "bg-purple-100 text-purple-700 px-4 py-1 rounded-xl text-xs font-bold";
@@ -497,32 +570,53 @@
             return;
         }
 
-        await showCustomAlert(`ส่ง Post-test สำเร็จ ${finalScore}%`, "success");
+        const lessons = sortedLessons();
+        const activeIndex = lessons.findIndex((lesson) => activeLesson && String(lesson.id) === String(activeLesson.id));
+        const nextLesson = lessons[activeIndex + 1];
+
+        if (nextLesson) {
+            const continueNext = await showCustomAlert(`ส่ง Post-test สำเร็จ ${finalScore}%\nต้องการเริ่มบทที่ ${nextLesson.order} ต่อเลยไหม?`, "warning");
+            switchTab("lessons");
+            if (continueNext) {
+                startLesson(nextLesson.id);
+            }
+            return;
+        }
+
+        await showCustomAlert(`ส่ง Post-test สำเร็จ ${finalScore}% คุณเรียนครบทุกบทแล้ว`, "success");
         switchTab("lessons");
     };
 
     fetchLessonsAndQuizzes = async function () {
         try {
-            const lessonResponse = await fetch(gasUrl, {
+            const lessonRequest = fetch(gasUrl, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ action: "getLessons" })
             });
-            const lessonData = await lessonResponse.json();
-            if (lessonData.status === "success") lessonsList = lessonData.lessons || [];
 
-            const quizResponse = await fetch(gasUrl, {
+            const quizRequest = fetch(gasUrl, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ action: "getQuizzes" })
             });
-            const quizData = await quizResponse.json();
-            if (quizData.status === "success") allQuizzes = quizData.quizzes || [];
+
+            const [lessonResponse, quizResponse] = await Promise.all([lessonRequest, quizRequest]);
+            const [lessonData, quizData] = await Promise.all([lessonResponse.json(), quizResponse.json()]);
+
+            if (lessonData.status === "success") {
+                lessonsList = lessonData.lessons || [];
+                sessionStorage.setItem(LESSONS_CACHE_KEY, JSON.stringify(lessonsList));
+            }
+            if (quizData.status === "success") {
+                allQuizzes = quizData.quizzes || [];
+                sessionStorage.setItem(QUIZZES_CACHE_KEY, JSON.stringify(allQuizzes));
+            }
 
             updateVisuals();
 
             const activeLesson = getActiveLesson();
-            if (activeLesson && hasScore(currentUser.preScore)) {
+            if (activeLesson) {
                 const lesson = sortedLessons().find((item) => String(item.id) === String(activeLesson.id));
                 const state = lesson ? stateFor(lesson) : {};
                 if (lesson && state.started && !state.videoDone) openLessonPlayer(lesson);
@@ -560,6 +654,8 @@
             }
 
             loadUserData();
+            loadCachedData();
+            updateVisuals();
             await fetchLessonsAndQuizzes();
         } catch (error) {
             console.error("Config load error:", error);
