@@ -130,27 +130,13 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-center">
-                    <h3 class="text-base font-bold text-gray-800 tracking-wide mb-10"><i class="fas fa-route text-earth-clay mr-2"></i> เส้นทางการเรียนรู้</h3>
-                        <div class="flex items-center justify-between relative px-6">
-                            <div class="absolute top-7 left-12 right-12 h-1.5 bg-gray-100 rounded-full z-0"></div>
-                            <div class="absolute top-7 left-12 h-1.5 bg-emerald-500 rounded-full z-0 transition-all duration-1000" id="journeyLine" style="width: 0%; max-width: 100%;"></div>
-                            
-                            <div class="flex flex-col items-center gap-3 relative z-10 w-24">
-                                <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm transition-colors" id="step1-circle"><i class="fas fa-pencil-alt"></i></div>
-                                <span class="text-xs font-bold text-gray-800 text-center">Pre-test</span>
-                                <span class="text-[10px] font-bold text-gray-400" id="step1-tag">รอทำ</span>
-                            </div>
-                            <div class="flex flex-col items-center gap-3 relative z-10 w-24">
-                                <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm transition-colors" id="step2-circle"><i class="fas fa-layer-group"></i></div>
-                                <span class="text-xs font-bold text-gray-800 text-center">บทเรียน</span>
-                                <span class="text-[10px] font-bold text-gray-400" id="step2-tag">รอเข้าเรียน</span>
-                            </div>
-                            <div class="flex flex-col items-center gap-3 relative z-10 w-24">
-                                <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm transition-colors" id="step3-circle"><i class="fas fa-award"></i></div>
-                                <span class="text-xs font-bold text-gray-800 text-center">Post-test</span>
-                                <span class="text-[10px] font-bold text-gray-400" id="step3-tag">รอประเมินผล</span>
-                            </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm flex flex-col h-full">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="text-base font-bold text-gray-800 tracking-wide"><i class="fas fa-route text-earth-clay mr-2"></i> เส้นทางการเรียนรู้รายบท</h3>
+                            <span class="text-[11px] font-bold text-gray-400">เลื่อนดูบท 1-10</span>
+                        </div>
+                        <div id="lessonJourneyList" class="flex gap-4 overflow-x-auto pb-3 snap-x">
+                            <div class="min-w-[220px] bg-gray-50 rounded-2xl p-4 border border-gray-100 text-sm text-gray-400">กำลังโหลดเส้นทาง...</div>
                         </div>
                     </div>
 
