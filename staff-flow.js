@@ -540,19 +540,30 @@
         const countdown = document.getElementById("lessonCountdown");
         const progressBar = document.getElementById("lessonProgressBar");
         const embedUrl = convertToEmbedUrl(lesson.url);
+        const isReview = Boolean(stateFor(lesson).postDone);
         lessonFinished = false;
 
         document.getElementById("playerLessonTitle").innerText = lesson.title;
         document.getElementById("lessonVideoFrame").src = embedUrl;
-        badge.innerText = "เรียนค้างไว้";
-        badge.className = "bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold";
+        badge.innerText = isReview ? "ดูย้อนหลัง" : "เรียนค้างไว้";
+        badge.className = isReview
+            ? "bg-slate-100 text-slate-700 px-4 py-1 rounded-xl text-xs font-bold"
+            : "bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold";
         player.classList.remove("hidden");
 
         const configuredSeconds = Number(lesson.durationSeconds || lesson.duration);
         const totalSeconds = configuredSeconds > 0 ? configuredSeconds : MIN_STUDY_SECONDS;
         let remaining = totalSeconds;
-        countdown.innerText = `00:00 / ${formatTime(totalSeconds)}`;
-        progressBar.style.width = "0%";
+        countdown.innerText = isReview ? "ดูย้อนหลัง" : `00:00 / ${formatTime(totalSeconds)}`;
+        progressBar.style.width = isReview ? "100%" : "0%";
+        timerText.innerText = isReview ? "" : "ระบบจะเปิด Post-test ให้อัตโนมัติเมื่อเรียนครบเวลา";
+        timerText.classList.toggle("hidden", isReview);
+
+        if (isReview) {
+            window.clearTimeout(window.lessonStudyTimer);
+            player.scrollIntoView({ behavior: "smooth", block: "start" });
+            return;
+        }
 
         const tick = () => {
             if (remaining <= 0) {
@@ -565,7 +576,8 @@
 
             const elapsed = totalSeconds - remaining;
             const percentage = Math.min(100, Math.round((elapsed / totalSeconds) * 100));
-            timerText.innerText = `เรียนค้างไว้ หากออกจากหน้านี้สามารถกลับมาเปิดบทเรียนต่อได้ เหลือ ${formatTime(remaining)}`;
+            timerText.innerText = "";
+            timerText.classList.add("hidden");
             countdown.innerText = `${formatTime(elapsed)} / ${formatTime(totalSeconds)}`;
             progressBar.style.width = `${percentage}%`;
             remaining -= 1;
@@ -638,13 +650,19 @@
 
         currentQuizData.forEach((quiz, index) => {
             container.innerHTML += `
-                <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm question-block" data-answer="${quiz.answer}">
-                    <h4 class="text-base font-bold text-gray-900 mb-6 leading-relaxed"><span class="text-earth-clay mr-2">ข้อที่ ${index + 1}.</span> ${quiz.question}</h4>
-                    <div class="space-y-3 ios-radio">
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_1" value="1"><label for="q${quiz.id}_1">1. ${quiz.opt1}</label></div>
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_2" value="2"><label for="q${quiz.id}_2">2. ${quiz.opt2}</label></div>
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_3" value="3"><label for="q${quiz.id}_3">3. ${quiz.opt3}</label></div>
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_4" value="4"><label for="q${quiz.id}_4">4. ${quiz.opt4}</label></div>
+                <div class="bg-white p-5 lg:p-7 rounded-2xl border border-gray-200 shadow-sm question-block" data-answer="${quiz.answer}">
+                    <div class="flex items-start gap-4 mb-5">
+                        <div class="w-10 h-10 rounded-xl bg-earth-clay text-white flex items-center justify-center text-sm font-bold shrink-0">${index + 1}</div>
+                        <div>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">คำถามที่ ${index + 1} จาก ${currentQuizData.length}</p>
+                            <h4 class="text-base lg:text-lg font-bold text-gray-900 leading-relaxed mt-1">${quiz.question}</h4>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-3 ios-radio">
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_1" value="1"><label for="q${quiz.id}_1"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">1</span>${quiz.opt1}</label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_2" value="2"><label for="q${quiz.id}_2"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">2</span>${quiz.opt2}</label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_3" value="3"><label for="q${quiz.id}_3"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">3</span>${quiz.opt3}</label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_4" value="4"><label for="q${quiz.id}_4"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">4</span>${quiz.opt4}</label></div>
                     </div>
                 </div>`;
         });
@@ -763,12 +781,12 @@
         if (selected) selected.classList.remove("hidden");
 
         document.querySelectorAll(".tab-btn").forEach((button) => {
-            button.className = "tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all";
+            button.className = "tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all";
         });
 
         const activeButton = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`);
         if (activeButton) {
-            activeButton.className = "tab-btn flex items-center gap-4 p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-sm transition-all";
+            activeButton.className = "tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-xs lg:text-sm transition-all";
         }
     };
 

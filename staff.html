@@ -27,13 +27,17 @@
         ::-webkit-scrollbar-thumb { background: #D4A373; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #A26952; }
         .ios-radio input[type="radio"] { display: none; }
-        .ios-radio label { display: flex; align-items: center; padding: 12px 16px; background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: #475569; }
+        .ios-radio label { display: flex; align-items: center; padding: 12px 16px; background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: #475569; line-height: 1.5; }
         .ios-radio input[type="radio"]:checked + label { background-color: #F0FDF4; border-color: #10B981; color: #047857; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1); }
+        @media (max-width: 640px) {
+            html { font-size: 16px; }
+            .ios-radio label { align-items: flex-start; padding: 12px; font-size: 13px; }
+        }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden bg-slate-50">
+<body class="flex flex-col lg:flex-row min-h-screen overflow-x-hidden bg-slate-50">
 
-    <aside class="w-72 bg-earth-navy text-white flex flex-col justify-between shrink-0 shadow-2xl z-20">
+    <aside class="w-full lg:w-72 bg-earth-navy text-white flex flex-col justify-between shrink-0 shadow-2xl z-20">
         <div>
             <div class="p-6 border-b border-white/10 flex items-center gap-4">
                 <div class="w-12 h-12 bg-[#F26522] rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-md shrink-0">NU</div>
@@ -43,20 +47,20 @@
                 </div>
             </div>
             
-            <nav class="p-4 space-y-2" id="navigationTabs">
-                <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex items-center gap-4 p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-sm transition-all">
-                    <i class="fas fa-home w-5 text-center text-lg"></i> หน้าแรก
+            <nav class="p-4 grid grid-cols-3 lg:block lg:space-y-2 gap-2" id="navigationTabs">
+                <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-xs lg:text-sm transition-all">
+                    <i class="fas fa-home w-5 text-center text-base lg:text-lg"></i> หน้าแรก
                 </a>
-                <a href="#" onclick="switchTab('lessons')" class="tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all">
-                    <i class="fas fa-layer-group w-5 text-center text-lg"></i> บทเรียน
+                <a href="#" onclick="switchTab('lessons')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all">
+                    <i class="fas fa-layer-group w-5 text-center text-base lg:text-lg"></i> บทเรียน
                 </a>
-                <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all">
-                    <i class="fas fa-chart-line w-5 text-center text-lg"></i> สรุปผล
+                <a href="#" onclick="switchTab('tests')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all">
+                    <i class="fas fa-chart-line w-5 text-center text-base lg:text-lg"></i> สรุปผล
                 </a>
             </nav>
         </div>
 
-        <div class="p-5 border-t border-white/10 bg-black/20">
+        <div class="hidden lg:block p-5 border-t border-white/10 bg-black/20">
             <div class="flex items-center gap-3 mb-4">
                 <div class="w-10 h-10 rounded-xl bg-earth-sand flex items-center justify-center text-earth-navy font-bold text-lg shrink-0" id="profileInitial">U</div>
                 <div class="overflow-hidden">
@@ -70,15 +74,15 @@
         </div>
     </aside>
 
-    <main class="flex-1 h-screen overflow-y-auto relative flex flex-col">
-        <header class="sticky top-0 z-30 h-20 bg-white/90 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shrink-0 shadow-sm">
-            <h2 class="text-base font-bold text-earth-navy">ระบบอบรมออนไลน์ (Staff Portal)</h2>
-            <div class="text-xs text-gray-500 font-bold bg-slate-100 px-4 py-2 rounded-xl border border-gray-200">
+    <main class="flex-1 min-h-screen lg:h-screen overflow-y-auto relative flex flex-col">
+        <header class="sticky top-0 z-30 min-h-16 lg:h-20 bg-white/90 backdrop-blur-md border-b border-gray-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2 px-4 lg:px-8 py-3 shrink-0 shadow-sm">
+            <h2 class="text-sm lg:text-base font-bold text-earth-navy">ระบบอบรมออนไลน์ (Staff Portal)</h2>
+            <div class="text-[11px] lg:text-xs text-gray-500 font-bold bg-slate-100 px-3 lg:px-4 py-2 rounded-xl border border-gray-200">
                 <i class="far fa-clock text-earth-clay mr-1.5"></i> เข้าใช้งาน: <span id="lastLoginTime">-</span>
             </div>
         </header>
 
-        <div class="p-8 space-y-8 max-w-7xl mx-auto w-full" id="viewContainer">
+        <div class="p-4 lg:p-8 space-y-6 lg:space-y-8 max-w-7xl mx-auto w-full" id="viewContainer">
             
             <div id="view-dashboard" class="space-y-8 animate-fadeIn">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -265,21 +269,21 @@
     </main>
 
     <div id="quizOverlay" class="fixed inset-0 bg-slate-50 z-[100] hidden flex-col overflow-hidden animate-fadeIn">
-        <div class="h-20 bg-white border-b border-gray-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
+        <div class="min-h-16 lg:h-20 bg-white border-b border-gray-200 px-4 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 shadow-sm">
             <div>
                 <span class="bg-earth-clay text-white px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider" id="quizHeaderType">PRE-TEST</span>
-                <h2 class="text-lg font-bold text-gray-900 inline-block ml-3">แบบทดสอบประเมินสมรรถนะ</h2>
+                <h2 class="text-base lg:text-lg font-bold text-gray-900 inline-block ml-2 lg:ml-3">แบบทดสอบประเมินสมรรถนะ</h2>
             </div>
             <span class="text-xs font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-xl">ต้องส่งคำตอบให้ครบก่อนออก</span>
         </div>
-        <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
-            <div class="max-w-3xl mx-auto space-y-8 pb-10" id="quizQuestionsContainer">
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50">
+            <div class="max-w-3xl mx-auto space-y-4 lg:space-y-6 pb-10" id="quizQuestionsContainer">
                 </div>
         </div>
-        <div class="bg-white border-t border-gray-200 p-6 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
-            <div class="max-w-3xl mx-auto flex justify-between items-center">
-                <p class="text-sm text-gray-500 font-medium">กรุณาตอบให้ครบทุกข้อก่อนกดส่งคำตอบ</p>
-                <button onclick="submitQuiz()" class="bg-earth-navy hover:bg-black text-white font-bold py-3 px-10 rounded-xl shadow-md transition-all">ส่งคำตอบและดูผลคะแนน</button>
+        <div class="bg-white border-t border-gray-200 p-4 lg:p-6 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+            <div class="max-w-3xl mx-auto flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+                <p class="text-xs lg:text-sm text-gray-500 font-medium">กรุณาตอบให้ครบทุกข้อก่อนกดส่งคำตอบ</p>
+                <button onclick="submitQuiz()" class="bg-earth-navy hover:bg-black text-white font-bold py-3 px-6 lg:px-10 rounded-xl shadow-md transition-all w-full sm:w-auto">ส่งคำตอบและดูผลคะแนน</button>
             </div>
         </div>
     </div>
