@@ -27,8 +27,9 @@
         ::-webkit-scrollbar-thumb { background: #D4A373; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #A26952; }
         .ios-radio input[type="radio"] { display: none; }
-        .ios-radio label { display: flex; align-items: center; padding: 12px 16px; background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; cursor: pointer; transition: all 0.2s; font-size: 14px; color: #475569; line-height: 1.5; }
-        .ios-radio input[type="radio"]:checked + label { background-color: #F0FDF4; border-color: #10B981; color: #047857; font-weight: 600; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.1); }
+        .ios-radio label { display: flex; align-items: center; padding: 14px 16px; background-color: #FFFFFF; border: 2px solid #E2E8F0; border-radius: 16px; cursor: pointer; transition: all 0.2s; font-size: 15px; color: #334155; line-height: 1.55; box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04); }
+        .ios-radio label:hover { border-color: #D4A373; background-color: #FDFBF7; }
+        .ios-radio input[type="radio"]:checked + label { background-color: #F0FDF4; border-color: #10B981; color: #047857; font-weight: 700; box-shadow: 0 8px 18px -12px rgba(16, 185, 129, 0.45); }
         @media (max-width: 640px) {
             html { font-size: 16px; }
             .ios-radio label { align-items: flex-start; padding: 12px; font-size: 13px; }
@@ -195,10 +196,10 @@
 
     <div class="p-5 space-y-3">
         <div class="flex items-center justify-between gap-4">
-            <p class="text-sm text-gray-500" id="lessonTimerText">
+            <p class="hidden text-sm text-gray-500" id="lessonTimerText">
                 ระบบกำลังจับเวลาเรียน เมื่อครบเวลาจะเปิด Post-test ให้อัตโนมัติ
             </p>
-            <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" id="lessonCountdown">00:00</span>
+            <span class="hidden bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" id="lessonCountdown">00:00</span>
         </div>
         <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
             <div id="lessonProgressBar" class="h-full bg-earth-clay rounded-full transition-all duration-500" style="width: 0%"></div>
@@ -268,22 +269,28 @@
         </div>
     </main>
 
-    <div id="quizOverlay" class="fixed inset-0 bg-slate-50 z-[100] hidden flex-col overflow-hidden animate-fadeIn">
-        <div class="min-h-16 lg:h-20 bg-white border-b border-gray-200 px-4 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 shrink-0 shadow-sm">
-            <div>
-                <span class="bg-earth-clay text-white px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider" id="quizHeaderType">PRE-TEST</span>
-                <h2 class="text-base lg:text-lg font-bold text-gray-900 inline-block ml-2 lg:ml-3">แบบทดสอบประเมินสมรรถนะ</h2>
+    <div id="quizOverlay" class="fixed inset-0 bg-[#F6F8FB] z-[100] hidden flex-col overflow-hidden animate-fadeIn">
+        <div class="min-h-16 lg:h-20 bg-white border-b border-gray-200 px-4 lg:px-8 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 shadow-sm">
+            <div class="flex items-center gap-3 min-w-0">
+                <span class="bg-earth-clay text-white px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider shrink-0" id="quizHeaderType">PRE-TEST</span>
+                <div class="min-w-0">
+                    <h2 class="text-base lg:text-xl font-bold text-gray-950 truncate">แบบทดสอบประเมินสมรรถนะ</h2>
+                    <p class="text-xs text-gray-500 mt-0.5" id="quizQuestionCount">กรุณาตอบทุกข้อก่อนส่งคำตอบ</p>
+                </div>
             </div>
-            <span class="text-xs font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-xl">ต้องส่งคำตอบให้ครบก่อนออก</span>
+            <span class="text-xs font-bold text-gray-500 bg-slate-100 px-4 py-2 rounded-xl border border-slate-200 self-start sm:self-auto">ต้องส่งคำตอบให้ครบก่อนออก</span>
         </div>
-        <div class="flex-1 overflow-y-auto p-4 lg:p-8 bg-slate-50">
-            <div class="max-w-3xl mx-auto space-y-4 lg:space-y-6 pb-10" id="quizQuestionsContainer">
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8 bg-[#F6F8FB]">
+            <div class="max-w-4xl mx-auto space-y-4 lg:space-y-5 pb-10" id="quizQuestionsContainer">
                 </div>
         </div>
         <div class="bg-white border-t border-gray-200 p-4 lg:p-6 shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
-            <div class="max-w-3xl mx-auto flex flex-col sm:flex-row justify-between sm:items-center gap-3">
+            <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between sm:items-center gap-3">
                 <p class="text-xs lg:text-sm text-gray-500 font-medium">กรุณาตอบให้ครบทุกข้อก่อนกดส่งคำตอบ</p>
-                <button onclick="submitQuiz()" class="bg-earth-navy hover:bg-black text-white font-bold py-3 px-6 lg:px-10 rounded-xl shadow-md transition-all w-full sm:w-auto">ส่งคำตอบและดูผลคะแนน</button>
+                <button onclick="submitQuiz()" class="bg-earth-navy hover:bg-black text-white font-bold py-3 px-6 lg:px-10 rounded-xl shadow-md transition-all w-full sm:w-auto flex items-center justify-center gap-2">
+                    <i class="fas fa-paper-plane"></i>
+                    ส่งคำตอบและดูผลคะแนน
+                </button>
             </div>
         </div>
     </div>

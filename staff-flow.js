@@ -5,6 +5,7 @@
     const QUIZZES_CACHE_KEY = "scinuQuizzesCache";
     let youtubeApiPromise = null;
     let youtubePlayer = null;
+    let youtubeGuardTimer = null;
     let lessonFinished = false;
 
     function hasScore(value) {
@@ -85,6 +86,11 @@
 
         sessionStorage.setItem("activeLesson", JSON.stringify(activeLesson));
         pendingLessonUrl = lesson.url || "";
+    }
+
+    function clearYouTubeGuard() {
+        if (youtubeGuardTimer) window.clearInterval(youtubeGuardTimer);
+        youtubeGuardTimer = null;
     }
 
     function completedLessonCount() {
@@ -402,10 +408,39 @@
 
         try {
             const YT = await loadYouTubeApi();
+            clearYouTubeGuard();
             if (youtubePlayer?.destroy) youtubePlayer.destroy();
 
             youtubePlayer = new YT.Player("lessonVideoFrame", {
                 events: {
+                    onReady(event) {
+                        const state = stateFor(lesson);
+                        const canReview = Boolean(state.postDone);
+                        let allowedSecond = Number(state.videoPosition || 0);
+
+                        if (allowedSecond > 0 && !canReview) {
+                            event.target.seekTo(allowedSecond, true);
+                        }
+
+                        if (canReview) return;
+
+                        youtubeGuardTimer = window.setInterval(() => {
+                            if (!youtubePlayer?.getCurrentTime) return;
+
+                            const currentSecond = youtubePlayer.getCurrentTime();
+                            if (currentSecond > allowedSecond + 2.5) {
+                                youtubePlayer.seekTo(allowedSecond, true);
+                                return;
+                            }
+
+                            if (currentSecond >= allowedSecond) {
+                                allowedSecond = currentSecond;
+                                if (Math.floor(allowedSecond) % 5 === 0) {
+                                    patchLessonState(lesson, { videoPosition: Math.floor(allowedSecond) });
+                                }
+                            }
+                        }, 700);
+                    },
                     onStateChange(event) {
                         if (event.data === YT.PlayerState.ENDED && !lessonFinished) {
                             finishLessonVideo(lesson);
@@ -542,6 +577,7 @@
         const embedUrl = convertToEmbedUrl(lesson.url);
         const isReview = Boolean(stateFor(lesson).postDone);
         lessonFinished = false;
+        clearYouTubeGuard();
 
         document.getElementById("playerLessonTitle").innerText = lesson.title;
         document.getElementById("lessonVideoFrame").src = embedUrl;
@@ -554,10 +590,11 @@
         const configuredSeconds = Number(lesson.durationSeconds || lesson.duration);
         const totalSeconds = configuredSeconds > 0 ? configuredSeconds : MIN_STUDY_SECONDS;
         let remaining = totalSeconds;
-        countdown.innerText = isReview ? "ดูย้อนหลัง" : `00:00 / ${formatTime(totalSeconds)}`;
+        countdown.innerText = "";
+        countdown.classList.add("hidden");
         progressBar.style.width = isReview ? "100%" : "0%";
-        timerText.innerText = isReview ? "" : "ระบบจะเปิด Post-test ให้อัตโนมัติเมื่อเรียนครบเวลา";
-        timerText.classList.toggle("hidden", isReview);
+        timerText.innerText = "";
+        timerText.classList.add("hidden");
 
         if (isReview) {
             window.clearTimeout(window.lessonStudyTimer);
@@ -567,8 +604,8 @@
 
         const tick = () => {
             if (remaining <= 0) {
-                timerText.innerText = "ครบเวลาเรียนแล้ว ระบบกำลังเปิด Post-test";
-                countdown.innerText = `${formatTime(totalSeconds)} / ${formatTime(totalSeconds)}`;
+                timerText.innerText = "";
+                countdown.innerText = "";
                 progressBar.style.width = "100%";
                 finishLessonVideo(lesson);
                 return;
@@ -578,7 +615,7 @@
             const percentage = Math.min(100, Math.round((elapsed / totalSeconds) * 100));
             timerText.innerText = "";
             timerText.classList.add("hidden");
-            countdown.innerText = `${formatTime(elapsed)} / ${formatTime(totalSeconds)}`;
+            countdown.innerText = "";
             progressBar.style.width = `${percentage}%`;
             remaining -= 1;
             window.clearTimeout(window.lessonStudyTimer);
@@ -626,6 +663,7 @@
         if (lessonFinished) return;
         lessonFinished = true;
         window.clearTimeout(window.lessonStudyTimer);
+        clearYouTubeGuard();
         patchLessonState(lesson, { videoDone: true });
         document.getElementById("lessonStatusBadge").innerText = "พร้อม Post-test";
         document.getElementById("lessonStatusBadge").className = "bg-purple-100 text-purple-700 px-4 py-1 rounded-xl text-xs font-bold";
@@ -645,26 +683,34 @@
         }
 
         document.getElementById("quizHeaderType").innerText = type === "pre" ? "PRE-TEST" : "POST-TEST";
+        setText("quizQuestionCount", `ทั้งหมด ${currentQuizData.length} ข้อ กรุณาตอบให้ครบก่อนส่งคำตอบ`);
         const container = document.getElementById("quizQuestionsContainer");
         container.innerHTML = "";
 
         currentQuizData.forEach((quiz, index) => {
             container.innerHTML += `
-                <div class="bg-white p-5 lg:p-7 rounded-2xl border border-gray-200 shadow-sm question-block" data-answer="${quiz.answer}">
+                <div class="bg-white p-5 lg:p-7 rounded-2xl border border-slate-200 shadow-sm question-block" data-answer="${quiz.answer}">
                     <div class="flex items-start gap-4 mb-5">
-                        <div class="w-10 h-10 rounded-xl bg-earth-clay text-white flex items-center justify-center text-sm font-bold shrink-0">${index + 1}</div>
+                        <div class="w-11 h-11 rounded-2xl bg-earth-clay text-white flex items-center justify-center text-base font-bold shrink-0 shadow-sm">${index + 1}</div>
                         <div>
-                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wide">คำถามที่ ${index + 1} จาก ${currentQuizData.length}</p>
-                            <h4 class="text-base lg:text-lg font-bold text-gray-900 leading-relaxed mt-1">${quiz.question}</h4>
+                            <p class="text-[11px] font-bold text-earth-clay uppercase tracking-wide">คำถามที่ ${index + 1} จาก ${currentQuizData.length}</p>
+                            <h4 class="text-lg lg:text-xl font-bold text-gray-950 leading-relaxed mt-1">${quiz.question}</h4>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-3 ios-radio">
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_1" value="1"><label for="q${quiz.id}_1"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">1</span>${quiz.opt1}</label></div>
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_2" value="2"><label for="q${quiz.id}_2"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">2</span>${quiz.opt2}</label></div>
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_3" value="3"><label for="q${quiz.id}_3"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">3</span>${quiz.opt3}</label></div>
-                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_4" value="4"><label for="q${quiz.id}_4"><span class="w-7 h-7 rounded-lg bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">4</span>${quiz.opt4}</label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_1" value="1"><label for="q${quiz.id}_1"><span class="w-8 h-8 rounded-xl bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">1</span><span>${quiz.opt1}</span></label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_2" value="2"><label for="q${quiz.id}_2"><span class="w-8 h-8 rounded-xl bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">2</span><span>${quiz.opt2}</span></label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_3" value="3"><label for="q${quiz.id}_3"><span class="w-8 h-8 rounded-xl bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">3</span><span>${quiz.opt3}</span></label></div>
+                        <div><input type="radio" name="q${quiz.id}" id="q${quiz.id}_4" value="4"><label for="q${quiz.id}_4"><span class="w-8 h-8 rounded-xl bg-white border border-current/20 flex items-center justify-center mr-3 text-xs font-bold shrink-0">4</span><span>${quiz.opt4}</span></label></div>
                     </div>
                 </div>`;
+        });
+
+        container.querySelectorAll('input[type="radio"]').forEach((input) => {
+            input.addEventListener("change", () => {
+                const answered = container.querySelectorAll('input[type="radio"]:checked').length;
+                setText("quizQuestionCount", `ตอบแล้ว ${answered}/${currentQuizData.length} ข้อ`);
+            });
         });
 
         document.getElementById("quizOverlay").classList.remove("hidden");
