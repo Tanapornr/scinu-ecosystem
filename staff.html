@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="config.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -47,10 +48,7 @@
                     <i class="fas fa-home w-5 text-center text-lg"></i> หน้าแรก
                 </a>
                 <a href="#" onclick="switchTab('lessons')" class="tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all">
-                    <i class="fas fa-layer-group w-5 text-center text-lg"></i> บทเรียนเวิร์กโฟลว์
-                </a>
-                <a href="#" onclick="switchTab('tests')" class="tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all">
-                    <i class="fas fa-chart-line w-5 text-center text-lg"></i> ประเมินและสรุปผล
+                    <i class="fas fa-layer-group w-5 text-center text-lg"></i> บทเรียน
                 </a>
             </nav>
         </div>
@@ -71,7 +69,7 @@
 
     <main class="flex-1 h-screen overflow-y-auto relative flex flex-col">
         <header class="sticky top-0 z-30 h-20 bg-white/90 backdrop-blur-md border-b border-gray-200 flex items-center justify-between px-8 shrink-0 shadow-sm">
-            <h2 class="text-base font-bold text-earth-navy">ระบบบริหารจัดการและเวิร์กโฟลว์อัตโนมัติ (Staff Portal)</h2>
+            <h2 class="text-base font-bold text-earth-navy">ระบบอบรมออนไลน์ (Staff Portal)</h2>
             <div class="text-xs text-gray-500 font-bold bg-slate-100 px-4 py-2 rounded-xl border border-gray-200">
                 <i class="far fa-clock text-earth-clay mr-1.5"></i> เข้าใช้งาน: <span id="lastLoginTime">-</span>
             </div>
@@ -130,7 +128,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col justify-center">
-                        <h3 class="text-base font-bold text-gray-800 tracking-wide mb-10"><i class="fas fa-route text-earth-clay mr-2"></i> เส้นทางการเรียนรู้เวิร์กโฟลว์</h3>
+                    <h3 class="text-base font-bold text-gray-800 tracking-wide mb-10"><i class="fas fa-route text-earth-clay mr-2"></i> เส้นทางการเรียนรู้</h3>
                         <div class="flex items-center justify-between relative px-6">
                             <div class="absolute top-7 left-12 right-12 h-1.5 bg-gray-100 rounded-full z-0"></div>
                             <div class="absolute top-7 left-12 h-1.5 bg-emerald-500 rounded-full z-0 transition-all duration-1000" id="journeyLine" style="width: 0%; max-width: 100%;"></div>
@@ -162,17 +160,10 @@
 
             <div id="view-lessons" class="hidden space-y-6 animate-fadeIn">
                 <div class="border-b pb-4 border-gray-200">
-                    <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-layer-group text-earth-clay mr-3"></i> เนื้อหาการอบรมระบบดิจิทัลเวิร์กโฟลว์</h3>
-                    <p class="text-sm text-gray-500 mt-2">ประเมินและศึกษาเนื้อหาตามลำดับเพื่อพัฒนาความเข้าใจในการใช้เครื่องมืออัตโนมัติลดภาระงาน</p>
+                    <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-layer-group text-earth-clay mr-3"></i> เนื้อหาการอบรม</h3>
+                    <p class="text-sm text-gray-500 mt-2">เลือกบทเรียนเพื่อทำ Pre-test เรียนวิดีโอในระบบ และทำ Post-test หลังเรียนครบตามลำดับ</p>
                 </div>
                 
-
-                <div id="state-need-post" class="hidden bg-purple-50 p-10 rounded-3xl border border-purple-200 shadow-sm flex flex-col items-center text-center mb-8">
-                    <div class="w-20 h-20 bg-white text-purple-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm"><i class="fas fa-award"></i></div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-3">ยินดีด้วย! คุณศึกษาเนื้อหาครบ 100% แล้ว</h4>
-                    <p class="text-gray-600 mb-8 max-w-lg">ขั้นตอนสุดท้าย กรุณาทำแบบประเมินหลังเรียน (Post-test) เพื่อวัดผลสัมฤทธิ์และจบหลักสูตรอย่างสมบูรณ์</p>
-                    <button onclick="openQuizModal('post')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-2xl shadow-md transition-all">เริ่มทำแบบประเมิน Post-test</button>
-                </div>
 
                 <div id="lessonsGridWrapper" class="hidden">
                     <div id="lessonPlayerWrapper"
@@ -211,12 +202,12 @@
 
     <div class="p-5 flex justify-between items-center">
 
-        <p class="text-sm text-gray-500">
-            หากเรียนจบแล้ว กดปุ่มนี้เพื่อปลดล็อก Post-test
+        <p class="text-sm text-gray-500" id="lessonTimerText">
+            ระบบจะปลดล็อกปุ่มยืนยันหลังเรียนในเว็บครบตามเวลาขั้นต่ำ
         </p>
 
-        <button onclick="markLessonComplete()"
-            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-bold">
+        <button id="completeLessonButton" onclick="markLessonComplete()"
+            class="bg-gray-300 text-gray-500 px-6 py-3 rounded-xl text-sm font-bold cursor-not-allowed" disabled>
 
             เรียนจบบทนี้แล้ว
 
@@ -277,48 +268,13 @@
         </div>
     </main>
 
-<div id="lessonPlayerWrapper" class="hidden bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden mt-8">
-    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
-        <div>
-            <h3 class="text-lg font-bold text-gray-900" id="playerLessonTitle">บทเรียน</h3>
-            <p class="text-sm text-gray-500">กรุณาเรียนวิดีโอให้จบก่อนทำ Post-test</p>
-        </div>
-
-        <span id="lessonStatusBadge" class="bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold">
-            กำลังเรียน
-        </span>
-    </div>
-
-    <div class="aspect-video bg-black">
-        <iframe id="lessonVideoFrame"
-            class="w-full h-full"
-            src=""
-            title="Lesson Video"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen>
-        </iframe>
-    </div>
-
-    <div class="p-5 flex justify-between items-center">
-        <p class="text-sm text-gray-500">
-            หากเรียนจบแล้ว กดปุ่มนี้เพื่อปลดล็อก Post-test
-        </p>
-
-        <button onclick="markLessonComplete()"
-            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-bold">
-            เรียนจบบทนี้แล้ว
-        </button>
-    </div>
-</div>
-    
     <div id="quizOverlay" class="fixed inset-0 bg-slate-50 z-[100] hidden flex-col overflow-hidden animate-fadeIn">
         <div class="h-20 bg-white border-b border-gray-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
             <div>
                 <span class="bg-earth-clay text-white px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider" id="quizHeaderType">PRE-TEST</span>
                 <h2 class="text-lg font-bold text-gray-900 inline-block ml-3">แบบทดสอบประเมินสมรรถนะ</h2>
             </div>
-            <button onclick="closeQuizModal()" class="w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition-all"><i class="fas fa-times text-lg"></i></button>
+            <span class="text-xs font-bold text-gray-500 bg-gray-100 px-4 py-2 rounded-xl">ต้องส่งคำตอบให้ครบก่อนออก</span>
         </div>
         <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
             <div class="max-w-3xl mx-auto space-y-8 pb-10" id="quizQuestionsContainer">
@@ -356,9 +312,11 @@
 
         async function initConfig() {
             try {
-                const res = await fetch('/api/config');
-                const config = await res.json();
-                gasUrl = config.GAS_WEB_APP_URL;
+                gasUrl = await window.loadScinuConfig();
+                if(!gasUrl) {
+                    await showCustomAlert("ยังไม่ได้ตั้งค่า GAS_WEB_APP_URL กรุณาตั้งค่าใน Vercel Environment Variable หรือในไฟล์ config.js หากใช้งานบน GitHub Pages", "error");
+                    return;
+                }
                 loadUserData();
                 fetchLessonsAndQuizzes();
             } catch (err) { console.error("Config load error:", err); }
@@ -421,8 +379,7 @@ function updateVisuals() {
     const wrapper =
         document.getElementById('lessonsGridWrapper');
 
-    const statePost =
-    document.getElementById('state-need-post');
+    const statePost = { classList: { add() {}, remove() {} } };
 
 // แสดงบทเรียนเลย
 wrapper.classList.remove('hidden');
@@ -758,7 +715,7 @@ function startLesson(lessonId, lessonUrl) {
 
         async function viewLesson(url) {
             if(url) {
-                window.open(url, '_blank');
+                openLessonPlayer({ url, title: "บทเรียน" });
                 let increment = Math.ceil(100 / (lessonsList.length || 4));
                 let next = Math.min(100, (currentUser.progress || 0) + increment);
                 currentUser.progress = next;
@@ -977,5 +934,6 @@ if (currentTakingType === 'pre') {
 
         window.onload = initConfig;
     </script>
+    <script src="staff-flow.js"></script>
 </body>
 </html>
