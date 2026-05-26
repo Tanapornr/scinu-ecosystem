@@ -12,7 +12,7 @@
     }
 
     function scoreText(score, total) {
-        return hasScore(score) && hasScore(total) ? `${score}/${total}` : "รอทำ";
+        return hasScore(score) && Number(total) > 0 ? `${score}/${total}` : "รอทำ";
     }
 
     function scorePercent(score, total) {
@@ -157,9 +157,88 @@
         document.getElementById("summaryPostScore").innerText = scoreText(post, postTotal);
 
         document.getElementById("chartPreBarTab3").style.height = preDone ? `${prePercent}%` : "0%";
-        document.getElementById("chartPreTextTab3").innerText = preDone ? `${pre}/${preTotal}` : "0/0";
+        document.getElementById("chartPreTextTab3").innerText = preDone && Number(preTotal) > 0 ? `${pre}/${preTotal}` : "รอทำ";
         document.getElementById("chartPostBarTab3").style.height = postDone ? `${postPercent}%` : "0%";
-        document.getElementById("chartPostTextTab3").innerText = postDone ? `${post}/${postTotal}` : "0/0";
+        document.getElementById("chartPostTextTab3").innerText = postDone && Number(postTotal) > 0 ? `${post}/${postTotal}` : "รอทำ";
+    }
+
+    function setText(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.innerText = value;
+    }
+
+    function renderSummaryPanel(lesson, state) {
+        if (!lesson) {
+            setText("summaryLessonOrder", "ยังไม่มีบทเรียน");
+            setText("summaryLessonTitle", "ยังไม่มีข้อมูลสรุปผล");
+            setText("summaryLessonStatus", "เมื่อมีบทเรียน ระบบจะแสดงคะแนนและสถานะที่นี่");
+            setText("summaryVideoStatus", "รอเรียน");
+            setText("summaryChartHint", "กราฟจะแสดงเมื่อมีคะแนน Pre-test หรือ Post-test");
+            return;
+        }
+
+        const stage = state.postDone
+            ? "เรียนจบบทนี้แล้ว"
+            : state.videoDone
+                ? "วิดีโอครบแล้ว เหลือ Post-test"
+                : state.started
+                    ? "เรียนค้างไว้"
+                    : state.preDone
+                        ? "พร้อมเรียนวิดีโอ"
+                        : "รอทำ Pre-test";
+
+        setText("summaryLessonOrder", `บทที่ ${lesson.order}`);
+        setText("summaryLessonTitle", lesson.title || "บทเรียน");
+        setText("summaryLessonStatus", stage);
+        setText("summaryVideoStatus", state.postDone ? "จบบทแล้ว" : state.videoDone ? "เรียนวิดีโอแล้ว" : state.started ? "เรียนค้างไว้" : "รอเรียน");
+        setText("summaryPreNote", state.preDone ? "คะแนนก่อนเรียนของบทนี้" : "เริ่มบทนี้เพื่อทำ Pre-test");
+        setText("summaryPostNote", state.postDone ? "คะแนนหลังเรียนของบทนี้" : state.videoDone ? "พร้อมทำ Post-test" : "ต้องเรียนวิดีโอก่อน");
+        setText("summaryChartHint", state.preDone || state.postDone ? "กราฟเทียบคะแนนดิบของบทนี้" : "ยังไม่มีคะแนนของบทนี้");
+    }
+
+    function renderSummaryList() {
+        const container = document.getElementById("summaryLessonList");
+        if (!container) return;
+
+        const lessons = sortedLessons();
+        if (!lessons.length) {
+            container.innerHTML = `<div class="text-sm text-gray-400">ยังไม่มีบทเรียน</div>`;
+            return;
+        }
+
+        container.innerHTML = "";
+        lessons.forEach((lesson, index) => {
+            const state = stateFor(lesson);
+            const locked = !isLessonUnlocked(lesson, index);
+            const dot = (done, active) => {
+                if (done) return "bg-emerald-500 text-white";
+                if (active) return "bg-earth-clay text-white";
+                return "bg-gray-100 text-gray-400";
+            };
+
+            const cardTone = state.postDone
+                ? "border-emerald-100 bg-emerald-50/50"
+                : locked
+                    ? "border-gray-100 bg-gray-50 opacity-70"
+                    : "border-gray-200 bg-white";
+
+            container.innerHTML += `
+                <div class="rounded-2xl border ${cardTone} p-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <p class="text-[11px] font-bold text-earth-clay">บทที่ ${lesson.order}</p>
+                            <h5 class="text-sm font-bold text-gray-900 mt-1 leading-snug">${lesson.title || "บทเรียน"}</h5>
+                        </div>
+                        <span class="text-[10px] font-bold ${state.postDone ? "text-emerald-700" : locked ? "text-gray-400" : "text-gray-600"}">${lessonStageLabel(lesson, index)}</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-4 text-center text-[10px] font-bold">
+                        <div><span class="mx-auto w-8 h-8 rounded-full flex items-center justify-center ${dot(state.preDone, !state.preDone && !locked)}"><i class="fas fa-pencil-alt"></i></span><p class="mt-1 text-gray-500">${state.preDone ? scoreText(state.preScore, state.preTotal) : "Pre"}</p></div>
+                        <div><span class="mx-auto w-8 h-8 rounded-full flex items-center justify-center ${dot(state.videoDone, state.preDone && !state.videoDone && !locked)}"><i class="fas fa-play"></i></span><p class="mt-1 text-gray-500">เรียน</p></div>
+                        <div><span class="mx-auto w-8 h-8 rounded-full flex items-center justify-center ${dot(state.postDone, state.videoDone && !state.postDone && !locked)}"><i class="fas fa-award"></i></span><p class="mt-1 text-gray-500">${state.postDone ? scoreText(state.postScore, state.postTotal) : "Post"}</p></div>
+                    </div>
+                </div>
+            `;
+        });
     }
 
     function lessonStageLabel(lesson, index) {
@@ -234,6 +313,8 @@
         updateScoreCards(preDone, postDone, pre, post, progress, preTotal, postTotal);
         updatePendingList(preDone, progress, postDone);
         renderJourney();
+        renderSummaryPanel(dashboardLesson, dashboardState);
+        renderSummaryList();
 
         document.getElementById("lessonsGridWrapper").classList.remove("hidden");
         if (lessonsList.length > 0) renderLessons();
