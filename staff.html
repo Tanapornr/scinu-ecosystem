@@ -369,27 +369,25 @@ if (chartPostBar && chartPostText) {
             else { document.getElementById('chartPostBarTab3').style.height = "0%"; document.getElementById('chartPostTextTab3').innerText = "0%"; }
 
             // Lesson Flow Logistics Updates
-            const statePre = document.getElementById('state-need-pre');
-            const statePost = document.getElementById('state-need-post');
-            const wrapper = document.getElementById('lessonsGridWrapper');
+            // Lesson Flow Logistics Updates
+const statePre = document.getElementById('state-need-pre');
+const statePost = document.getElementById('state-need-post');
+const wrapper = document.getElementById('lessonsGridWrapper');
 
-            statePre.classList.add('hidden');
-            statePost.classList.add('hidden');
-            wrapper.classList.add('hidden');
+statePre.classList.add('hidden');
+statePost.classList.add('hidden');
+wrapper.classList.add('hidden');
 
-            if (!pre) {
-                statePre.classList.remove('hidden');
-            } else if (prog < 100) {
-                wrapper.classList.remove('hidden');
-            } else if (prog >= 100 && !post) {
-                statePost.classList.remove('hidden');
-                wrapper.classList.remove('hidden'); 
-            } else {
-                wrapper.classList.remove('hidden');
-            }
-
-            updatePendingList(pre, prog, post);
-        }
+if (!pre) {
+    statePre.classList.remove('hidden');
+} else if (prog < 100) {
+    wrapper.classList.remove('hidden');
+} else if (prog >= 100 && !post) {
+    statePost.classList.remove('hidden');
+    wrapper.classList.remove('hidden'); 
+} else {
+    wrapper.classList.remove('hidden');
+}
 
         function updatePendingList(pre, prog, post) {
             const list = document.getElementById('pendingTasksList');
@@ -429,35 +427,58 @@ if (chartPostBar && chartPostText) {
             } catch(e) { console.error(e); }
         }
 
-        function renderLessons() {
-            const grid = document.getElementById('lessonsGrid');
-            grid.innerHTML = '';
+function renderLessons() {
+    const grid = document.getElementById('lessonsGrid');
+    grid.innerHTML = '';
 
-            if(!lessonsList || lessonsList.length === 0) {
-                grid.innerHTML = '<p class="text-sm text-gray-400 col-span-3 p-4">แอดมินยังไม่ได้เพิ่มบทเรียนเข้าสู่ระบบ</p>';
-                return;
-            }
-            
-            const gradients = ['from-teal-400 to-emerald-500', 'from-blue-400 to-indigo-500', 'from-orange-400 to-rose-400', 'from-purple-400 to-pink-500'];
-            
-            lessonsList.forEach((l, index) => {
-                let grad = gradients[index % gradients.length];
-                grid.innerHTML += `
-                    <div class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col">
-                        <div class="h-36 bg-gradient-to-r ${grad} p-5 flex items-end justify-between relative overflow-hidden">
-                            <i class="fas fa-play-circle absolute -right-4 -bottom-4 text-[80px] text-white/20"></i>
-                            <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1.5 rounded-2xl text-xs font-bold border border-white/20 shadow-sm">บทที่ ${l.order}</span>
-                        </div>
-                        <div class="p-6 flex-1 flex flex-col justify-between">
-                            <div>
-                                <h4 class="text-base font-bold text-gray-900 leading-tight mb-2">${l.title}</h4>
-                                <p class="text-xs text-gray-500 line-clamp-2 leading-relaxed">${l.desc}</p>
-                            </div>
-                            <button onclick="viewLesson('${l.url}')" class="mt-6 w-full bg-slate-50 hover:bg-earth-navy hover:text-white border text-earth-navy font-bold py-3 rounded-2xl text-xs transition-all flex items-center justify-center gap-2"><i class="fas fa-external-link-alt text-xs"></i> เข้าสู่เนื้อหา</button>
-                        </div>
-                    </div>`;
-            });
-        }
+    if (!lessonsList || lessonsList.length === 0) {
+        grid.innerHTML = '<p class="text-sm text-gray-400 col-span-3 p-4">แอดมินยังไม่ได้เพิ่มบทเรียนเข้าสู่ระบบ</p>';
+        return;
+    }
+
+    lessonsList.sort((a, b) => Number(a.order) - Number(b.order));
+
+    lessonsList.forEach((l) => {
+        grid.innerHTML += `
+            <div class="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl transition-all overflow-hidden flex flex-col">
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                        <span class="inline-block bg-earth-clay text-white px-4 py-1.5 rounded-xl text-xs font-bold mb-4">
+                            บทที่ ${l.order}
+                        </span>
+
+                        <h4 class="text-lg font-bold text-gray-900 leading-tight mb-3">
+                            ${l.title}
+                        </h4>
+
+                        <p class="text-sm text-gray-500 leading-relaxed">
+                            ${l.desc}
+                        </p>
+                    </div>
+
+                    <button onclick="startLesson('${l.id}', '${l.url}')" 
+                        class="mt-6 w-full bg-earth-navy hover:bg-black text-white font-bold py-3 rounded-2xl text-sm transition-all">
+                        เริ่มเรียน
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+}
+
+        let pendingLessonUrl = "";
+
+function startLesson(lessonId, lessonUrl) {
+    pendingLessonUrl = lessonUrl;
+
+    if (!currentUser.preScore) {
+        openQuizModal('pre');
+        return;
+    }
+
+    viewLesson(lessonUrl);
+}
+        
 
         async function viewLesson(url) {
             if(url) {
@@ -534,25 +555,19 @@ if (chartPostBar && chartPostText) {
             closeQuizModal();
             
             let payload = { action: "updateProgress", username: currentUser.username };
-            if (currentTakingType === 'pre') {
-                currentUser.preScore = finalScore;
-                payload.preScore = finalScore;
-            } else {
-                currentUser.postScore = finalScore;
-                payload.postScore = finalScore;
-            }
-            sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-            try { await fetch(gasUrl, { method: 'POST', headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) }); } catch(e){}
-            
-            loadUserData();
-            
-            if(currentTakingType === 'pre') {
-                await showCustomAlert("ส่งแบบประเมิน Pre-test สำเร็จ! คุณได้คะแนน: " + finalScore + "% ตอนนี้สามารถเข้าเรียนบทเรียนได้แล้วครับ", "success");
-            } else {
-                await showCustomAlert("ส่งแบบประเมิน Post-test สำเร็จ! คุณได้คะแนน: " + finalScore + "% ยินดีด้วยครับ คุณจบหลักสูตรแล้ว", "success");
-                switchTab('tests');
-            }
+          if (currentTakingType === 'pre') {
+    showCustomAlert("ส่งแบบประเมิน Pre-test สำเร็จ! คุณได้คะแนน: " + finalScore + "%", "success");
+
+    setTimeout(() => {
+        if (pendingLessonUrl) {
+            viewLesson(pendingLessonUrl);
         }
+    }, 300);
+
+} else {
+    showCustomAlert("ส่งแบบประเมิน Post-test สำเร็จ! คุณได้คะแนน: " + finalScore + "% ยินดีด้วยครับ คุณจบหลักสูตรแล้ว", "success");
+    switchTab('tests');
+}
 
         function switchTab(tabId) {
     ['dashboard', 'lessons', 'tests'].forEach(t => {
