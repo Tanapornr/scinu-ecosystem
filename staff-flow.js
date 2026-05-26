@@ -11,8 +11,13 @@
         return value !== undefined && value !== null && value !== "";
     }
 
-    function scoreText(value) {
-        return hasScore(value) ? `${value}%` : "รอทำ";
+    function scoreText(score, total) {
+        return hasScore(score) && hasScore(total) ? `${score}/${total}` : "รอทำ";
+    }
+
+    function scorePercent(score, total) {
+        if (!hasScore(score) || !Number(total)) return 0;
+        return Math.round((Number(score) / Number(total)) * 100);
     }
 
     function getLessonState() {
@@ -141,17 +146,20 @@
         return youtubeApiPromise;
     }
 
-    function updateScoreCards(preDone, postDone, pre, post, progress) {
-        document.getElementById("statPreScore").innerText = scoreText(pre);
-        document.getElementById("statPostScore").innerText = scoreText(post);
-        document.getElementById("statProgress").innerText = `${progress}%`;
-        document.getElementById("summaryPreScore").innerText = scoreText(pre);
-        document.getElementById("summaryPostScore").innerText = scoreText(post);
+    function updateScoreCards(preDone, postDone, pre, post, progress, preTotal, postTotal) {
+        const prePercent = scorePercent(pre, preTotal);
+        const postPercent = scorePercent(post, postTotal);
 
-        document.getElementById("chartPreBarTab3").style.height = preDone ? `${pre}%` : "0%";
-        document.getElementById("chartPreTextTab3").innerText = preDone ? `${pre}%` : "0%";
-        document.getElementById("chartPostBarTab3").style.height = postDone ? `${post}%` : "0%";
-        document.getElementById("chartPostTextTab3").innerText = postDone ? `${post}%` : "0%";
+        document.getElementById("statPreScore").innerText = scoreText(pre, preTotal);
+        document.getElementById("statPostScore").innerText = scoreText(post, postTotal);
+        document.getElementById("statProgress").innerText = `${progress}%`;
+        document.getElementById("summaryPreScore").innerText = scoreText(pre, preTotal);
+        document.getElementById("summaryPostScore").innerText = scoreText(post, postTotal);
+
+        document.getElementById("chartPreBarTab3").style.height = preDone ? `${prePercent}%` : "0%";
+        document.getElementById("chartPreTextTab3").innerText = preDone ? `${pre}/${preTotal}` : "0/0";
+        document.getElementById("chartPostBarTab3").style.height = postDone ? `${postPercent}%` : "0%";
+        document.getElementById("chartPostTextTab3").innerText = postDone ? `${post}/${postTotal}` : "0/0";
     }
 
     function lessonStageLabel(lesson, index) {
@@ -214,13 +222,15 @@
         const dashboardState = dashboardLesson ? stateFor(dashboardLesson) : {};
         const pre = dashboardLesson ? dashboardState.preScore : currentUser.preScore;
         const post = dashboardLesson ? dashboardState.postScore : currentUser.postScore;
+        const preTotal = dashboardLesson ? dashboardState.preTotal : currentUser.preTotal;
+        const postTotal = dashboardLesson ? dashboardState.postTotal : currentUser.postTotal;
         const preDone = hasScore(pre);
         const postDone = hasScore(post);
         const progress = courseProgress();
 
         currentUser.progress = progress;
         saveCurrentUser();
-        updateScoreCards(preDone, postDone, pre, post, progress);
+        updateScoreCards(preDone, postDone, pre, post, progress, preTotal, postTotal);
         updatePendingList(preDone, progress, postDone);
         renderJourney();
 
@@ -332,7 +342,7 @@
             const locked = !isLessonUnlocked(lesson, index);
             const isActive = activeLesson && String(activeLesson.id) === String(lesson.id);
             const preBadge = state.preDone
-                ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">Pre-test ${hasScore(state.preScore) ? state.preScore + "%" : "ทำแล้ว"}</span>`
+                ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">Pre-test ${scoreText(state.preScore, state.preTotal)}</span>`
                 : `<span class="bg-red-50 text-red-600 border border-red-100 px-3 py-1 rounded-lg text-[11px] font-bold">รอ Pre-test</span>`;
             const lessonBadge = state.videoDone
                 ? `<span class="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนวิดีโอแล้ว</span>`
@@ -340,7 +350,7 @@
                     ? `<span class="bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนค้างไว้</span>`
                     : `<span class="bg-gray-50 text-gray-500 border border-gray-100 px-3 py-1 rounded-lg text-[11px] font-bold">ยังไม่เริ่มเรียน</span>`;
             const postBadge = state.postDone
-                ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ${hasScore(state.postScore) ? state.postScore + "%" : "ทำแล้ว"}</span>`
+                ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ${scoreText(state.postScore, state.postTotal)}</span>`
                 : state.videoDone
                     ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">พร้อม Post-test</span>`
                     : `<span class="bg-gray-50 text-gray-500 border border-gray-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ยังล็อก</span>`;
@@ -547,25 +557,29 @@
             return;
         }
 
-        const finalScore = Math.round((correctCount / currentQuizData.length) * 100);
+        const rawScore = correctCount;
+        const totalScore = currentQuizData.length;
+        const finalPercent = Math.round((correctCount / currentQuizData.length) * 100);
         const activeLesson = getActiveLesson();
         closeQuizModal();
 
         if (currentTakingType === "pre") {
-            currentUser.preScore = finalScore;
-            if (activeLesson) patchLessonState(activeLesson, { preDone: true, preScore: finalScore });
+            currentUser.preScore = rawScore;
+            currentUser.preTotal = totalScore;
+            if (activeLesson) patchLessonState(activeLesson, { preDone: true, preScore: rawScore, preTotal: totalScore, prePercent: finalPercent });
         } else {
-            currentUser.postScore = finalScore;
-            if (activeLesson) patchLessonState(activeLesson, { postDone: true, postScore: finalScore });
+            currentUser.postScore = rawScore;
+            currentUser.postTotal = totalScore;
+            if (activeLesson) patchLessonState(activeLesson, { postDone: true, postScore: rawScore, postTotal: totalScore, postPercent: finalPercent });
         }
 
         saveCurrentUser();
-        await syncProgress();
-        await saveUserSnapshot();
         updateVisuals();
+        syncProgress();
+        saveUserSnapshot();
 
         if (currentTakingType === "pre") {
-            await showCustomAlert(`ส่ง Pre-test สำเร็จ ${finalScore}%`, "success");
+            await showCustomAlert(`ส่ง Pre-test สำเร็จ ได้ ${rawScore}/${totalScore} คะแนน`, "success");
             if (activeLesson) openLessonPlayer(activeLesson);
             return;
         }
@@ -575,7 +589,7 @@
         const nextLesson = lessons[activeIndex + 1];
 
         if (nextLesson) {
-            const continueNext = await showCustomAlert(`ส่ง Post-test สำเร็จ ${finalScore}%\nต้องการเริ่มบทที่ ${nextLesson.order} ต่อเลยไหม?`, "warning");
+            const continueNext = await showCustomAlert(`ส่ง Post-test สำเร็จ ได้ ${rawScore}/${totalScore} คะแนน\nต้องการเริ่มบทที่ ${nextLesson.order} ต่อเลยไหม?`, "warning");
             switchTab("lessons");
             if (continueNext) {
                 startLesson(nextLesson.id);
@@ -583,7 +597,7 @@
             return;
         }
 
-        await showCustomAlert(`ส่ง Post-test สำเร็จ ${finalScore}% คุณเรียนครบทุกบทแล้ว`, "success");
+        await showCustomAlert(`ส่ง Post-test สำเร็จ ได้ ${rawScore}/${totalScore} คะแนน คุณเรียนครบทุกบทแล้ว`, "success");
         switchTab("lessons");
     };
 
