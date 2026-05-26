@@ -110,7 +110,7 @@
             </div>
             <div class="flex justify-end gap-3 mt-8">
                 <button onclick="closeLessonModal()" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all">ยกเลิก</button>
-                <button onclick="saveLesson()" class="px-6 py-3 bg-earth-clay text-white font-bold rounded-xl hover:bg-earth-700 transition-all">บันทึกข้อมูล</button>
+                <button id="btnSaveLesson" onclick="saveLesson()" class="px-6 py-3 bg-earth-clay text-white font-bold rounded-xl hover:bg-earth-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">บันทึกข้อมูล</button>
             </div>
         </div>
     </div>
@@ -146,7 +146,7 @@
             </div>
             <div class="flex justify-end gap-3 mt-8">
                 <button onclick="closeQuizModal()" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all">ยกเลิก</button>
-                <button onclick="saveQuiz()" class="px-6 py-3 bg-earth-navy text-white font-bold rounded-xl hover:bg-black transition-all">บันทึกคำถาม</button>
+                <button id="btnSaveQuiz" onclick="saveQuiz()" class="px-6 py-3 bg-earth-navy text-white font-bold rounded-xl hover:bg-black transition-all disabled:opacity-50 disabled:cursor-not-allowed">บันทึกคำถาม</button>
             </div>
         </div>
     </div>
@@ -166,6 +166,8 @@
     <script>
         let gasUrl = "";
         let globalLessons = [];
+        let isSavingLesson = false;
+        let isSavingQuiz = false;
 
         async function initConfig() {
             try {
@@ -182,17 +184,31 @@
                 const res = await fetch(gasUrl, { method: 'POST', body: JSON.stringify({ action: "getLessons" }) });
                 const data = await res.json();
                 if(data.status === "success") {
-                    globalLessons = data.lessons;
-                    renderLessons(data.lessons);
-                    updateLessonDropdown(data.lessons);
+                    globalLessons = getUniqueLessons(data.lessons);
+                    renderLessons(globalLessons);
+                    updateLessonDropdown(globalLessons);
                 }
             } catch(e){}
+        }
+
+        function getUniqueLessons(lessons = []) {
+            const seen = new Set();
+            return lessons
+                .filter(l => l && (l.id || l.title))
+                .filter(l => {
+                    // กันข้อมูลซ้ำจาก Google Sheet/API เช่น กดบันทึกซ้ำ หรือ append ซ้ำ
+                    const key = String(l.id || `${l.order}|${l.title}|${l.desc}|${l.url}`).trim();
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                })
+                .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
         }
 
         function renderLessons(lessons) {
             const tbody = document.getElementById('lessonTableBody');
             tbody.innerHTML = '';
-            lessons.forEach(l => {
+            getUniqueLessons(lessons).forEach(l => {
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-5 text-center font-bold text-earth-navy">${l.order}</td>
@@ -216,18 +232,48 @@
         }
 
         async function saveLesson() {
+            if (isSavingLesson) return; // กันกดซ้ำแล้วเด้ง 2 แถว
+
             let lesson = {
-                id: document.getElementById('lessonId').value,
-                order: document.getElementById('lessonOrder').value,
-                title: document.getElementById('lessonTitle').value,
-                desc: document.getElementById('lessonDesc').value,
-                url: document.getElementById('lessonUrl').value
+                id: document.getElementById('lessonId').value.trim(),
+                order: document.getElementById('lessonOrder').value.trim(),
+                title: document.getElementById('lessonTitle').value.trim(),
+                desc: document.getElementById('lessonDesc').value.trim(),
+                url: document.getElementById('lessonUrl').value.trim()
             };
+
+            if (!lesson.order || !lesson.title) {
+                await showCustomAlert("กรุณากรอกลำดับและชื่อบทเรียน", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveLesson');
+            isSavingLesson = true;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+
             try {
-                const res = await fetch(gasUrl, { method: 'POST', body: JSON.stringify({ action: "saveLesson", lesson: lesson }) });
+                const res = await fetch(gasUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "saveLesson", lesson: lesson })
+                });
                 const data = await res.json();
-                if(data.status === "success") { closeLessonModal(); await showCustomAlert(data.message, "success"); fetchLessons(); }
-            } catch(e) {}
+                if(data.status === "success") {
+                    closeLessonModal();
+                    await showCustomAlert(data.message || "บันทึกบทเรียนเรียบร้อย", "success");
+                    await fetchLessons();
+                } else {
+                    await showCustomAlert(data.message || "บันทึกไม่สำเร็จ", "error");
+                }
+            } catch(e) {
+                console.error(e);
+                await showCustomAlert("เชื่อมต่อระบบบันทึกข้อมูลไม่สำเร็จ", "error");
+            } finally {
+                isSavingLesson = false;
+                btn.disabled = false;
+                btn.innerHTML = 'บันทึกข้อมูล';
+            }
         }
 
         async function deleteLesson(id) {
@@ -275,22 +321,52 @@
         }
 
         async function saveQuiz() {
+            if (isSavingQuiz) return; // กันกดซ้ำ
+
             let quiz = {
-                id: document.getElementById('quizId').value,
+                id: document.getElementById('quizId').value.trim(),
                 lessonId: document.getElementById('quizLessonId').value,
                 type: document.getElementById('quizType').value,
-                question: document.getElementById('quizQuestion').value,
-                opt1: document.getElementById('quizOpt1').value,
-                opt2: document.getElementById('quizOpt2').value,
-                opt3: document.getElementById('quizOpt3').value,
-                opt4: document.getElementById('quizOpt4').value,
-                answer: document.getElementById('quizAnswer').value
+                question: document.getElementById('quizQuestion').value.trim(),
+                opt1: document.getElementById('quizOpt1').value.trim(),
+                opt2: document.getElementById('quizOpt2').value.trim(),
+                opt3: document.getElementById('quizOpt3').value.trim(),
+                opt4: document.getElementById('quizOpt4').value.trim(),
+                answer: document.getElementById('quizAnswer').value.trim()
             };
+
+            if (!quiz.question || !quiz.opt1 || !quiz.opt2 || !quiz.answer) {
+                await showCustomAlert("กรุณากรอกคำถาม ตัวเลือก และเฉลยให้ครบ", "error");
+                return;
+            }
+
+            const btn = document.getElementById('btnSaveQuiz');
+            isSavingQuiz = true;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>กำลังบันทึก...';
+
             try {
-                const res = await fetch(gasUrl, { method: 'POST', body: JSON.stringify({ action: "saveQuiz", quiz: quiz }) });
+                const res = await fetch(gasUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: "saveQuiz", quiz: quiz })
+                });
                 const data = await res.json();
-                if(data.status === "success") { closeQuizModal(); await showCustomAlert(data.message, "success"); fetchQuizzes(); }
-            } catch(e) {}
+                if(data.status === "success") {
+                    closeQuizModal();
+                    await showCustomAlert(data.message || "บันทึกคำถามเรียบร้อย", "success");
+                    await fetchQuizzes();
+                } else {
+                    await showCustomAlert(data.message || "บันทึกไม่สำเร็จ", "error");
+                }
+            } catch(e) {
+                console.error(e);
+                await showCustomAlert("เชื่อมต่อระบบบันทึกข้อมูลไม่สำเร็จ", "error");
+            } finally {
+                isSavingQuiz = false;
+                btn.disabled = false;
+                btn.innerHTML = 'บันทึกคำถาม';
+            }
         }
 
         async function deleteQuiz(id) {
