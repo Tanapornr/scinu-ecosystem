@@ -165,6 +165,7 @@
     function lessonStageLabel(lesson, index) {
         const state = stateFor(lesson);
         if (!isLessonUnlocked(lesson, index)) return "ล็อก";
+        if (state.postDone) return "เสร็จแล้ว";
         if (!state.preDone) return "รอ Pre";
         if (!state.videoDone) return state.started ? "เรียนค้างไว้" : "พร้อมเรียน";
         if (!state.postDone) return "รอ Post";
@@ -247,8 +248,8 @@
         const nextLesson = lessons.find((lesson, index) => isLessonUnlocked(lesson, index) && !stateFor(lesson).postDone);
         if (nextLesson) {
             const state = stateFor(nextLesson);
-            const label = !state.preDone ? "ทำ Pre-test" : state.videoDone ? "ทำ Post-test" : state.started ? "เรียนค้างไว้" : "เรียนบทถัดไป";
-            const sub = !state.preDone ? `บทที่ ${nextLesson.order} ยังไม่ได้ทำ Pre-test` : state.videoDone ? "วิดีโอครบแล้ว เหลือ Post-test" : `เหลือ ${lessons.length - completedLessonCount()} บท`;
+            const label = !state.preDone ? "ทำ Pre-test" : state.videoDone && !state.postDone ? "ทำ Post-test" : state.started ? "เรียนค้างไว้" : "เรียนบทถัดไป";
+            const sub = !state.preDone ? `บทที่ ${nextLesson.order} ยังไม่ได้ทำ Pre-test` : state.videoDone && !state.postDone ? "วิดีโอครบแล้ว เหลือ Post-test" : `เหลือ ${lessons.length - completedLessonCount()} บท`;
             list.innerHTML += `<div class="flex justify-between items-center p-5 bg-amber-50 rounded-2xl border border-amber-100"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center"><i class="fas fa-layer-group text-xl"></i></div><div><p class="text-sm font-bold text-gray-900">${label}</p><p class="text-xs text-gray-500">${sub}</p></div></div><button onclick="switchTab('lessons')" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-5 py-2.5 rounded-xl font-bold">ไปต่อ</button></div>`;
         }
 
@@ -310,15 +311,16 @@
 
     function lessonButtonLabel(locked, state) {
         if (locked) return "ล็อกบทเรียน";
+        if (state.postDone) return "ดูบทเรียนอีกครั้ง";
         if (!state.preDone) return "ทำ Pre-test ก่อนเรียน";
         if (state.videoDone && !state.postDone) return "ทำ Post-test";
         if (state.started && !state.videoDone) return "เรียนค้างไว้";
-        if (state.postDone) return "เปิดดูบทเรียน";
         return "เปิดบทเรียน";
     }
 
     function lessonButtonClass(locked, state) {
         if (locked) return "bg-gray-200 text-gray-400 cursor-not-allowed border border-gray-200";
+        if (state.postDone) return "bg-slate-700 hover:bg-slate-800 text-white";
         if (!state.preDone) return "bg-emerald-600 hover:bg-emerald-700 text-white";
         if (state.videoDone && !state.postDone) return "bg-purple-600 hover:bg-purple-700 text-white";
         if (state.started && !state.videoDone) return "bg-amber-600 hover:bg-amber-700 text-white";
@@ -344,7 +346,9 @@
             const preBadge = state.preDone
                 ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">Pre-test ${scoreText(state.preScore, state.preTotal)}</span>`
                 : `<span class="bg-red-50 text-red-600 border border-red-100 px-3 py-1 rounded-lg text-[11px] font-bold">รอ Pre-test</span>`;
-            const lessonBadge = state.videoDone
+            const lessonBadge = state.postDone
+                ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนจบบทแล้ว</span>`
+                : state.videoDone
                 ? `<span class="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนวิดีโอแล้ว</span>`
                 : state.started
                     ? `<span class="bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนค้างไว้</span>`
@@ -362,7 +366,7 @@
                         <div>
                             <div class="flex items-center justify-between gap-3 mb-4">
                                 <span class="inline-block bg-earth-clay text-white px-4 py-1.5 rounded-xl text-xs font-bold">บทที่ ${lesson.order}</span>
-                                ${isActive && !state.videoDone ? '<span class="text-[11px] font-bold text-amber-700">เรียนค้างไว้</span>' : ""}
+                                ${isActive && state.started && !state.videoDone && !state.postDone ? '<span class="text-[11px] font-bold text-amber-700">เรียนค้างไว้</span>' : ""}
                             </div>
                             <h4 class="text-lg font-bold text-gray-900 leading-tight mb-3">${lesson.title}</h4>
                             <p class="text-sm text-gray-500 leading-relaxed">${lesson.desc || ""}</p>
@@ -570,7 +574,7 @@
         } else {
             currentUser.postScore = rawScore;
             currentUser.postTotal = totalScore;
-            if (activeLesson) patchLessonState(activeLesson, { postDone: true, postScore: rawScore, postTotal: totalScore, postPercent: finalPercent });
+            if (activeLesson) patchLessonState(activeLesson, { started: false, videoDone: true, postDone: true, postScore: rawScore, postTotal: totalScore, postPercent: finalPercent });
         }
 
         saveCurrentUser();
