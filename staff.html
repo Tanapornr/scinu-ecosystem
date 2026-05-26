@@ -166,12 +166,6 @@
                     <p class="text-sm text-gray-500 mt-2">ประเมินและศึกษาเนื้อหาตามลำดับเพื่อพัฒนาความเข้าใจในการใช้เครื่องมืออัตโนมัติลดภาระงาน</p>
                 </div>
                 
-                <div id="state-need-pre" class="hidden bg-white p-10 rounded-3xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
-                    <div class="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner"><i class="fas fa-clipboard-list"></i></div>
-                    <h4 class="text-xl font-bold text-gray-900 mb-3">แบบประเมินก่อนเรียน (Pre-test)</h4>
-                    <p class="text-gray-500 mb-8 max-w-lg">คุณจำเป็นต้องทำแบบประเมินก่อนเรียน เพื่อวัดระดับความรู้พื้นฐานก่อนเข้าสู่เนื้อหาบทเรียน</p>
-                    <button onclick="openQuizModal('pre')" class="bg-earth-navy hover:bg-black text-white font-bold py-4 px-10 rounded-2xl shadow-md transition-all">เริ่มทำแบบประเมิน</button>
-                </div>
 
                 <div id="state-need-post" class="hidden bg-purple-50 p-10 rounded-3xl border border-purple-200 shadow-sm flex flex-col items-center text-center mb-8">
                     <div class="w-20 h-20 bg-white text-purple-600 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm"><i class="fas fa-award"></i></div>
@@ -342,24 +336,19 @@ function updateVisuals() {
     const wrapper =
         document.getElementById('lessonsGridWrapper');
 
-    const statePre =
-        document.getElementById('state-need-pre');
-
     const statePost =
-        document.getElementById('state-need-post');
+    document.getElementById('state-need-post');
 
-    wrapper.classList.remove('hidden');
+// แสดงบทเรียนเลย
+wrapper.classList.remove('hidden');
 
-    statePre.classList.add('hidden');
-    statePost.classList.add('hidden');
+// ซ่อน post-test ไว้ก่อน
+statePost.classList.add('hidden');
 
-    if (!pre) {
-        statePre.classList.remove('hidden');
-    }
-
-    if (prog >= 100 && !post) {
-        statePost.classList.remove('hidden');
-    }
+// ถ้าเรียนครบ 100% แล้ว ค่อยแสดง post-test
+if (prog >= 100 && !post) {
+    statePost.classList.remove('hidden');
+}
 
     updatePendingList(pre, prog, post);
 }
