@@ -171,9 +171,9 @@
         let gasUrl = "";
         let lessonsList = [];
         let allQuizzes = [];
-        let myGrades = []; // {lessonId, preScore, postScore, status}
+        let myGrades = []; // ตัวแปรเก็บคะแนนรายบท
         let currentTakingType = "";
-        let activeLesson = null; // ตัวแปรเก็บว่ากำลังเปิดโมดอลบทไหนอยู่
+        let activeLesson = null; 
 
         if (!currentUser) window.location.href = "index.html";
 
@@ -192,12 +192,11 @@
             document.getElementById('welcomeName').innerText = currentUser.name;
             document.getElementById('profileDept').innerText = currentUser.department;
             document.getElementById('profileInitial').innerText = currentUser.name.trim().charAt(0);
-            document.getElementById('lastLoginTime').innerText = currentUser.lastLogin || "เพิ่งเข้าสู่ระบบ";
         }
 
         async function fetchData() {
             try {
-                // โหลด 3 อย่าง: บทเรียน, ข้อสอบทั้งหมด, เกรดของฉัน
+                // โหลดข้อมูล 3 ส่วนพร้อมกัน
                 const [resL, resQ, resG] = await Promise.all([
                     fetch(gasUrl, { method: 'POST', body: JSON.stringify({ action: "getLessons" }) }),
                     fetch(gasUrl, { method: 'POST', body: JSON.stringify({ action: "getQuizzes" }) }),
@@ -217,39 +216,59 @@
             } catch(e) { console.error(e); }
         }
 
+        // ค้นหาเกรดของบทเรียนที่ระบุ
         function getGradeForLesson(lId) {
             return myGrades.find(g => g.lessonId === lId) || { preScore: null, postScore: null, status: 'locked' };
         }
 
         function updateDashboard() {
-            // คำนวณคะแนนเฉลี่ยรวม
-            let preTotal = 0, postTotal = 0, compCount = 0;
+            let preTotal = 0, postTotal = 0, compCount = 0, preCount = 0;
+            
             myGrades.forEach(g => {
-                if(g.preScore !== "" && g.preScore !== null) preTotal += Number(g.preScore);
-                if(g.postScore !== "" && g.postScore !== null) postTotal += Number(g.postScore);
+                if(g.preScore !== "" && g.preScore !== null) { preTotal += Number(g.preScore); preCount++; }
+                if(g.postScore !== "" && g.postScore !== null) { postTotal += Number(g.postScore); }
                 if(g.status === 'completed') compCount++;
             });
             
-            let preAvg = myGrades.length ? Math.round(preTotal / myGrades.length) : 0;
+            // หาค่าเฉลี่ย
+            let preAvg = preCount ? Math.round(preTotal / preCount) : 0;
             let postAvg = compCount ? Math.round(postTotal / compCount) : 0;
 
-            if (preAvg > 0) { document.getElementById('chartPreBar').style.height = preAvg + "%"; document.getElementById('chartPreText').innerText = preAvg + "%"; }
-            if (postAvg > 0) { document.getElementById('chartPostBar').style.height = postAvg + "%"; document.getElementById('chartPostText').innerText = postAvg + "%"; }
+            if (preAvg > 0) { 
+                document.getElementById('chartPreBar').style.height = preAvg + "%"; 
+                document.getElementById('chartPreText').innerText = preAvg + "%"; 
+            } else {
+                document.getElementById('chartPreBar').style.height = "0%"; 
+                document.getElementById('chartPreText').innerText = "0%"; 
+            }
 
-            // รายการเกรดแต่ละบท
+            if (postAvg > 0) { 
+                document.getElementById('chartPostBar').style.height = postAvg + "%"; 
+                document.getElementById('chartPostText').innerText = postAvg + "%"; 
+            } else {
+                document.getElementById('chartPostBar').style.height = "0%"; 
+                document.getElementById('chartPostText').innerText = "0%"; 
+            }
+
+            // แสดงรายการเกรดแต่ละบท
             const list = document.getElementById('gradesListContainer');
             list.innerHTML = '';
+            
+            if(lessonsList.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-400">ยังไม่มีข้อมูลบทเรียน</p>';
+            }
+
             lessonsList.forEach(l => {
                 let g = getGradeForLesson(l.id);
                 let statHtml = '';
-                if(g.status === 'completed') statHtml = `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-[10px] font-bold">เรียนจบแล้ว</span>`;
-                else if(g.preScore) statHtml = `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-[10px] font-bold">กำลังเรียน</span>`;
-                else statHtml = `<span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg text-[10px] font-bold">ยังไม่เริ่ม</span>`;
+                if(g.status === 'completed') statHtml = `<span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-lg text-xs font-bold shrink-0">เรียนจบแล้ว</span>`;
+                else if(g.preScore) statHtml = `<span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-lg text-xs font-bold shrink-0">กำลังเรียน</span>`;
+                else statHtml = `<span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-lg text-xs font-bold shrink-0">ยังไม่เริ่ม</span>`;
 
                 list.innerHTML += `
                     <div class="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-gray-100">
-                        <div>
-                            <p class="text-sm font-bold text-earth-navy">บทที่ ${l.order}: ${l.title}</p>
+                        <div class="pr-4">
+                            <p class="text-sm font-bold text-earth-navy truncate leading-tight">บทที่ ${l.order}: ${l.title}</p>
                             <p class="text-xs text-gray-500 mt-1">Pre: ${g.preScore || '-'}% | Post: ${g.postScore || '-'}%</p>
                         </div>
                         ${statHtml}
@@ -262,26 +281,25 @@
             const grid = document.getElementById('lessonsGrid');
             grid.innerHTML = '';
 
-            let isPreviousCompleted = true; // บทแรกจะปลดล็อกเสมอ
+            let isPreviousCompleted = true; // ปลดล็อกบทที่ 1 เสมอ
 
-            lessonsList.forEach((l, index) => {
+            lessonsList.forEach(l => {
                 let grade = getGradeForLesson(l.id);
                 let isLocked = !isPreviousCompleted;
                 
-                // การ์ดบทเรียน
                 let cardClass = isLocked ? "bg-gray-50 opacity-60 grayscale cursor-not-allowed" : "bg-white hover:shadow-2xl cursor-pointer";
-                let btnHtml = isLocked ? `<div class="mt-6 text-center text-gray-400 font-bold text-xs"><i class="fas fa-lock mr-2"></i> กรุณาเรียนบทก่อนหน้าให้จบ</div>` : 
-                    (grade.status === 'completed' ? `<button class="mt-6 w-full bg-purple-50 text-purple-600 font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-2"><i class="fas fa-check-circle"></i> ดูเนื้อหาทบทวน</button>` : 
-                    `<button class="mt-6 w-full bg-earth-navy hover:bg-black text-white font-bold py-3 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 shadow-md">เข้าเรียนบทนี้</button>`);
+                let btnHtml = isLocked ? `<div class="mt-6 text-center text-gray-400 font-bold text-sm"><i class="fas fa-lock mr-2"></i> เรียนบทก่อนหน้าให้จบ</div>` : 
+                    (grade.status === 'completed' ? `<button class="mt-6 w-full bg-purple-50 text-purple-600 font-bold py-4 rounded-2xl text-sm flex items-center justify-center gap-2"><i class="fas fa-check-circle"></i> ดูเนื้อหาทบทวน</button>` : 
+                    `<button class="mt-6 w-full bg-earth-navy hover:bg-black text-white font-bold py-4 rounded-2xl text-sm transition-all flex items-center justify-center gap-2 shadow-md">เข้าเรียนบทนี้</button>`);
 
                 grid.innerHTML += `
                     <div onclick="if(!${isLocked}) openLessonPlayer('${l.id}')" class="rounded-3xl border border-gray-200 shadow-sm transition-all overflow-hidden flex flex-col ${cardClass}">
                         <div class="h-40 bg-earth-navy p-5 flex items-end justify-between relative overflow-hidden">
-                            ${isLocked ? '<div class="absolute inset-0 bg-gray-200/50 backdrop-blur-[2px] z-10 flex items-center justify-center"><i class="fas fa-lock text-4xl text-gray-500"></i></div>' : ''}
+                            ${isLocked ? '<div class="absolute inset-0 bg-gray-200/50 backdrop-blur-[2px] z-10 flex items-center justify-center"><i class="fas fa-lock text-5xl text-gray-500"></i></div>' : ''}
                             <i class="fas fa-layer-group absolute -right-4 -bottom-4 text-[90px] text-white/10"></i>
                             <span class="bg-white/20 backdrop-blur-md text-white px-4 py-1.5 rounded-2xl text-xs font-bold border border-white/20 shadow-sm relative z-0">บทที่ ${l.order}</span>
                         </div>
-                        <div class="p-6 flex-1 flex flex-col justify-between">
+                        <div class="p-6 flex-1 flex flex-col justify-between relative z-0">
                             <div>
                                 <h4 class="text-lg font-bold text-gray-900 leading-tight mb-3">${l.title}</h4>
                                 <p class="text-sm text-gray-500 line-clamp-2">${l.desc}</p>
@@ -290,11 +308,12 @@
                         </div>
                     </div>`;
 
-                // อัปเดตตัวแปรปลดล็อกบทถัดไป (ถ้าบทนี้ completed บทหน้าถึงปลดล็อก)
+                // เช็คเงื่อนไขปลดล็อกบทถัดไป
                 isPreviousCompleted = (grade.status === 'completed');
             });
         }
 
+        // --- ระบบเปิด Modal เรียนทีละบท ---
         function openLessonPlayer(lessonId) {
             activeLesson = lessonsList.find(l => l.id === lessonId);
             let grade = getGradeForLesson(lessonId);
@@ -304,44 +323,44 @@
             const contentBox = document.getElementById('playerContentBox');
 
             if (!grade.preScore) {
-                // Step 1: ต้องทำ Pre-test
+                // Step 1: ให้ทำ Pre-test ก่อน
                 contentBox.innerHTML = `
                     <div class="bg-red-50 p-8 rounded-3xl border border-red-100 text-center flex flex-col items-center">
                         <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center text-2xl mb-4"><i class="fas fa-clipboard-list"></i></div>
                         <h4 class="text-xl font-bold text-gray-900 mb-2">กรุณาทำแบบประเมินก่อนเรียน (Pre-test)</h4>
-                        <p class="text-gray-600 mb-8 max-w-sm">คุณต้องทำการประเมินความรู้พื้นฐานของบทนี้ก่อน จึงจะสามารถดูวิดีโอเนื้อหาได้ครับ</p>
+                        <p class="text-gray-600 mb-8 max-w-sm">คุณต้องประเมินความรู้พื้นฐานของบทนี้ก่อน จึงจะสามารถเข้าดูวิดีโอเนื้อหาได้ครับ</p>
                         <button onclick="startQuizFlow('pre')" class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all text-lg">เริ่มทำ Pre-test</button>
                     </div>`;
             } else if (grade.preScore && !grade.postScore) {
-                // Step 2 & 3: ผ่าน Pre แล้ว ให้ดูวิดีโอ แล้วค่อยทำ Post-test
+                // Step 2 & 3: ผ่าน Pre-test แล้วให้เปิดวิดีโอ แล้วค่อยทำ Post-test
                 contentBox.innerHTML = `
                     <div class="space-y-6">
-                        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-center gap-3">
-                            <i class="fas fa-check-circle text-emerald-500 text-xl"></i>
-                            <div><p class="text-sm font-bold text-gray-900">คุณผ่าน Pre-test บทนี้แล้ว (ได้ ${grade.preScore}%)</p><p class="text-xs text-gray-500">สามารถคลิกเรียนเนื้อหาด้านล่างได้เลย</p></div>
+                        <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 flex items-center gap-4">
+                            <i class="fas fa-check-circle text-emerald-500 text-2xl"></i>
+                            <div><p class="text-sm font-bold text-gray-900">ผ่าน Pre-test เรียบร้อย (คะแนน ${grade.preScore}%)</p><p class="text-xs text-gray-500">สามารถเข้าเรียนเนื้อหาด้านล่างได้เลยครับ</p></div>
                         </div>
                         
                         <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
                             <div class="w-20 h-20 bg-earth-100 text-earth-600 rounded-full flex items-center justify-center text-3xl mb-6 shadow-inner"><i class="fas fa-play"></i></div>
-                            <h4 class="text-xl font-bold text-gray-900 mb-2">คลิกปุ่มด้านล่างเพื่อเข้าเรียน</h4>
-                            <p class="text-gray-500 mb-8 max-w-md">เมื่อดูวิดีโอจบแล้ว ให้กลับมาที่หน้านี้และกดปุ่ม "เรียนจบแล้ว" เพื่อปลดล็อก Post-test</p>
+                            <h4 class="text-xl font-bold text-gray-900 mb-2">คลิกเพื่อเข้าดูวิดีโอบทเรียน</h4>
+                            <p class="text-gray-500 mb-8 max-w-md">เมื่อดูจบแล้ว ให้กลับมากดปุ่มยืนยันเพื่อทำการทดสอบ Post-test</p>
                             <button onclick="window.open('${activeLesson.url}', '_blank')" class="bg-earth-navy hover:bg-black text-white font-bold py-4 w-full rounded-2xl shadow-md transition-all text-lg mb-4"><i class="fas fa-external-link-alt mr-2"></i> เปิดวิดีโอเนื้อหา</button>
-                            <button onclick="unlockPostTest()" class="text-sm font-bold text-earth-clay hover:underline">ฉันดูวิดีโอจบแล้ว (ปลดล็อกข้อสอบ)</button>
+                            <button onclick="unlockPostTest()" class="text-sm font-bold text-earth-clay hover:underline">ฉันดูวิดีโอจบแล้ว (กดเพื่อสอบ)</button>
                         </div>
 
                         <div id="unlockPostBox" class="hidden bg-purple-50 p-8 rounded-3xl border border-purple-100 text-center flex-col items-center">
-                            <h4 class="text-xl font-bold text-gray-900 mb-4">เยี่ยมมาก! กรุณาทำประเมินหลังเรียน</h4>
+                            <h4 class="text-xl font-bold text-gray-900 mb-4">เยี่ยมมาก! ขั้นตอนสุดท้าย กรุณาทำ Post-test</h4>
                             <button onclick="startQuizFlow('post')" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-10 rounded-2xl shadow-lg transition-all text-lg w-full">เริ่มทำ Post-test</button>
                         </div>
                     </div>`;
             } else if (grade.status === 'completed') {
-                // Step 4: จบแล้ว ดูทบทวนได้ตลอด
+                // Step 4: จบบทแล้ว ทบทวนอย่างเดียว
                 contentBox.innerHTML = `
                     <div class="bg-white p-10 rounded-3xl border border-gray-200 shadow-sm text-center flex flex-col items-center">
                         <div class="w-20 h-20 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner"><i class="fas fa-award"></i></div>
                         <h4 class="text-2xl font-bold text-gray-900 mb-3">คุณเรียนจบบทนี้แล้ว ยินดีด้วย! 🎉</h4>
-                        <p class="text-gray-500 mb-8 max-w-md">คะแนนของคุณ: ก่อนเรียน ${grade.preScore}% ➔ หลังเรียน ${grade.postScore}%</p>
-                        <button onclick="window.open('${activeLesson.url}', '_blank')" class="bg-earth-navy hover:bg-black text-white font-bold py-4 px-10 rounded-2xl shadow-md transition-all text-lg w-full"><i class="fas fa-redo mr-2"></i> ดูวิดีโอทบทวนเนื้อหา</button>
+                        <p class="text-gray-500 mb-8 max-w-md">คะแนนของคุณ: ก่อนเรียน <span class="font-bold text-emerald-600">${grade.preScore}%</span> ➔ หลังเรียน <span class="font-bold text-purple-600">${grade.postScore}%</span></p>
+                        <button onclick="window.open('${activeLesson.url}', '_blank')" class="bg-earth-navy hover:bg-black text-white font-bold py-4 px-10 rounded-2xl shadow-md transition-all text-lg w-full"><i class="fas fa-redo mr-2"></i> ดูเนื้อหาทบทวนอีกครั้ง</button>
                     </div>`;
             }
 
@@ -351,7 +370,6 @@
         function unlockPostTest() {
             document.getElementById('unlockPostBox').classList.remove('hidden');
             document.getElementById('unlockPostBox').classList.add('flex');
-            showCustomAlert("ปลดล็อกแบบประเมินหลังเรียน (Post-test) เรียบร้อยแล้ว กรุณาทำให้เสร็จเพื่อจบบทเรียนนี้ครับ", "success");
         }
 
         function closeLessonPlayer() {
@@ -359,16 +377,16 @@
             activeLesson = null;
         }
 
-        // เริ่มทำข้อสอบ (ดึงข้อสอบเฉพาะบทนี้)
+        // --- ระบบสอบ (Quiz Overlay) ---
         function startQuizFlow(type) {
             if(!activeLesson) return;
             currentTakingType = type;
             
-            // กรองข้อสอบที่เป็นของบทนี้ (หรือข้อสอบรวมถ้าเป็นกรณีอื่น) + กรอง Type
+            // กรองข้อสอบ: ของบทนี้ (หรือ all) และ ตรง Type (pre/post/both)
             let lessonQuizzes = allQuizzes.filter(q => (q.lessonId === activeLesson.id || q.lessonId === "all") && (q.type === type || q.type === 'both'));
             
             if(lessonQuizzes.length === 0) {
-                showCustomAlert("แอดมินยังไม่ได้เพิ่มคำถามสำหรับบทนี้ครับ", "error");
+                showCustomAlert("ขออภัย แอดมินยังไม่ได้เพิ่มคำถามสำหรับบทนี้ครับ", "error");
                 return;
             }
 
@@ -377,10 +395,10 @@
             const container = document.getElementById('quizQuestionsContainer');
             container.innerHTML = '';
             
-            // วาดข้อสอบ
+            // วาดคำถาม
             lessonQuizzes.forEach((q, idx) => {
                 container.innerHTML += `
-                    <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm question-block" data-answer="${q.answer}" data-total="${lessonQuizzes.length}">
+                    <div class="bg-white p-8 rounded-3xl border border-gray-200 shadow-sm question-block" data-answer="${q.answer}">
                         <h4 class="text-lg font-bold text-gray-900 mb-6 leading-relaxed"><span class="text-earth-clay mr-2">ข้อที่ ${idx + 1}.</span> ${q.question}</h4>
                         <div class="space-y-4 ios-radio">
                             <div><input type="radio" name="q${q.id}" id="q${q.id}_1" value="1"><label for="q${q.id}_1">1. ${q.opt1}</label></div>
@@ -391,7 +409,7 @@
                     </div>`;
             });
 
-            closeLessonPlayer(); // ปิดหน้าต่างบทเรียน
+            closeLessonPlayer();
             document.getElementById('quizOverlay').classList.remove('hidden');
             document.getElementById('quizOverlay').classList.add('flex');
         }
@@ -404,9 +422,8 @@
         async function submitQuiz() {
             const blocks = document.querySelectorAll('.question-block');
             let correctCount = 0;
-            let totalQ = blocks.length;
-
             let allAnswered = true;
+
             blocks.forEach(block => {
                 const radios = block.querySelectorAll('input[type="radio"]');
                 let selectedVal = null;
@@ -425,24 +442,23 @@
                 return;
             }
 
-            // คิดคะแนนเปอร์เซ็นต์
-            const finalScore = Math.round((correctCount / totalQ) * 100);
+            const finalScore = Math.round((correctCount / blocks.length) * 100);
             closeQuizModal();
             
-            // ยิง API เซฟเกรดลงชีต (ฟังก์ชันใหม่ updateGrade ใน Code.gs)
+            // ยิงข้อมูลไปเซฟที่หลังบ้าน
             try { 
                 await fetch(gasUrl, { method: 'POST', body: JSON.stringify({ action: "updateGrade", username: currentUser.username, lessonId: activeLesson.id, type: currentTakingType, score: finalScore }) }); 
             } catch(e){}
             
             await showCustomAlert(`ส่งคำตอบสำเร็จ! คุณทำคะแนนได้ ${finalScore}%`, "success");
             
-            // โหลดข้อมูลเกรดใหม่ เพื่ออัปเดตหน้าจอให้ถูกสถานะทันที
+            // โหลดข้อมูลใหม่เพื่ออัปเดตหน้าจอทันที
             fetchData();
         }
 
         function switchTab(tabId) {
             ['dashboard', 'lessons'].forEach(t => document.getElementById('view-'+t).classList.add('hidden'));
-            if(tabId === 'tests') tabId = 'dashboard'; // เปลี่ยน Tests ไปรวมที่ Dashboard
+            if(tabId === 'tests') tabId = 'dashboard';
             document.getElementById('view-' + tabId).classList.remove('hidden');
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -456,27 +472,30 @@
                 const modal = document.getElementById('customAlert');
                 const titleEl = document.getElementById('alertTitle');
                 const iconBox = document.getElementById('alertIconBox');
-                const btnContainer = document.getElementById('alertButtons');
+                const btn = document.getElementById('alertButtons');
                 document.getElementById('alertMessage').innerText = message;
                 
                 if(type === 'success') {
-                    titleEl.innerText = "ดำเนินการสำเร็จ"; iconBox.className = "w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl shrink-0";
+                    titleEl.innerText = "สำเร็จ"; iconBox.className = "w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center text-xl shrink-0";
                     document.getElementById('alertIcon').className = "fas fa-check";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-6 py-3 bg-earth-navy hover:bg-gray-800 text-white rounded-xl text-sm font-bold transition-all w-full">ตกลง</button>`;
-                } else if (type === 'error') {
+                    btn.innerHTML = `<button onclick="closeCustomAlert(true)" class="w-full py-3 bg-earth-navy hover:bg-black text-white rounded-2xl font-bold transition-all">ตกลง</button>`;
+                } else if(type === 'error') {
                     titleEl.innerText = "ข้อผิดพลาด"; iconBox.className = "w-12 h-12 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center text-xl shrink-0";
                     document.getElementById('alertIcon').className = "fas fa-exclamation-triangle";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(true)" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all w-full">ปิด</button>`;
-                } else if (type === 'warning') {
-                    titleEl.innerText = "ยืนยันการดำเนินการ"; iconBox.className = "w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0";
+                    btn.innerHTML = `<button onclick="closeCustomAlert(true)" class="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold transition-all">ปิด</button>`;
+                } else if(type === 'warning') {
+                    titleEl.innerText = "ยืนยัน"; iconBox.className = "w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center text-xl shrink-0";
                     document.getElementById('alertIcon').className = "fas fa-question";
-                    btnContainer.innerHTML = `<button onclick="closeCustomAlert(false)" class="flex-1 px-5 py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl text-sm font-bold transition-all">ยกเลิก</button>
-                                              <button onclick="closeCustomAlert(true)" class="flex-1 px-5 py-3 bg-earth-clay text-white rounded-xl text-sm font-bold transition-all">ยืนยัน</button>`;
+                    btn.innerHTML = `<button onclick="closeCustomAlert(false)" class="flex-1 py-3 bg-gray-100 text-gray-800 hover:bg-gray-200 rounded-2xl font-bold">ยกเลิก</button><button onclick="closeCustomAlert(true)" class="flex-1 py-3 bg-earth-clay hover:bg-earth-700 text-white rounded-2xl font-bold">ยืนยัน</button>`;
                 }
                 modal.classList.remove('hidden'); window.currentAlertResolve = resolve;
             });
         }
-        function closeCustomAlert(res) { document.getElementById('customAlert').classList.add('hidden'); if(window.currentAlertResolve) window.currentAlertResolve(res); }
+        
+        function closeCustomAlert(res) {
+            document.getElementById('customAlert').classList.add('hidden');
+            if(window.currentAlertResolve) window.currentAlertResolve(res);
+        }
 
         async function logout() {
             const isConfirmed = await showCustomAlert("ต้องการออกจากระบบใช่หรือไม่?", "warning");
