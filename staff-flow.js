@@ -20,6 +20,20 @@
         return Math.round((Number(score) / Number(total)) * 100);
     }
 
+    function averageScore(type) {
+        const scoreKey = `${type}Score`;
+        const totalKey = `${type}Total`;
+        const scored = sortedLessons()
+            .map((lesson) => stateFor(lesson))
+            .filter((state) => hasScore(state[scoreKey]) && Number(state[totalKey]) > 0);
+
+        if (!scored.length) return null;
+
+        const score = scored.reduce((sum, state) => sum + Number(state[scoreKey]), 0);
+        const total = scored.reduce((sum, state) => sum + Number(state[totalKey]), 0);
+        return { score, total };
+    }
+
     function getLessonState() {
         try {
             return JSON.parse(localStorage.getItem(COURSE_PROGRESS_KEY) || "{}");
@@ -147,19 +161,16 @@
     }
 
     function updateScoreCards(preDone, postDone, pre, post, progress, preTotal, postTotal) {
-        const prePercent = scorePercent(pre, preTotal);
-        const postPercent = scorePercent(post, postTotal);
+        const avgPre = averageScore("pre");
+        const avgPost = averageScore("post");
 
         document.getElementById("statPreScore").innerText = scoreText(pre, preTotal);
         document.getElementById("statPostScore").innerText = scoreText(post, postTotal);
         document.getElementById("statProgress").innerText = `${progress}%`;
-        document.getElementById("summaryPreScore").innerText = scoreText(pre, preTotal);
-        document.getElementById("summaryPostScore").innerText = scoreText(post, postTotal);
-
-        document.getElementById("chartPreBarTab3").style.height = preDone ? `${prePercent}%` : "0%";
-        document.getElementById("chartPreTextTab3").innerText = preDone && Number(preTotal) > 0 ? `${pre}/${preTotal}` : "รอทำ";
-        document.getElementById("chartPostBarTab3").style.height = postDone ? `${postPercent}%` : "0%";
-        document.getElementById("chartPostTextTab3").innerText = postDone && Number(postTotal) > 0 ? `${post}/${postTotal}` : "รอทำ";
+        document.getElementById("summaryPreScore").innerText = avgPre ? scoreText(avgPre.score, avgPre.total) : "รอทำ";
+        document.getElementById("summaryPostScore").innerText = avgPost ? scoreText(avgPost.score, avgPost.total) : "รอทำ";
+        setText("summaryCompletedLessons", `${completedLessonCount()}/${lessonsList.length || 0}`);
+        setText("summaryPendingLessons", `${pendingCount()}`);
     }
 
     function setText(id, value) {
@@ -167,33 +178,50 @@
         if (element) element.innerText = value;
     }
 
-    function renderSummaryPanel(lesson, state) {
-        if (!lesson) {
-            setText("summaryLessonOrder", "ยังไม่มีบทเรียน");
-            setText("summaryLessonTitle", "ยังไม่มีข้อมูลสรุปผล");
-            setText("summaryLessonStatus", "เมื่อมีบทเรียน ระบบจะแสดงคะแนนและสถานะที่นี่");
-            setText("summaryVideoStatus", "รอเรียน");
-            setText("summaryChartHint", "กราฟจะแสดงเมื่อมีคะแนน Pre-test หรือ Post-test");
+    function renderSummaryChart() {
+        const container = document.getElementById("summaryScoreChart");
+        if (!container) return;
+
+        const rows = sortedLessons()
+            .map((lesson) => ({ lesson, state: stateFor(lesson) }))
+            .filter(({ state }) => state.preDone || state.postDone);
+
+        if (!rows.length) {
+            container.innerHTML = `<div class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center"><p class="text-sm font-bold text-gray-500">ยังไม่มีคะแนนสำหรับแสดงกราฟ</p><p class="text-xs text-gray-400 mt-2">เริ่มทำ Pre-test ในบทเรียนแรก แล้วสรุปผลจะแสดงทันที</p></div>`;
+            setText("summaryChartHint", "แสดงเฉพาะบทที่มีคะแนนแล้ว");
             return;
         }
 
-        const stage = state.postDone
-            ? "เรียนจบบทนี้แล้ว"
-            : state.videoDone
-                ? "วิดีโอครบแล้ว เหลือ Post-test"
-                : state.started
-                    ? "เรียนค้างไว้"
-                    : state.preDone
-                        ? "พร้อมเรียนวิดีโอ"
-                        : "รอทำ Pre-test";
+        setText("summaryChartHint", "เปรียบเทียบคะแนนดิบรายบท");
+        container.innerHTML = "";
+        rows.forEach(({ lesson, state }) => {
+            const prePercent = scorePercent(state.preScore, state.preTotal);
+            const postPercent = scorePercent(state.postScore, state.postTotal);
 
-        setText("summaryLessonOrder", `บทที่ ${lesson.order}`);
-        setText("summaryLessonTitle", lesson.title || "บทเรียน");
-        setText("summaryLessonStatus", stage);
-        setText("summaryVideoStatus", state.postDone ? "จบบทแล้ว" : state.videoDone ? "เรียนวิดีโอแล้ว" : state.started ? "เรียนค้างไว้" : "รอเรียน");
-        setText("summaryPreNote", state.preDone ? "คะแนนก่อนเรียนของบทนี้" : "เริ่มบทนี้เพื่อทำ Pre-test");
-        setText("summaryPostNote", state.postDone ? "คะแนนหลังเรียนของบทนี้" : state.videoDone ? "พร้อมทำ Post-test" : "ต้องเรียนวิดีโอก่อน");
-        setText("summaryChartHint", state.preDone || state.postDone ? "กราฟเทียบคะแนนดิบของบทนี้" : "ยังไม่มีคะแนนของบทนี้");
+            container.innerHTML += `
+                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                    <div class="flex items-center justify-between gap-4 mb-3">
+                        <div>
+                            <p class="text-[11px] font-bold text-earth-clay">บทที่ ${lesson.order}</p>
+                            <h5 class="text-sm font-bold text-gray-900">${lesson.title || "บทเรียน"}</h5>
+                        </div>
+                        <span class="text-xs font-bold text-gray-500">${state.postDone ? "ครบแล้ว" : state.preDone ? "รอ Post-test" : "รอคะแนน"}</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="grid grid-cols-[64px_1fr_52px] items-center gap-3">
+                            <span class="text-xs font-bold text-emerald-700">Pre</span>
+                            <div class="h-2 bg-white rounded-full overflow-hidden border border-emerald-100"><div class="h-full bg-emerald-500 rounded-full" style="width:${prePercent}%"></div></div>
+                            <span class="text-xs font-bold text-emerald-700 text-right">${scoreText(state.preScore, state.preTotal)}</span>
+                        </div>
+                        <div class="grid grid-cols-[64px_1fr_52px] items-center gap-3">
+                            <span class="text-xs font-bold text-purple-700">Post</span>
+                            <div class="h-2 bg-white rounded-full overflow-hidden border border-purple-100"><div class="h-full bg-purple-500 rounded-full" style="width:${postPercent}%"></div></div>
+                            <span class="text-xs font-bold text-purple-700 text-right">${scoreText(state.postScore, state.postTotal)}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
     }
 
     function renderSummaryList() {
@@ -313,7 +341,7 @@
         updateScoreCards(preDone, postDone, pre, post, progress, preTotal, postTotal);
         updatePendingList(preDone, progress, postDone);
         renderJourney();
-        renderSummaryPanel(dashboardLesson, dashboardState);
+        renderSummaryChart();
         renderSummaryList();
 
         document.getElementById("lessonsGridWrapper").classList.remove("hidden");
