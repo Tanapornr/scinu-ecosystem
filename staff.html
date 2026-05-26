@@ -346,11 +346,20 @@
             document.getElementById('journeyLine').style.width = linePercent + "%";
 
             // Dashboard Chart Updates
-            if (pre) { document.getElementById('chartPreBar').style.height = pre + "%"; document.getElementById('chartPreText').innerText = pre + "%"; }
-            else { document.getElementById('chartPreBar').style.height = "0%"; document.getElementById('chartPreText').innerText = "0%"; }
-            
-            if (post) { document.getElementById('chartPostBar').style.height = post + "%"; document.getElementById('chartPostText').innerText = post + "%"; }
-            else { document.getElementById('chartPostBar').style.height = "0%"; document.getElementById('chartPostText').innerText = "0%"; }
+            const chartPreBar = document.getElementById('chartPreBar');
+const chartPreText = document.getElementById('chartPreText');
+const chartPostBar = document.getElementById('chartPostBar');
+const chartPostText = document.getElementById('chartPostText');
+
+if (chartPreBar && chartPreText) {
+    chartPreBar.style.height = pre ? pre + "%" : "0%";
+    chartPreText.innerText = pre ? pre + "%" : "0%";
+}
+
+if (chartPostBar && chartPostText) {
+    chartPostBar.style.height = post ? post + "%" : "0%";
+    chartPostText.innerText = post ? post + "%" : "0%";
+}
 
             // Tests Tab Chart Updates
             if (pre) { document.getElementById('chartPreBarTab3').style.height = pre + "%"; document.getElementById('chartPreTextTab3').innerText = pre + "%"; }
@@ -546,14 +555,21 @@
         }
 
         function switchTab(tabId) {
-            ['dashboard', 'lessons', 'tests'].forEach(t => document.getElementById('view-'+t).classList.add('hidden'));
-            document.getElementById('view-' + tabId).classList.remove('hidden');
+    ['dashboard', 'lessons', 'tests'].forEach(t => {
+        document.getElementById('view-' + t).classList.add('hidden');
+    });
 
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.className = "tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all";
-            });
-            event.currentTarget.className = "tab-btn flex items-center gap-4 p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-sm transition-all";
-        }
+    document.getElementById('view-' + tabId).classList.remove('hidden');
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.className = "tab-btn flex items-center gap-4 p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-sm transition-all";
+    });
+
+    const activeBtn = document.querySelector(`.tab-btn[onclick="switchTab('${tabId}')"]`);
+    if (activeBtn) {
+        activeBtn.className = "tab-btn flex items-center gap-4 p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-sm transition-all";
+    }
+}
 
         function showCustomAlert(message, type = 'info') {
             return new Promise((resolve) => {
