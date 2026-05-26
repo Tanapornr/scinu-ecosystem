@@ -203,19 +203,16 @@
 
     </div>
 
-    <div class="p-5 flex justify-between items-center">
-
-        <p class="text-sm text-gray-500" id="lessonTimerText">
-            ระบบจะปลดล็อกปุ่มยืนยันหลังเรียนในเว็บครบตามเวลาขั้นต่ำ
-        </p>
-
-        <button id="completeLessonButton" onclick="markLessonComplete()"
-            class="bg-gray-300 text-gray-500 px-6 py-3 rounded-xl text-sm font-bold cursor-not-allowed" disabled>
-
-            เรียนจบบทนี้แล้ว
-
-        </button>
-
+    <div class="p-5 space-y-3">
+        <div class="flex items-center justify-between gap-4">
+            <p class="text-sm text-gray-500" id="lessonTimerText">
+                ระบบกำลังจับเวลาเรียน เมื่อครบเวลาจะเปิด Post-test ให้อัตโนมัติ
+            </p>
+            <span class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold" id="lessonCountdown">00:00</span>
+        </div>
+        <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div id="lessonProgressBar" class="h-full bg-earth-clay rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
     </div>
 
 </div>
@@ -660,7 +657,7 @@ async function markLessonComplete() {
     updateVisuals();
 
     showCustomAlert(
-        "เรียนจบบทนี้แล้ว ตอนนี้สามารถทำ Post-test ได้ครับ",
+        "พร้อมทำ Post-test แล้วครับ",
         "success"
     );
 }

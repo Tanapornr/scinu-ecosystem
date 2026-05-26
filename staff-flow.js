@@ -1,5 +1,6 @@
 (function () {
     const MIN_STUDY_SECONDS = 60;
+    const COURSE_PROGRESS_KEY = `scinuLessonProgress:${currentUser?.username || "guest"}`;
 
     function hasScore(value) {
         return value !== undefined && value !== null && value !== "";
@@ -15,6 +16,35 @@
 
     function saveCurrentUser() {
         sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
+    }
+
+    function getLessonProgress() {
+        try {
+            return JSON.parse(localStorage.getItem(COURSE_PROGRESS_KEY) || "{}");
+        } catch (error) {
+            return {};
+        }
+    }
+
+    function saveLessonProgress(progress) {
+        localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(progress));
+    }
+
+    function isLessonCompleted(lesson) {
+        return Boolean(getLessonProgress()[String(lesson.id)]);
+    }
+
+    function isLessonUnlocked(lesson, index) {
+        if (index === 0) return true;
+        const previousLesson = lessonsList[index - 1];
+        return previousLesson ? isLessonCompleted(previousLesson) : false;
+    }
+
+    function formatTime(totalSeconds) {
+        const seconds = Math.max(0, Number(totalSeconds || 0));
+        const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+        const remainder = Math.floor(seconds % 60).toString().padStart(2, "0");
+        return `${minutes}:${remainder}`;
     }
 
     function getActiveLesson() {
@@ -76,8 +106,8 @@
 
         updateScoreCards(preDone, postDone, pre, post, progress);
         setStepState("step1", preDone, preDone ? "ทำแล้ว" : "รอทำ");
-        setStepState("step2", progress >= 100, progress >= 100 ? "เรียนครบแล้ว" : preDone ? "กำลังเรียน" : "รอ Pre-test");
-        setStepState("step3", postDone, postDone ? "ทำแล้ว" : progress >= 100 ? "พร้อมทำ" : "รอเรียนครบ");
+        setStepState("step2", progress > 0, progress > 0 ? "กำลังเรียน" : preDone ? "เริ่มเรียนได้" : "รอ Pre-test");
+        setStepState("step3", postDone, postDone ? "ทำแล้ว" : progress >= 100 ? "พร้อมทำ" : "รอเรียน");
 
         document.getElementById("lessonsGridWrapper").classList.remove("hidden");
         updatePendingList(preDone, progress, postDone);
@@ -141,14 +171,16 @@
         return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1&controls=0&disablekb=1&fs=0`;
     }
 
-    function lessonButtonLabel(preDone, postDone, progress) {
+    function lessonButtonLabel(preDone, postDone, progress, locked, completed) {
+        if (locked) return "ล็อกบทเรียน";
         if (!preDone) return "ทำ Pre-test ก่อนเรียน";
         if (progress >= 100 && !postDone) return "ทำ Post-test";
-        if (postDone) return "ทบทวนบทเรียน";
+        if (completed || postDone) return "เปิดบทเรียน";
         return getActiveLesson() ? "เรียนต่อในเว็บ" : "เข้าเรียนในเว็บ";
     }
 
-    function lessonButtonClass(preDone, postDone, progress) {
+    function lessonButtonClass(preDone, postDone, progress, locked) {
+        if (locked) return "bg-gray-200 text-gray-400 cursor-not-allowed";
         if (!preDone) return "bg-emerald-600 hover:bg-emerald-700";
         if (progress >= 100 && !postDone) return "bg-purple-600 hover:bg-purple-700";
         if (postDone) return "bg-slate-700 hover:bg-slate-800";
@@ -170,19 +202,27 @@
         const activeLesson = getActiveLesson();
 
         lessonsList.sort((a, b) => Number(a.order) - Number(b.order));
-        lessonsList.forEach((lesson) => {
+        lessonsList.forEach((lesson, index) => {
             const isActive = activeLesson && String(activeLesson.id) === String(lesson.id);
+            const locked = !isLessonUnlocked(lesson, index);
+            const completed = isLessonCompleted(lesson);
             const preBadge = preDone
                 ? `<span class="bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-lg text-[11px] font-bold">Pre-test ${currentUser.preScore}%</span>`
                 : `<span class="bg-red-50 text-red-600 border border-red-100 px-3 py-1 rounded-lg text-[11px] font-bold">รอ Pre-test</span>`;
             const postBadge = postDone
                 ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ${currentUser.postScore}%</span>`
-                : progress >= 100
+                : completed || progress >= 100
                     ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">พร้อม Post-test</span>`
                     : `<span class="bg-gray-50 text-gray-500 border border-gray-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ยังล็อก</span>`;
 
+            const lockBadge = locked
+                ? `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-3 py-1 rounded-lg text-[11px] font-bold"><i class="fas fa-lock mr-1"></i>ล็อก</span>`
+                : completed
+                    ? `<span class="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-lg text-[11px] font-bold">เรียนแล้ว</span>`
+                    : "";
+
             grid.innerHTML += `
-                <div class="bg-white rounded-2xl border ${isActive ? "border-earth-clay ring-2 ring-earth-clay/20" : "border-gray-100"} shadow-sm hover:shadow-lg transition-all overflow-hidden flex flex-col">
+                <div class="bg-white rounded-2xl border ${isActive ? "border-earth-clay ring-2 ring-earth-clay/20" : "border-gray-100"} ${locked ? "opacity-60" : ""} shadow-sm hover:shadow-lg transition-all overflow-hidden flex flex-col">
                     <div class="p-6 flex-1 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between gap-3 mb-4">
@@ -191,10 +231,10 @@
                             </div>
                             <h4 class="text-lg font-bold text-gray-900 leading-tight mb-3">${lesson.title}</h4>
                             <p class="text-sm text-gray-500 leading-relaxed">${lesson.desc || ""}</p>
-                            <div class="flex flex-wrap gap-2 mt-5">${preBadge}${postBadge}</div>
+                            <div class="flex flex-wrap gap-2 mt-5">${preBadge}${postBadge}${lockBadge}</div>
                         </div>
-                        <button data-lesson-id="${lesson.id}" class="${lessonButtonClass(preDone, postDone, progress)} mt-6 w-full text-white font-bold py-3 rounded-2xl text-sm transition-all">
-                            ${lessonButtonLabel(preDone, postDone, progress)}
+                        <button data-lesson-id="${lesson.id}" ${locked ? "disabled" : ""} class="${lessonButtonClass(preDone, postDone, progress, locked)} mt-6 w-full font-bold py-3 rounded-2xl text-sm transition-all">
+                            ${lessonButtonLabel(preDone, postDone, progress, locked, completed)}
                         </button>
                     </div>
                 </div>
@@ -212,6 +252,12 @@
     startLesson = function (lessonId) {
         const lesson = lessonsList.find((item) => String(item.id) === String(lessonId));
         if (!lesson) return;
+        const lessonIndex = lessonsList.findIndex((item) => String(item.id) === String(lessonId));
+
+        if (!isLessonUnlocked(lesson, lessonIndex)) {
+            showCustomAlert("กรุณาเรียนบทก่อนหน้าให้เสร็จก่อนครับ", "error");
+            return;
+        }
 
         setActiveLesson(lesson);
 
@@ -220,7 +266,7 @@
             return;
         }
 
-        if (getProgress() >= 100 && !hasScore(currentUser.postScore)) {
+        if (isLessonCompleted(lesson) && !hasScore(currentUser.postScore)) {
             openQuizModal("post");
             return;
         }
@@ -237,8 +283,9 @@
         setActiveLesson(lesson);
         const player = document.getElementById("lessonPlayerWrapper");
         const badge = document.getElementById("lessonStatusBadge");
-        const completeButton = document.getElementById("completeLessonButton");
         const timerText = document.getElementById("lessonTimerText");
+        const countdown = document.getElementById("lessonCountdown");
+        const progressBar = document.getElementById("lessonProgressBar");
 
         document.getElementById("playerLessonTitle").innerText = lesson.title;
         document.getElementById("lessonVideoFrame").src = convertToEmbedUrl(lesson.url);
@@ -246,19 +293,26 @@
         badge.className = "bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold";
         player.classList.remove("hidden");
 
-        let remaining = Number(lesson.durationSeconds || lesson.duration || MIN_STUDY_SECONDS);
-        completeButton.disabled = true;
-        completeButton.className = "bg-gray-300 text-gray-500 px-6 py-3 rounded-xl text-sm font-bold cursor-not-allowed";
+        const configuredSeconds = Number(lesson.durationSeconds || lesson.duration);
+        const totalSeconds = configuredSeconds > 0 ? configuredSeconds : MIN_STUDY_SECONDS;
+        let remaining = totalSeconds;
+        countdown.innerText = `00:00 / ${formatTime(totalSeconds)}`;
+        progressBar.style.width = "0%";
 
         const tick = () => {
             if (remaining <= 0) {
-                timerText.innerText = "เรียนครบตามเวลาขั้นต่ำแล้ว สามารถยืนยันเพื่อปลดล็อก Post-test ได้";
-                completeButton.disabled = false;
-                completeButton.className = "bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-bold";
+                timerText.innerText = "เรียนครบตามเวลาแล้ว ระบบกำลังเปิด Post-test";
+                countdown.innerText = `${formatTime(totalSeconds)} / ${formatTime(totalSeconds)}`;
+                progressBar.style.width = "100%";
+                finishLessonVideo(lesson);
                 return;
             }
 
-            timerText.innerText = `กำลังเรียนในเว็บ กรุณาอย่าปิดหน้านี้ เหลืออย่างน้อย ${remaining} วินาที`;
+            const elapsed = totalSeconds - remaining;
+            const percentage = Math.min(100, Math.round((elapsed / totalSeconds) * 100));
+            timerText.innerText = `กำลังเรียนในเว็บ กรุณาอย่าปิดหน้านี้ เหลือ ${formatTime(remaining)}`;
+            countdown.innerText = `${formatTime(elapsed)} / ${formatTime(totalSeconds)}`;
+            progressBar.style.width = `${percentage}%`;
             remaining -= 1;
             window.clearTimeout(window.lessonStudyTimer);
             window.lessonStudyTimer = window.setTimeout(tick, 1000);
@@ -268,10 +322,27 @@
         player.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
-    markLessonComplete = async function () {
-        const increment = Math.ceil(100 / (lessonsList.length || 1));
-        currentUser.progress = Math.min(100, getProgress() + increment);
+    async function saveUserSnapshot() {
+        try {
+            await fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "saveUser", user: currentUser })
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    finishLessonVideo = async function (lesson) {
+        const lessonIndex = lessonsList.findIndex((item) => String(item.id) === String(lesson.id));
+        const nextProgress = Math.round(((lessonIndex + 1) / (lessonsList.length || 1)) * 100);
+        currentUser.progress = Math.max(getProgress(), nextProgress);
         saveCurrentUser();
+
+        const progress = getLessonProgress();
+        progress[String(lesson.id)] = true;
+        saveLessonProgress(progress);
 
         try {
             await fetch(gasUrl, {
@@ -287,18 +358,16 @@
             console.error(error);
         }
 
-        document.getElementById("lessonStatusBadge").innerText = currentUser.progress >= 100 ? "เรียนครบแล้ว" : "บันทึกความคืบหน้าแล้ว";
-        document.getElementById("lessonStatusBadge").className = "bg-emerald-100 text-emerald-700 px-4 py-1 rounded-xl text-xs font-bold";
+        document.getElementById("lessonStatusBadge").innerText = "พร้อม Post-test";
+        document.getElementById("lessonStatusBadge").className = "bg-purple-100 text-purple-700 px-4 py-1 rounded-xl text-xs font-bold";
         updateVisuals();
 
-        if (currentUser.progress >= 100 && !hasScore(currentUser.postScore)) {
-            await showCustomAlert("เรียนครบแล้วครับ ปุ่ม Post-test พร้อมอยู่ในการ์ดบทเรียน", "success");
-            renderLessons();
-            return;
+        if (!hasScore(currentUser.postScore)) {
+            openQuizModal("post");
         }
-
-        showCustomAlert("บันทึกความคืบหน้าบทเรียนแล้ว คุณสามารถกลับมาเรียนต่อได้ครับ", "success");
     };
+
+    markLessonComplete = function () {};
 
     openQuizModal = function (type) {
         currentTakingType = type;
@@ -357,6 +426,7 @@
         }
 
         saveCurrentUser();
+        await saveUserSnapshot();
         updateVisuals();
 
         if (currentTakingType === "pre") {
