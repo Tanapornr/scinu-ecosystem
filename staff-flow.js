@@ -35,16 +35,34 @@
         return { score, total };
     }
 
-    function getLessonState() {
+    function parseLessonProgress(value) {
+        if (!value) return {};
+        if (typeof value === "object") return value;
         try {
-            return JSON.parse(localStorage.getItem(COURSE_PROGRESS_KEY) || "{}");
+            return JSON.parse(value);
         } catch (error) {
             return {};
         }
     }
 
+    function userLessonState() {
+        return parseLessonProgress(currentUser.lessonProgress || currentUser.lessonState);
+    }
+
+    function getLessonState() {
+        try {
+            const localState = JSON.parse(localStorage.getItem(COURSE_PROGRESS_KEY) || "{}");
+            return { ...userLessonState(), ...localState };
+        } catch (error) {
+            return userLessonState();
+        }
+    }
+
     function saveLessonState(state) {
         localStorage.setItem(COURSE_PROGRESS_KEY, JSON.stringify(state));
+        currentUser.lessonProgress = JSON.stringify(state);
+        currentUser.lessonProgressUpdatedAt = new Date().toISOString();
+        saveCurrentUser();
     }
 
     function stateFor(lesson) {
@@ -61,6 +79,41 @@
 
     function saveCurrentUser() {
         sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
+    }
+
+    function hydrateLessonStateFromUser() {
+        const localState = (() => {
+            try {
+                return JSON.parse(localStorage.getItem(COURSE_PROGRESS_KEY) || "{}");
+            } catch (error) {
+                return {};
+            }
+        })();
+        const remoteState = userLessonState();
+        const mergedState = { ...remoteState, ...localState };
+
+        if (Object.keys(mergedState).length) {
+            saveLessonState(mergedState);
+            return;
+        }
+
+        const progress = Number(currentUser.progress || 0);
+        if (!progress || !lessonsList.length) return;
+
+        const completedCount = Math.min(lessonsList.length, Math.floor((progress / 100) * lessonsList.length));
+        if (!completedCount) return;
+
+        const restoredState = {};
+        sortedLessons().slice(0, completedCount).forEach((lesson) => {
+            restoredState[String(lesson.id)] = {
+                started: false,
+                preDone: true,
+                videoDone: true,
+                postDone: true,
+                restoredFromProgress: true
+            };
+        });
+        saveLessonState(restoredState);
     }
 
     function sortedLessons() {
@@ -642,6 +695,7 @@
 
     async function syncProgress() {
         currentUser.progress = courseProgress();
+        currentUser.lessonProgress = JSON.stringify(getLessonState());
         saveCurrentUser();
 
         try {
@@ -654,6 +708,7 @@
                     progress: currentUser.progress
                 })
             });
+            saveUserSnapshot();
         } catch (error) {
             console.error(error);
         }
@@ -804,6 +859,7 @@
                 sessionStorage.setItem(QUIZZES_CACHE_KEY, JSON.stringify(allQuizzes));
             }
 
+            hydrateLessonStateFromUser();
             updateVisuals();
 
             const activeLesson = getActiveLesson();
