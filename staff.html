@@ -294,12 +294,13 @@
             updateVisuals();
         }
 
-     function updateVisuals() {
+    function updateVisuals() {
 
-    let pre = currentUser.preScore;
-    let post = currentUser.postScore;
+    let pre = currentUser.preScore || 0;
+    let post = currentUser.postScore || 0;
     let prog = currentUser.progress || 0;
 
+    // cards
     document.getElementById('statPreScore').innerText =
         pre ? pre + "%" : "รอทำ";
 
@@ -315,69 +316,16 @@
     document.getElementById('summaryPostScore').innerText =
         post ? post + "%" : "รอทำ";
 
-    // STEP 1
-    if (pre) {
+    // progress line
+    let line = 0;
 
-        document.getElementById('step1-circle').className =
-            "w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl border-[5px] border-emerald-100 shadow-md";
-
-        document.getElementById('step1-tag').innerText =
-            "เสร็จสิ้น";
-
-    } else {
-
-        document.getElementById('step1-circle').className =
-            "w-14 h-14 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl border-[5px] border-white shadow-sm";
-
-        document.getElementById('step1-tag').innerText =
-            "รอทำแบบทดสอบ";
-    }
-
-    // STEP 2
-    if (prog >= 100) {
-
-        document.getElementById('step2-circle').className =
-            "w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl border-[5px] border-emerald-100 shadow-md";
-
-        document.getElementById('step2-tag').innerText =
-            "เสร็จสิ้น";
-
-    } else if (prog > 0) {
-
-        document.getElementById('step2-tag').innerText =
-            `กำลังเรียน (${prog}%)`;
-
-    } else {
-
-        document.getElementById('step2-tag').innerText =
-            "รอเข้าเรียน";
-    }
-
-    // STEP 3
-    if (post) {
-
-        document.getElementById('step3-circle').className =
-            "w-14 h-14 rounded-full bg-purple-500 text-white flex items-center justify-center text-xl border-[5px] border-purple-100 shadow-md";
-
-        document.getElementById('step3-tag').innerText =
-            "เสร็จสิ้น";
-
-    } else {
-
-        document.getElementById('step3-tag').innerText =
-            "รอประเมินผล";
-    }
-
-    // Progress Line
-    let linePercent = 0;
-
-    if (pre) linePercent = 50;
-    if (prog >= 100) linePercent = 100;
+    if (pre) line = 50;
+    if (prog >= 100) line = 100;
 
     document.getElementById('journeyLine').style.width =
-        linePercent + "%";
+        line + "%";
 
-    // Chart
+    // chart
     document.getElementById('chartPreBarTab3').style.height =
         pre ? pre + "%" : "0%";
 
@@ -390,19 +338,17 @@
     document.getElementById('chartPostTextTab3').innerText =
         post ? post + "%" : "0%";
 
-    // Lesson State
-    const statePost =
-        document.getElementById('state-need-post');
-
+    // lesson section
     const wrapper =
         document.getElementById('lessonsGridWrapper');
 
-    statePost.classList.add('hidden');
+    const statePost =
+        document.getElementById('state-need-post');
 
-    // ให้เห็นบทเรียนเลย
     wrapper.classList.remove('hidden');
 
-    // ถ้าเรียนครบแล้วแต่ยังไม่ทำ post
+    statePost.classList.add('hidden');
+
     if (prog >= 100 && !post) {
         statePost.classList.remove('hidden');
     }
@@ -664,30 +610,47 @@ function startLesson(lessonId, lessonUrl) {
     updateVisuals();
 
     // open lesson automatically
-    if (currentTakingType === 'pre') {
+   if (currentTakingType === 'pre') {
 
-        showCustomAlert(
-            `ส่ง Pre-test สำเร็จ ${finalScore}%`,
-            "success"
-        );
+    currentUser.preScore = finalScore;
 
-        setTimeout(() => {
+} else {
 
-            if (pendingLessonUrl) {
-                viewLesson(pendingLessonUrl);
-            }
+    currentUser.postScore = finalScore;
+}
 
-        }, 300);
+sessionStorage.setItem(
+    'currentUser',
+    JSON.stringify(currentUser)
+);
 
-    } else {
+updateVisuals();
 
-        showCustomAlert(
-            `ส่ง Post-test สำเร็จ ${finalScore}%`,
-            "success"
-        );
+if (currentTakingType === 'pre') {
 
-        switchTab('tests');
-    }
+    showCustomAlert(
+        `ส่ง Pre-test สำเร็จ ${finalScore}%`,
+        "success"
+    );
+
+    setTimeout(() => {
+
+        if (pendingLessonUrl) {
+            viewLesson(pendingLessonUrl);
+        }
+
+    }, 300);
+
+} else {
+
+    showCustomAlert(
+        `ส่ง Post-test สำเร็จ ${finalScore}%`,
+        "success"
+    );
+
+    switchTab('tests');
+}
+
 }
 
         function switchTab(tabId) {
