@@ -175,6 +175,56 @@
                 </div>
 
                 <div id="lessonsGridWrapper" class="hidden">
+                    <div id="lessonPlayerWrapper"
+     class="hidden bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden mt-8">
+
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+
+        <div>
+            <h3 class="text-lg font-bold text-gray-900"
+                id="playerLessonTitle">
+                บทเรียน
+            </h3>
+
+            <p class="text-sm text-gray-500">
+                กรุณาเรียนวิดีโอให้จบก่อนทำ Post-test
+            </p>
+        </div>
+
+        <span id="lessonStatusBadge"
+            class="bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold">
+            กำลังเรียน
+        </span>
+
+    </div>
+
+    <div class="aspect-video bg-black">
+
+        <iframe id="lessonVideoFrame"
+            class="w-full h-full"
+            src=""
+            frameborder="0"
+            allowfullscreen>
+        </iframe>
+
+    </div>
+
+    <div class="p-5 flex justify-between items-center">
+
+        <p class="text-sm text-gray-500">
+            หากเรียนจบแล้ว กดปุ่มนี้เพื่อปลดล็อก Post-test
+        </p>
+
+        <button onclick="markLessonComplete()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-bold">
+
+            เรียนจบบทนี้แล้ว
+
+        </button>
+
+    </div>
+
+</div>
                     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="lessonsGrid">
                         <p class="text-sm text-gray-500 p-4">กำลังโหลดข้อมูล...</p>
                     </div>
@@ -227,6 +277,41 @@
         </div>
     </main>
 
+<div id="lessonPlayerWrapper" class="hidden bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden mt-8">
+    <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+        <div>
+            <h3 class="text-lg font-bold text-gray-900" id="playerLessonTitle">บทเรียน</h3>
+            <p class="text-sm text-gray-500">กรุณาเรียนวิดีโอให้จบก่อนทำ Post-test</p>
+        </div>
+
+        <span id="lessonStatusBadge" class="bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold">
+            กำลังเรียน
+        </span>
+    </div>
+
+    <div class="aspect-video bg-black">
+        <iframe id="lessonVideoFrame"
+            class="w-full h-full"
+            src=""
+            title="Lesson Video"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+        </iframe>
+    </div>
+
+    <div class="p-5 flex justify-between items-center">
+        <p class="text-sm text-gray-500">
+            หากเรียนจบแล้ว กดปุ่มนี้เพื่อปลดล็อก Post-test
+        </p>
+
+        <button onclick="markLessonComplete()"
+            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl text-sm font-bold">
+            เรียนจบบทนี้แล้ว
+        </button>
+    </div>
+</div>
+    
     <div id="quizOverlay" class="fixed inset-0 bg-slate-50 z-[100] hidden flex-col overflow-hidden animate-fadeIn">
         <div class="h-20 bg-white border-b border-gray-200 px-8 flex items-center justify-between shrink-0 shadow-sm">
             <div>
@@ -517,6 +602,108 @@ function updatePendingList(pre, prog, post) {
         }
 
 function renderLessons() {
+    let pendingLessonUrl = "";
+let currentLessonId = "";
+let currentLessonTitle = "";
+
+function convertToEmbedUrl(url) {
+    if (!url) return "";
+
+    if (url.includes("watch?v=")) {
+        const videoId = url.split("watch?v=")[1].split("&")[0];
+        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+    }
+
+    if (url.includes("youtu.be/")) {
+        const videoId = url.split("youtu.be/")[1].split("?")[0];
+        return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+    }
+
+    return url;
+}
+
+function startLesson(lessonId, lessonUrl, lessonTitle) {
+
+    currentLessonId = lessonId;
+    currentLessonTitle = lessonTitle;
+    pendingLessonUrl = lessonUrl;
+
+    if (!currentUser.preScore) {
+        openQuizModal('pre');
+        return;
+    }
+
+    openLessonPlayer(lessonUrl, lessonTitle);
+}
+
+function openLessonPlayer(url, title) {
+
+    const embedUrl = convertToEmbedUrl(url);
+
+    document.getElementById('lessonPlayerWrapper')
+        .classList.remove('hidden');
+
+    document.getElementById('playerLessonTitle')
+        .innerText = title;
+
+    document.getElementById('lessonVideoFrame')
+        .src = embedUrl;
+
+    document.getElementById('lessonStatusBadge')
+        .innerText = "กำลังเรียน";
+
+    document.getElementById('lessonStatusBadge')
+        .className =
+        "bg-amber-100 text-amber-700 px-4 py-1 rounded-xl text-xs font-bold";
+
+    document.getElementById('lessonPlayerWrapper')
+        .scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+}
+
+async function markLessonComplete() {
+
+    currentUser.progress = 100;
+
+    sessionStorage.setItem(
+        'currentUser',
+        JSON.stringify(currentUser)
+    );
+
+    try {
+
+        await fetch(gasUrl, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+                action: "updateProgress",
+                username: currentUser.username,
+                progress: 100
+            })
+        });
+
+    } catch (e) {
+        console.error(e);
+    }
+
+    document.getElementById('lessonStatusBadge')
+        .innerText = "เรียนครบแล้ว";
+
+    document.getElementById('lessonStatusBadge')
+        .className =
+        "bg-emerald-100 text-emerald-700 px-4 py-1 rounded-xl text-xs font-bold";
+
+    updateVisuals();
+
+    showCustomAlert(
+        "เรียนจบบทนี้แล้ว ตอนนี้สามารถทำ Post-test ได้ครับ",
+        "success"
+    );
+}
     const grid = document.getElementById('lessonsGrid');
     grid.innerHTML = '';
 
@@ -545,10 +732,10 @@ function renderLessons() {
                         </p>
                     </div>
 
-                    <button onclick="startLesson('${l.id}', '${l.url}')" 
-                        class="mt-6 w-full bg-earth-navy hover:bg-black text-white font-bold py-3 rounded-2xl text-sm transition-all">
-                        เริ่มเรียน
-                    </button>
+           <button onclick="startLesson('${l.id}', '${l.url}', '${l.title}')"
+    class="mt-6 w-full bg-earth-navy hover:bg-black text-white font-bold py-3 rounded-2xl text-sm transition-all">
+    เริ่มเรียน
+</button>
                 </div>
             </div>
         `;
