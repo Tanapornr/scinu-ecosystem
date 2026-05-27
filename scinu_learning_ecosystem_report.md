@@ -1,199 +1,255 @@
-from pathlib import Path
-import re
+# การออกแบบระบบนิเวศการเรียนรู้ดิจิทัลสำหรับการพัฒนาสมรรถนะบุคลากรสายสนับสนุนของคณะวิทยาศาสตร์ มหาวิทยาลัยนเรศวร
 
-from docx import Document
-from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
-from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.oxml import OxmlElement
-from docx.oxml.ns import qn
-from docx.shared import Inches, Pt, RGBColor
+รายงานรายวิชา การจัดการระบบนิเวศการเรียนรู้ดิจิทัล
 
+จัดทำโดย: ........................................  รหัสนิสิต: ........................................
 
-BASE = Path(__file__).resolve().parent
-SOURCE = BASE / "scinu_learning_ecosystem_report.md"
-TARGET = BASE / "scinu_learning_ecosystem_report.docx"
+สาขาวิชา: ........................................
 
+อาจารย์ผู้สอน: ........................................
 
-def set_run_font(run, size=16, bold=False, color=None, font="TH Sarabun New"):
-    run.font.name = font
-    run.font.size = Pt(size)
-    run.bold = bold
-    if color:
-        run.font.color.rgb = RGBColor.from_string(color)
-    rpr = run._element.get_or_add_rPr()
-    rfonts = rpr.rFonts
-    if rfonts is None:
-        rfonts = OxmlElement("w:rFonts")
-        rpr.append(rfonts)
-    for key in ("ascii", "hAnsi", "eastAsia", "cs"):
-        rfonts.set(qn(f"w:{key}"), font)
+ต้นแบบระบบ: NU Smart Admin Ecosystem
 
+## หมายเหตุการใช้เอกสารประกอบ
 
-def set_para(paragraph, before=0, after=6, line=1.25, align=None):
-    fmt = paragraph.paragraph_format
-    fmt.space_before = Pt(before)
-    fmt.space_after = Pt(after)
-    fmt.line_spacing = line
-    if align is not None:
-        paragraph.alignment = align
+รายงานนี้สังเคราะห์จากไฟล์ `06 Developing Digital Learning Ecosystem.pdf` โดยใช้หน้า 1-55 เป็นกรอบแนวคิดด้านสถาปัตยกรรมระบบนิเวศการเรียนรู้ดิจิทัล และใช้หน้า 57-74 เป็นโครงรายงานตามที่อาจารย์กำหนด เนื้อหาถูกปรับให้สอดคล้องกับต้นแบบระบบ `Tanapornr/scinu-ecosystem` ซึ่งพัฒนาเป็นระบบนิเวศการเรียนรู้ของบุคลากรสายสนับสนุนของมหาวิทยาลัย
 
+| ช่วงหน้าเอกสาร | บทบาทต่อรายงาน |
+|---|---|
+| หน้า 1-55 | ใช้สรุปกรอบคิดเรื่องระบบนิเวศการเรียนรู้ดิจิทัล, affordance, ADDIE, Design Thinking, AI-TPACK, Learning Analytics และ Continuous Innovation Loop |
+| หน้า 57-74 | ใช้เป็นแม่แบบหัวข้อรายงานระดับปริญญาโท ได้แก่ Course Information, Learner Analysis, Learning Goals, Ecosystem Design, Pedagogy, Technology, Learning Flow, Assessment, Prototype, Ethics, Sustainability, Reflection และ Summary |
 
-def add_text(doc, text, style=None, size=16, bold=False, color=None, align=None, before=0, after=6, line=1.25):
-    p = doc.add_paragraph(style=style)
-    set_para(p, before=before, after=after, line=line, align=align)
-    run = p.add_run(text)
-    set_run_font(run, size=size, bold=bold, color=color)
-    return p
+## ชื่อโครงการ
 
+“การออกแบบระบบนิเวศการเรียนรู้ดิจิทัลสำหรับการพัฒนาสมรรถนะบุคลากรสายสนับสนุนของคณะวิทยาศาสตร์ มหาวิทยาลัยนเรศวร”
 
-def add_heading(doc, text, level):
-    p = doc.add_paragraph()
-    set_para(p, before=16 if level == 1 else 10, after=6, line=1.15)
-    size = 20 if level == 1 else 17
-    color = "2E74B5" if level == 1 else "1F4D78"
-    run = p.add_run(text)
-    set_run_font(run, size=size, bold=True, color=color)
+ระบบต้นแบบมีชื่อว่า NU Smart Admin Ecosystem โดยออกแบบเป็นระบบใช้งานจริงสำหรับผู้เรียน ผู้ดูแลระบบ และผู้บริหาร ไม่ใช่เพียง prototype เชิงภาพ ตัวระบบมีเมนูที่เชื่อมโยงกัน ได้แก่ หน้าแรก บทเรียน ระบบนิเวศ ชุมชน Portfolio และสรุปผล โดยหน้า “ระบบนิเวศ” ทำหน้าที่เป็น hub กลางให้ผู้เรียนกดไปยังส่วนที่ต้องทำได้จริง
 
+## แผนผังระบบที่พัฒนา
 
-def shade_cell(cell, fill):
-    tc_pr = cell._tc.get_or_add_tcPr()
-    shd = OxmlElement("w:shd")
-    shd.set(qn("w:fill"), fill)
-    tc_pr.append(shd)
+```text
+ผู้เรียนเข้าสู่ระบบ
+   |
+   v
+หน้าแรก Dashboard
+   |
+   +--> บทเรียน: Pre-test -> เรียนวิดีโอ/เนื้อหา -> Post-test
+   |
+   +--> ระบบนิเวศ: ดู readiness, competency gap, recommendation
+   |        |
+   |        +--> คลิกไปบทเรียนที่เกี่ยวข้องกับช่องว่างสมรรถนะ
+   |        +--> คลิกไปชุมชนเพื่อถาม/แลกเปลี่ยน
+   |        +--> คลิกไป Portfolio เพื่อบันทึกหลักฐานงานจริง
+   |        +--> คลิกไปสรุปผลเพื่อดู analytics รายบุคคล
+   |
+   +--> ชุมชน: โพสต์คำถามหรือแบ่งปันแนวปฏิบัติ
+   |
+   +--> Portfolio: บันทึก workflow, checklist, dashboard, reflection, link หลักฐาน
+   |
+   +--> สรุปผล: ดูคะแนน Pre/Post, ความก้าวหน้า และสถานะรายบท
+```
 
+| เมนู | ใช้ทำอะไรจริงในระบบ | ข้อมูลที่เกิดขึ้น |
+|---|---|---|
+| หน้าแรก | เห็นภาพรวม สถานะบทเรียน และกิจกรรมค้าง | progress, pending task |
+| บทเรียน | ทำ Pre-test เรียนเนื้อหา ทำ Post-test ตามลำดับ | lesson progress, pre/post score |
+| ระบบนิเวศ | เห็น readiness, competency gap และกดไปส่วนที่เกี่ยวข้อง | readiness score, recommendation |
+| ชุมชน | โพสต์คำถาม แบ่งปันปัญหาหน้างานและแนวปฏิบัติ | community post |
+| Portfolio | บันทึกหลักฐานการนำความรู้ไปใช้จริง | portfolio item, reflection evidence |
+| สรุปผล | ดู analytics รายบุคคลและสถานะทุกบท | score chart, completed lessons |
 
-def set_cell_margins(cell, top=80, start=120, bottom=80, end=120):
-    tc_pr = cell._tc.get_or_add_tcPr()
-    tc_mar = tc_pr.first_child_found_in("w:tcMar")
-    if tc_mar is None:
-        tc_mar = OxmlElement("w:tcMar")
-        tc_pr.append(tc_mar)
-    for name, value in (("top", top), ("start", start), ("bottom", bottom), ("end", end)):
-        node = tc_mar.find(qn(f"w:{name}"))
-        if node is None:
-            node = OxmlElement(f"w:{name}")
-            tc_mar.append(node)
-        node.set(qn("w:w"), str(value))
-        node.set(qn("w:type"), "dxa")
+## ตารางตรวจสอบหัวข้อรายงานตามหน้า 57-74
 
+| หน้าในไฟล์อาจารย์ | หัวข้อที่กำหนด | ตำแหน่งในรายงานฉบับนี้ |
+|---|---|---|
+| 57 | ชื่อโครงการ/ผู้จัดทำ/รายวิชา/อาจารย์ผู้สอน | ปกและหัวข้อ “ชื่อโครงการ” |
+| 58 | ข้อมูลรายวิชาและปัญหา | หัวข้อ 1 |
+| 59 | การวิเคราะห์ผู้เรียน | หัวข้อ 2 |
+| 60 | เป้าหมายการเรียนรู้และสมรรถนะ | หัวข้อ 3 |
+| 61 | แนวคิดระบบนิเวศการเรียนรู้ดิจิทัล | หัวข้อ 4 |
+| 62 | การออกแบบ Learning Ecosystem | หัวข้อ 5 และแผนผังระบบ |
+| 63 | Pedagogy Design | หัวข้อ 6 |
+| 64 | Technology และ AI Integration | หัวข้อ 7 |
+| 65 | Learning Flow / Learning Journey | หัวข้อ 8 |
+| 66 | Assessment Design | หัวข้อ 9 |
+| 67 | Prototype / Screenshot / Wireframe | หัวข้อ 10 และตารางเมนูระบบ |
+| 68 | Ethics และ Impact | หัวข้อ 11 |
+| 69 | Feasibility และ Sustainability | หัวข้อ 12 |
+| 70 | Reflection | หัวข้อ 13 |
+| 71 | Summary | หัวข้อ 14 |
+| 72-73 | Rubric การประเมิน | หัวข้อ 15 |
+| 74 | Thank you / เตรียมนำเสนอ | ใช้เป็นแนวทางปิดรายงานและเตรียมนำเสนอ |
 
-def split_table_row(line):
-    cells = [cell.strip().replace("`", "") for cell in line.strip().strip("|").split("|")]
-    return cells
+## บทคัดย่อ
 
+รายงานฉบับนี้นำเสนอการออกแบบระบบนิเวศการเรียนรู้ดิจิทัลสำหรับบุคลากรสายสนับสนุนของมหาวิทยาลัย โดยใช้ต้นแบบระบบ NU Smart Admin Ecosystem เป็นฐานการพัฒนา ระบบเดิมมีบทบาทหลัก 3 ส่วน ได้แก่ Staff สำหรับเรียนบทเรียนและทำแบบทดสอบ Admin สำหรับจัดการผู้ใช้ เนื้อหา และข้อสอบ และ Management สำหรับติดตามผลการเรียนรู้ ภายหลังการวิเคราะห์ตามแนวคิดระบบนิเวศการเรียนรู้ดิจิทัลพบว่า ระบบควรขยายจาก “ระบบอบรมออนไลน์” ไปสู่ “ระบบนิเวศ” ที่เชื่อมผู้เรียน ผู้เอื้ออำนวยการเรียนรู้ เทคโนโลยี ชุมชน หน้างาน แหล่งทรัพยากร การประเมิน และ AI ให้ทำงานร่วมกันอย่างต่อเนื่อง
 
-def add_table(doc, rows):
-    if not rows:
-        return
-    col_count = len(rows[0])
-    table = doc.add_table(rows=1, cols=col_count)
-    table.alignment = WD_TABLE_ALIGNMENT.LEFT
-    table.style = "Table Grid"
-    widths = [6.5 / col_count] * col_count
-    for i, cell_text in enumerate(rows[0]):
-        cell = table.rows[0].cells[i]
-        cell.width = Inches(widths[i])
-        cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-        shade_cell(cell, "F2F4F7")
-        set_cell_margins(cell)
-        p = cell.paragraphs[0]
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        set_para(p, after=0, line=1.1)
-        run = p.add_run(cell_text)
-        set_run_font(run, size=14, bold=True, color="1F4D78")
-    for row in rows[1:]:
-        cells = table.add_row().cells
-        for i, cell_text in enumerate(row):
-            cell = cells[i]
-            cell.width = Inches(widths[i])
-            cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
-            set_cell_margins(cell)
-            p = cell.paragraphs[0]
-            set_para(p, after=0, line=1.15)
-            run = p.add_run(cell_text)
-            set_run_font(run, size=14)
-    doc.add_paragraph()
+การออกแบบนี้อ้างอิงกรอบคิดจากเอกสารประกอบการสอนเรื่องสถาปัตยกรรมระบบนิเวศการเรียนรู้ดิจิทัล โดยเฉพาะแนวคิด affordance, ADDIE ในยุคดิจิทัล, Design Thinking, AI-TPACK, learning analytics และ continuous innovation loop ผลลัพธ์ของการพัฒนาระบบเพิ่มเติมคือการเพิ่มแท็บ “ระบบนิเวศ” ในหน้า Staff เพื่อวิเคราะห์ช่องว่างสมรรถนะและบันทึก Reflection/Portfolio เพิ่ม metadata บทเรียนในหน้า Admin และเพิ่ม Ecosystem Readiness กับข้อเสนอเชิงระบบในหน้า Management รายงานฉบับนี้จึงทำหน้าที่ทั้งเป็นเอกสารออกแบบเชิงวิชาการและคำอธิบายต้นแบบระบบที่สอดคล้องกับเกณฑ์การประเมินของรายวิชา
 
+## 1. ข้อมูลรายวิชาและบริบทของระบบ
 
-def parse_table(lines, start):
-    rows = []
-    i = start
-    while i < len(lines) and lines[i].strip().startswith("|"):
-        raw = lines[i].strip()
-        if not re.fullmatch(r"\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?", raw):
-            rows.append(split_table_row(raw))
-        i += 1
-    return rows, i
+รายวิชาหรือหัวข้อที่เลือกคือการพัฒนาสมรรถนะดิจิทัลและการประยุกต์ใช้ระบบอัตโนมัติในงานสนับสนุนของคณะวิทยาศาสตร์ มหาวิทยาลัยนเรศวร กลุ่มเป้าหมายคือบุคลากรสายสนับสนุนจากหลายหน่วยงาน เช่น งานธุรการ งานการเงินและพัสดุ งานนโยบายและแผน งานบริการการศึกษา งานห้องปฏิบัติการ และงานกิจการนิสิต ระบบมีเป้าหมายให้ผู้เรียนสามารถเรียนรู้ด้วยตนเอง ติดตามความก้าวหน้า สะท้อนผลการนำไปใช้ และให้ผู้บริหารมองเห็นภาพรวมการพัฒนาสมรรถนะขององค์กร
 
+รูปแบบการจัดการเรียนรู้ปัจจุบันในระบบเป็น e-Learning ผ่านหน้า Staff Portal มีบทเรียน วิดีโอ Pre-test/Post-test และ Dashboard สรุปผล อย่างไรก็ตาม หากพิจารณาในมุม learning ecosystem ระบบยังขาดกลไกเชื่อมโยงชุมชนการเรียนรู้ การวิเคราะห์ช่องว่างสมรรถนะระดับบุคคลและหน่วยงาน การกำหนดหลักฐานผลงานจากงานจริง และการใช้ AI เพื่อช่วยแนะนำเส้นทางการเรียนรู้ จึงจำเป็นต้องต่อยอดระบบให้เป็น ecosystem ที่มี feedback loop ชัดเจน
 
-def build():
-    lines = SOURCE.read_text(encoding="utf-8").splitlines()
-    doc = Document()
-    section = doc.sections[0]
-    section.page_width = Inches(8.5)
-    section.page_height = Inches(11)
-    section.top_margin = Inches(1)
-    section.bottom_margin = Inches(1)
-    section.left_margin = Inches(1)
-    section.right_margin = Inches(1)
-    section.header_distance = Inches(0.492)
-    section.footer_distance = Inches(0.492)
+- ชื่อรายวิชา/หัวข้อ: การพัฒนาสมรรถนะดิจิทัลและ Smart Admin Workflow สำหรับบุคลากรสายสนับสนุน
+- ระดับผู้เรียน: บุคลากรมหาวิทยาลัยหรือผู้เรียนวัยทำงาน
+- จำนวนผู้เรียนเป้าหมาย: ปรับตามจำนวนบุคลากรของคณะและหน่วยงานที่เข้าร่วม
+- รูปแบบปัจจุบัน: Online self-paced learning, quiz-based assessment และ management dashboard
+- ปัญหาหรือความท้าทาย: เวลาเรียนจำกัด ทักษะดิจิทัลแตกต่างกัน ขาดชุมชนแลกเปลี่ยน และขาดหลักฐานการนำความรู้ไปใช้จริง
 
-    normal = doc.styles["Normal"]
-    normal.font.name = "TH Sarabun New"
-    normal.font.size = Pt(16)
-    normal._element.rPr.rFonts.set(qn("w:eastAsia"), "TH Sarabun New")
+## 2. การวิเคราะห์ผู้เรียน
 
-    title = lines[0].removeprefix("# ").strip()
-    p = doc.add_paragraph()
-    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    set_para(p, before=96, after=18, line=1.15)
-    r = p.add_run(title)
-    set_run_font(r, size=24, bold=True, color="0B2545")
+ผู้เรียนเป็นบุคลากรวัยทำงานที่มีประสบการณ์หน้างานสูง แต่มีพื้นฐานดิจิทัลแตกต่างกันตามบทบาทและภาระงาน บางกลุ่มคุ้นเคยกับเอกสารและระบบสารสนเทศของมหาวิทยาลัย แต่ยังขาดความมั่นใจในการออกแบบ workflow ใช้ข้อมูลเพื่อวิเคราะห์งาน ใช้ AI อย่างรับผิดชอบ หรือสร้างหลักฐานผลงานดิจิทัล การออกแบบจึงต้องยืดหยุ่น ใช้งานง่าย และเชื่อมกับปัญหาจริงในหน่วยงาน
 
-    i = 1
-    while i < len(lines) and not lines[i].startswith("## "):
-        text = lines[i].strip()
-        if text:
-            add_text(doc, text, size=16, align=WD_ALIGN_PARAGRAPH.CENTER)
-        i += 1
-    doc.add_page_break()
+Pain point สำคัญคือเวลาจำกัด ภาระงานประจำสูง ความแตกต่างของทักษะดิจิทัล การขาดพื้นที่แลกเปลี่ยนระหว่างหน่วยงาน และการประเมินผลที่มักหยุดอยู่ที่คะแนนสอบมากกว่าการเปลี่ยนแปลงพฤติกรรมการทำงาน ดังนั้นระบบควรออกแบบให้เรียนเป็นหน่วยสั้น มีเส้นทางชัดเจน มีตัวอย่างจากงานจริง มีพี่เลี้ยงหรือชุมชนช่วยเหลือ และมี Portfolio/Reflection เพื่อยืนยันการนำไปใช้จริง
 
-    while i < len(lines):
-        line = lines[i].strip()
-        if not line:
-            i += 1
-            continue
-        if line.startswith("## "):
-            add_heading(doc, line[3:].strip(), 1)
-            i += 1
-            continue
-        if line.startswith("### "):
-            add_heading(doc, line[4:].strip(), 2)
-            i += 1
-            continue
-        if line.startswith("|"):
-            rows, i = parse_table(lines, i)
-            add_table(doc, rows)
-            continue
-        if line.startswith("- "):
-            add_text(doc, line[2:].strip(), style="List Bullet", after=4)
-            i += 1
-            continue
-        if re.match(r"^\d+\.\s+", line):
-            add_text(doc, re.sub(r"^\d+\.\s+", "", line), style="List Number", after=4)
-            i += 1
-            continue
-        add_text(doc, line)
-        i += 1
+- ช่วงวัย: ผู้ใหญ่วัยทำงาน มีประสบการณ์งานสนับสนุนหลากหลาย
+- พื้นฐานความรู้: เข้าใจบริบทงานมหาวิทยาลัย แต่ระดับทักษะดิจิทัลไม่เท่ากัน
+- ทักษะดิจิทัล: ตั้งแต่ระดับใช้งานเครื่องมือทั่วไปถึงระดับออกแบบ workflow และวิเคราะห์ข้อมูลได้
+- พฤติกรรมการเรียนรู้: ต้องการบทเรียนสั้น ใช้ได้ทันที และเรียนตามเวลาที่สะดวก
+- ความต้องการ: ลดขั้นตอนงาน เพิ่มความถูกต้อง ใช้ AI/ข้อมูลอย่างปลอดภัย และมีหลักฐานความก้าวหน้า
 
-    footer = doc.sections[0].footer.paragraphs[0]
-    footer.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    run = footer.add_run("NU Smart Admin Ecosystem")
-    set_run_font(run, size=10, color="666666")
-    doc.save(TARGET)
-    print(TARGET)
+## 3. เป้าหมายการเรียนรู้
 
+ระบบกำหนดผลลัพธ์การเรียนรู้ใน 3 มิติ ได้แก่ Knowledge, Skills และ Attitude โดยเชื่อมกับสมรรถนะสำคัญที่รายวิชากำหนด เช่น Digital Literacy, AI Literacy, Collaboration, Communication และ Lifelong Learning เป้าหมายไม่ใช่เพียงให้ผู้เรียนทำแบบทดสอบผ่าน แต่ให้สามารถประยุกต์ความรู้กับกระบวนงานจริงและสร้างคุณค่าต่อหน่วยงานได้
 
-if __name__ == "__main__":
-    build()
+สำหรับระบบต้นแบบ ได้เพิ่มโมเดลสมรรถนะในหน้า Staff ได้แก่ Digital Literacy, Workflow Automation, Learning/Data Analytics, AI Literacy, Community & Collaboration และ Lifelong Learning แต่ละสมรรถนะถูกแสดงเป็น competency bar และระบบเสนอช่องว่างที่ควรเติมจากข้อมูลความก้าวหน้า คะแนน และหลักฐาน Reflection
+
+- Knowledge: เข้าใจระบบนิเวศการเรียนรู้ดิจิทัล แนวคิด workflow และการใช้ข้อมูล/AI ในงานสนับสนุน
+- Skills: วิเคราะห์ปัญหางาน ออกแบบขั้นตอนงานดิจิทัล ใช้เครื่องมือออนไลน์ สร้าง dashboard เบื้องต้น และเขียน reflection จากงานจริง
+- Attitude: เปิดรับการเรียนรู้ตลอดชีวิต ทำงานร่วมกับชุมชน และใช้ข้อมูล/AI อย่างรับผิดชอบ
+
+## 4. แนวคิดระบบนิเวศการเรียนรู้ดิจิทัลจากเอกสารหน้า 1-55
+
+จากหน้า 1-55 ของเอกสารประกอบการสอน แนวคิดสำคัญคือ “นวัตกรรมไม่ใช่แค่เครื่องมือใหม่ แต่คือการออกแบบแบบทั้งระบบ” ระบบนิเวศการเรียนรู้จึงต้องประกอบด้วยมนุษย์ เทคโนโลยี ชุมชน นโยบาย ข้อมูล และวัฒนธรรมการเรียนรู้ที่ทำงานสัมพันธ์กัน องค์ประกอบหลักที่นำมาใช้กับระบบนี้ ได้แก่ Learners, Learning Facilitator/Teachers, Technology, Community, Workplace, Learning Resources, Assessment และ AI Integration
+
+แนวคิด affordance ชี้ว่าเทคโนโลยีควรถูกออกแบบตามสิ่งที่ผู้เรียน “ทำได้จริง” ไม่ใช่เพียงมีฟีเจอร์จำนวนมาก รายงานนี้จึงแปล affordance เป็น 3 เสาหลัก ได้แก่ Educational Affordance เพื่อช่วยให้เรียนรู้และประเมินผล Social Affordance เพื่อเชื่อมผู้เรียนกับเพื่อนร่วมงาน/พี่เลี้ยง และ Technological Affordance เพื่อให้ระบบใช้งานได้เสถียร ยืดหยุ่น และเข้าถึงง่าย
+
+เอกสารยังเสนอกรอบ ADDIE, Design Thinking, TPACK/SAMR และ AI-TPACK โดยเฉพาะ AI-TPACK ที่เพิ่ม AI Knowledge และ Human & Ethical Knowledge เข้าไปในความสัมพันธ์ระหว่าง Content, Pedagogy และ Technology ดังนั้นการออกแบบระบบสำหรับบุคลากรสายสนับสนุนต้องคำนึงถึงความเหมาะสมของเนื้อหา วิธีสอน เทคโนโลยี การใช้ AI และจริยธรรมข้อมูลในเวลาเดียวกัน
+
+- ADDIE ใช้เป็นวงจร Analysis, Design, Development, Implementation, Evaluation สำหรับพัฒนาและปรับปรุงระบบ
+- Design Thinking ใช้เข้าใจผู้เรียน กำหนดปัญหา สร้างแนวคิด ทำ prototype และทดสอบจาก feedback จริง
+- Learning Analytics ใช้เปลี่ยนข้อมูลการเข้าเรียน คะแนน และความก้าวหน้าเป็นข้อเสนอเพื่อพัฒนาผู้เรียน
+- Continuous Innovation Loop ทำให้ระบบไม่หยุดที่รุ่นแรก แต่ปรับตามหลักฐานและบริบทมหาวิทยาลัยอย่างต่อเนื่อง
+
+## 5. การออกแบบ Learning Ecosystem ของระบบ
+
+ระบบที่ออกแบบประกอบด้วย 6 มิติสำคัญ ได้แก่ ผู้เรียน ผู้เอื้ออำนวยการเรียนรู้ เทคโนโลยีและข้อมูล ชุมชนการเรียนรู้ หน้างานจริง และระบบประเมิน/หลักฐานผลงาน หน้า Staff ทำหน้าที่เป็น learner-facing ecosystem ส่วน Admin เป็นพื้นที่ออกแบบเนื้อหาและ metadata และ Management เป็นพื้นที่เห็นภาพรวมเชิงนโยบาย การเพิ่มแท็บระบบนิเวศจึงทำให้ผู้เรียนเห็นมากกว่าคะแนน โดยเห็นแผนที่องค์ประกอบ ช่องว่างสมรรถนะ และเส้นทางการต่อยอด
+
+แนวคิดสำคัญคือการเปลี่ยนจาก Course-centric system ไปเป็น Ecosystem-centric system กล่าวคือ บทเรียนเป็นเพียงส่วนหนึ่งของวงจรเรียนรู้ แต่ระบบยังต้องเชื่อมการสะท้อนผล การสร้างหลักฐาน การแลกเปลี่ยนกับชุมชน และการใช้ข้อมูลเพื่อแนะนำการพัฒนารายบุคคล
+
+| องค์ประกอบ | การออกแบบในระบบ | สิ่งที่เติมเพื่อเป็น ecosystem |
+|---|---|---|
+| Learners | บุคลากรสายสนับสนุนใช้ Staff Portal เรียนตามลำดับ | เพิ่ม competency gap และ Reflection ส่วนบุคคล |
+| Facilitator/Admin | จัดการบทเรียนและข้อสอบ | เพิ่ม metadata สมรรถนะ ผลลัพธ์ และหลักฐานผลงาน |
+| Technology & AI | เว็บ static + Google Apps Script + dashboard | ต่อพัฒนา AI assistant/recommendation/feedback guardrail |
+| Community | ยังไม่ใช่ฟีเจอร์หลักในระบบเดิม | ควรเพิ่ม mentor, CoP, discussion และ sharing session |
+| Workplace | บทเรียนเกี่ยวกับ workflow | เพิ่ม assignment จากงานจริงและ portfolio |
+| Assessment | Pre-test/Post-test/Progress | เพิ่ม analytics, readiness, reflection และ evidence-based assessment |
+
+## 6. การออกแบบวิธีการจัดการเรียนรู้
+
+วิธีการจัดการเรียนรู้ที่เหมาะกับผู้เรียนวัยทำงานคือ Active Learning, Problem-Based Learning, Authentic Learning, Flipped Learning และ Collaborative Learning ระบบควรให้ผู้เรียนเริ่มจากการประเมินตนเอง เรียนบทเรียนสั้นจากวิดีโอหรือทรัพยากรออนไลน์ แล้วทำภารกิจจากงานจริง เช่น วิเคราะห์ workflow เดิม ออกแบบขั้นตอนใหม่ ใช้ AI ช่วยร่างเอกสารหรือ checklist และบันทึก Reflection หลังทดลองใช้
+
+บทเรียนจึงควรมีองค์ประกอบ 4 ส่วน ได้แก่ แนวคิดสั้น ตัวอย่างงานจริง แบบฝึกปฏิบัติ และหลักฐานผลงานที่ต้องส่ง เช่น flowchart, checklist, dashboard screenshot หรือ before-after workflow การเพิ่มช่อง “สมรรถนะเป้าหมาย”, “ผลลัพธ์การเรียนรู้” และ “หลักฐาน/Portfolio” ในหน้า Admin ช่วยให้ผู้ดูแลระบบออกแบบบทเรียนอย่างสอดคล้องกับ pedagogy มากขึ้น
+
+- ตัวอย่างกิจกรรม: วิเคราะห์ขั้นตอนเบิกพัสดุเดิมแล้วออกแบบ workflow ใหม่
+- ตัวอย่างกิจกรรม: ใช้ AI ช่วยร่างอีเมล ประกาศ หรือแบบฟอร์ม โดยตรวจสอบความถูกต้องและจริยธรรมข้อมูล
+- ตัวอย่างกิจกรรม: สร้าง dashboard ง่าย ๆ จากข้อมูลการให้บริการของหน่วยงาน
+- ตัวอย่างกิจกรรม: เขียน reflection ว่าสิ่งที่เรียนเปลี่ยนวิธีทำงานอย่างไร
+
+## 7. การบูรณาการเทคโนโลยีและ AI
+
+ระบบปัจจุบันใช้ HTML/JavaScript เชื่อม Google Apps Script เป็นฐานข้อมูลและบริการหลังบ้าน มีหน้าเข้าสู่ระบบ หน้าเรียนรู้ หน้าแอดมิน และหน้าแดชบอร์ดผู้บริหาร การต่อยอดครั้งนี้เพิ่มชั้นวิเคราะห์ระบบนิเวศโดยยังไม่ทำลาย API เดิม แต่เพิ่มข้อมูล metadata และการคำนวณ readiness จากข้อมูลที่มีอยู่
+
+AI Integration ที่เหมาะสมในระยะต่อไปคือ AI Learning Assistant ที่ตอบคำถามจากบทเรียนและคู่มืองานภายใน, AI Recommendation ที่แนะนำบทเรียนจากช่องว่างสมรรถนะ, AI Feedback ที่ช่วยร่างข้อเสนอแนะต่อ Reflection และ AI Ethics Guardrail เพื่อเตือนเรื่องข้อมูลส่วนบุคคล ความลำเอียง และความรับผิดชอบในการใช้ผลลัพธ์จาก AI
+
+| เทคโนโลยี | วัตถุประสงค์ | สถานะในต้นแบบ |
+|---|---|---|
+| LMS/Staff Portal | เรียนบทเรียน ทำแบบทดสอบ และติดตามผลรายบุคคล | มีแล้วและเพิ่มแท็บระบบนิเวศ |
+| Admin Content Manager | ออกแบบบทเรียน ข้อสอบ และ metadata สมรรถนะ | มีแล้วและเพิ่มช่อง ecosystem metadata |
+| Learning Analytics | สรุปความก้าวหน้า คะแนน กลุ่มเสี่ยง และ readiness | เพิ่มในหน้า Staff และ Management |
+| AI Learning Assistant | ช่วยตอบคำถาม แนะนำบทเรียน และให้ feedback | เสนอเป็นระยะพัฒนาต่อ |
+| Community Platform | แลกเปลี่ยนปัญหา/แนวปฏิบัติระหว่างหน่วยงาน | เสนอเป็นระยะพัฒนาต่อ |
+
+## 8. Learning Flow / Learning Journey
+
+เส้นทางการเรียนรู้ถูกออกแบบเป็นวงจรต่อเนื่อง 5 ระยะ ได้แก่ ก่อนเรียน ระหว่างเรียน หลังเรียน นอกห้องเรียน/หน้างาน และ Lifelong Learning Extension ก่อนเรียน ผู้เรียนทำ Pre-test และเห็นช่องว่างเบื้องต้น ระหว่างเรียน ผู้เรียนเรียนบทเรียนตามลำดับและทำกิจกรรม หลังเรียนทำ Post-test และดูผลเปรียบเทียบ นอกห้องเรียนผู้เรียนทดลองใช้กับงานจริง และระยะต่อยอดคือการบันทึก Reflection/Portfolio และแลกเปลี่ยนในชุมชน
+
+แท็บ “นิเวศ” ในหน้า Staff แสดง journey นี้ให้ผู้เรียนเห็นชัดเจน ทำให้ระบบไม่เป็นเพียงหน้าดูวิดีโอ แต่เป็นแผนพัฒนารายบุคคลที่เชื่อมกับงานจริงและการเรียนรู้ตลอดชีวิต
+
+1. ก่อนเรียน: วิเคราะห์พื้นฐานและความต้องการด้วย Pre-test
+2. ระหว่างเรียน: เรียนบทเรียนสั้น ทำกิจกรรม และรับคำแนะนำตามลำดับ
+3. หลังเรียน: ทำ Post-test ดูผลเปรียบเทียบ และตรวจช่องว่างสมรรถนะ
+4. การเรียนรู้นอกห้องเรียน: ทดลองใช้กับงานจริงและแลกเปลี่ยนกับเพื่อนร่วมงาน
+5. Lifelong Learning Extension: บันทึก Reflection, Portfolio และต่อยอดเป็นชุมชนนักปฏิบัติ
+
+## 9. การประเมินผล
+
+การประเมินผลควรใช้หลายเครื่องมือร่วมกัน ได้แก่ Pre-test/Post-test เพื่อวัดความรู้ก่อนและหลังเรียน Assignment/Project เพื่อวัดการนำไปใช้จริง Reflection เพื่อวัดการคิดทบทวนและ attitude และ Learning Analytics เพื่อวัดพฤติกรรมการเรียนรู้ในภาพรวม ระบบที่พัฒนาเพิ่มจึงให้ผู้เรียนบันทึก Reflection/Portfolio และให้ผู้บริหารเห็น readiness และกลุ่มที่ควรติดตาม
+
+เกณฑ์สำคัญคือไม่ควรมองคะแนนสอบเป็นผลลัพธ์เดียว เพราะบุคลากรสายสนับสนุนต้องแปลงความรู้เป็นคุณภาพงานจริง เช่น ลดเวลาทำงาน ลดข้อผิดพลาด เพิ่มความโปร่งใส และเพิ่มความสามารถในการทำงานร่วมกัน
+
+| วิธีประเมิน | เครื่องมือ | สิ่งที่วัด |
+|---|---|---|
+| Pre-test | แบบทดสอบก่อนเรียน | พื้นฐานความรู้และช่องว่างเบื้องต้น |
+| Post-test | แบบทดสอบหลังเรียนรายบท | ผลสัมฤทธิ์หลังเรียนและการพัฒนาความรู้ |
+| Assignment/Project | ภารกิจจากงานจริง เช่น workflow redesign | ทักษะการนำไปใช้และการแก้ปัญหา |
+| Reflection | บันทึกใน Staff Ecosystem Tab | การคิดทบทวน Attitude และ evidence of transfer |
+| Learning Analytics | Dashboard ผู้เรียนและผู้บริหาร | พฤติกรรมการเรียน กลุ่มเสี่ยง และ readiness ของระบบ |
+
+## 10. ระบบนวัตกรรมที่พัฒนาและการใช้งานจริง
+
+ระบบนี้ไม่ออกแบบให้เป็นเพียง prototype เชิงภาพ แต่เป็นระบบเว็บที่สามารถใช้งานได้จริงในระดับต้นแบบปฏิบัติการ โดยใช้ LMS + Learning Community + Portfolio + Analytics Platform ในรูปแบบเว็บ static ต่อกับ Google Apps Script ส่วนที่มีอยู่แล้ว ได้แก่ Login, Staff Portal, Course/Quiz Manager และ Management Dashboard ส่วนที่เพิ่มใหม่ ได้แก่ Staff Ecosystem Hub, Community Board, Portfolio Evidence, Competency Gap, Lesson Metadata และ Ecosystem Management Insights
+
+ไฟล์ที่เกี่ยวข้องกับระบบ ได้แก่ `staff.html` และ `staff-flow.js` สำหรับประสบการณ์ผู้เรียน `admin_content.html` สำหรับจัดการบทเรียน/ข้อสอบและ metadata และ `management.html` สำหรับมุมมองผู้บริหาร การออกแบบนี้ทำให้หัวข้อ Prototype ในหน้า 67 ของเอกสารอาจารย์ถูกตอบด้วยระบบที่คลิกใช้งานได้จริง ไม่ใช่ mockup อย่างเดียว โดยสามารถจับภาพหน้าจอจากระบบจริงไปใช้ประกอบการนำเสนอได้
+
+| ประเด็น | มีอยู่ในระบบเดิม | สิ่งที่พัฒนาแล้ว/ควรพัฒนาต่อ |
+|---|---|---|
+| บทเรียนและข้อสอบ | มี Staff/Admin flow | เพิ่ม metadata สมรรถนะและหลักฐานผลงาน |
+| ช่องว่างสมรรถนะ | ยังไม่ชัด | เพิ่ม competency bars และ gap recommendation |
+| Portfolio/Reflection | ยังไม่มี | เพิ่มหน้า Portfolio และปุ่มบันทึก Reflection เป็นหลักฐานผลงาน |
+| ชุมชนและพี่เลี้ยง | ยังไม่มี | เพิ่มหน้า Community Board สำหรับถามตอบและแบ่งปันแนวปฏิบัติ |
+| AI Integration | ยังไม่มี | ควรเพิ่ม AI assistant พร้อม privacy/ethics guardrail |
+| ผู้บริหาร | มี KPI พื้นฐาน | เพิ่ม readiness, at-risk group และ insight รายหน่วยงาน |
+
+## 11. การวิเคราะห์เชิงจริยธรรมและผลกระทบ
+
+ระบบเกี่ยวข้องกับข้อมูลบุคลากร คะแนน ความก้าวหน้า และ Reflection จึงต้องให้ความสำคัญกับ Data Privacy, AI Ethics, Digital Divide และ Accessibility การใช้ AI ต้องหลีกเลี่ยงการส่งข้อมูลส่วนบุคคลหรือข้อมูลลับของมหาวิทยาลัยไปยังบริการภายนอกโดยไม่มีนโยบายรองรับ และควรให้มนุษย์ตรวจสอบผลลัพธ์ของ AI ก่อนนำไปใช้จริง
+
+แนวทางป้องกันคือกำหนดสิทธิ์การเข้าถึงตามบทบาท ใช้ข้อมูลวิเคราะห์ในระดับที่จำเป็น แสดงผลผู้บริหารแบบภาพรวมเมื่อเหมาะสม มีคำอธิบายว่าข้อมูลถูกใช้เพื่อพัฒนาไม่ใช่ลงโทษ จัดทำแนวปฏิบัติการใช้ AI และออกแบบ UI ให้เข้าถึงง่ายบนอุปกรณ์หลากหลาย
+
+## 12. ความเป็นไปได้และความยั่งยืน
+
+ความเป็นไปได้ของระบบอยู่ในระดับสูง เพราะต้นแบบใช้เทคโนโลยีที่ดูแลได้ง่าย ได้แก่ static web, Google Apps Script และ dashboard ใน browser โดยไม่ต้องลงทุนโครงสร้างพื้นฐานซับซ้อน จุดแข็งคือสามารถ deploy บน Vercel/GitHub Pages และเชื่อมข้อมูลกับ Google Sheets ได้ เหมาะกับการทดลองใช้ในคณะก่อนขยายผล
+
+ความยั่งยืนขึ้นกับการมีเจ้าของระบบ การปรับปรุงเนื้อหาอย่างต่อเนื่อง การใช้ข้อมูล analytics เพื่อปรับบทเรียน และการสร้างชุมชนนักปฏิบัติ หากระบบมีเพียงบทเรียนแต่ไม่มีผู้เอื้ออำนวยการเรียนรู้หรือกิจกรรมหน้างาน ความยั่งยืนจะต่ำ ดังนั้นควรมีรอบทบทวนรายภาคการศึกษาและรายงานผลต่อผู้บริหาร
+
+## 13. Reflection
+
+สิ่งที่ได้เรียนรู้จากการออกแบบระบบนี้คือ ระบบนิเวศการเรียนรู้ดิจิทัลไม่สามารถลดรูปเหลือ LMS หรือชุดวิดีโอได้ การเรียนรู้ของบุคลากรสายสนับสนุนเกิดจากความสัมพันธ์ระหว่างผู้เรียน บริบทงานจริง เทคโนโลยี ข้อมูล ชุมชน และนโยบายสนับสนุน การเพิ่มระบบวิเคราะห์ช่องว่างและ Reflection ทำให้ผู้เรียนเห็นเส้นทางพัฒนาของตนเองมากขึ้น
+
+หากพัฒนาต่อ ควรเพิ่ม AI Assistant ที่อ้างอิงเนื้อหาในระบบและคู่มือหน่วยงาน เพิ่มระบบ Discussion/Community of Practice เพิ่มการอัปโหลด Portfolio เพิ่ม notification/reminder และพัฒนา recommendation engine ที่แนะนำบทเรียนตามช่องว่างสมรรถนะรายบุคคล
+
+## 14. สรุปแนวคิดสำคัญ
+
+จุดเด่นของระบบนิเวศการเรียนรู้ที่ออกแบบคือการเชื่อมบทเรียนออนไลน์กับสมรรถนะ งานจริง หลักฐานผลงาน และข้อมูลสำหรับการตัดสินใจของผู้บริหาร ระบบนี้จึงตอบโจทย์ทั้งผู้เรียน ผู้ดูแลระบบ และผู้บริหาร โดยยังคงความเรียบง่ายของเทคโนโลยีเดิม
+
+สิ่งที่คาดว่าจะเกิดกับผู้เรียนคือมีความมั่นใจในการใช้เทคโนโลยีมากขึ้น เข้าใจการออกแบบ workflow ใช้ข้อมูลและ AI อย่างรับผิดชอบ สามารถสร้างผลงานจากงานจริง และเกิดวัฒนธรรมการเรียนรู้ต่อเนื่องในหน่วยงาน
+
+## 15. ความสอดคล้องกับเกณฑ์การประเมิน
+
+| เกณฑ์ | การตอบสนองในรายงาน/ต้นแบบ |
+|---|---|
+| การวิเคราะห์บริบทและปัญหา | วิเคราะห์ผู้เรียนวัยทำงาน หน่วยงานสนับสนุน Pain point และข้อจำกัดของระบบเดิม |
+| การออกแบบ Learning Ecosystem | ออกแบบองค์ประกอบครบ Learners, Facilitator, Technology, Community, Workplace, Resources, Assessment และ AI |
+| การบูรณาการ Pedagogy + Technology + AI | ใช้ Active/PBL/Authentic Learning ร่วมกับ LMS, Analytics และแผน AI assistant |
+| ความคิดสร้างสรรค์และนวัตกรรม | เพิ่ม competency gap, readiness, reflection/portfolio และ management insight จากข้อมูลระบบ |
+| ความเป็นไปได้และความยั่งยืน | ใช้เทคโนโลยีเดิมที่ deploy ได้จริง และเสนอ governance/CoP/continuous improvement loop |
+
+## 16. เอกสารอ้างอิงและหลักฐานประกอบ
+
+- เอกสารประกอบการสอน `06 Developing Digital Learning Ecosystem.pdf` โดย ผศ.ดร.กอบสุข คงมนัส หน้า 1-74
+- ต้นแบบระบบ NU Smart Admin Ecosystem: `staff.html`, `staff-flow.js`, `admin_content.html`, `management.html`
+- แนวคิดที่ใช้: ADDIE, Design Thinking, TPACK/SAMR, AI-TPACK, Learning Analytics, Learning Ecosystem และ Continuous Innovation Loop
