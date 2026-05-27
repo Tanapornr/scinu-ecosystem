@@ -166,7 +166,7 @@ def build():
             continue
         if line.startswith("## "):
             add_heading(doc, line[3:].strip(), 1)
-            i += 1
+            i += 1 
             continue
         if line.startswith("### "):
             add_heading(doc, line[4:].strip(), 2)
