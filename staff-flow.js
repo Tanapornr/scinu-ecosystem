@@ -331,7 +331,7 @@
         const status = document.getElementById("ecosystemReflectionStatus");
         if (!textarea || !status) return;
 
-        const saved = localStorage.getItem(ECOSYSTEM_REFLECTION_KEY) || "";
+        const saved = currentUser.reflection || localStorage.getItem(ECOSYSTEM_REFLECTION_KEY) || "";
         if (document.activeElement !== textarea) textarea.value = saved;
         status.innerText = saved ? "มีบันทึก Reflection แล้ว ระบบใช้เป็นหลักฐาน Portfolio เบื้องต้น" : "ยังไม่มีบันทึก";
     }
@@ -405,14 +405,53 @@
         }
     }
 
-    window.saveEcosystemReflection = function (silent = false) {
+    async function saveReflectionToBackend(text) {
+        if (!gasUrl || !currentUser?.username) return;
+        try {
+            await fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                    action: "saveReflection",
+                    username: currentUser.username,
+                    reflection: text
+                })
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    async function loadReflectionFromBackend() {
+        if (!gasUrl || !currentUser?.username) return;
+        try {
+            const response = await fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                    action: "getReflection",
+                    username: currentUser.username
+                })
+            });
+            const data = await response.json();
+            if (data.status === "success" && data.reflection !== undefined) {
+                currentUser.reflection = data.reflection || "";
+                localStorage.setItem(ECOSYSTEM_REFLECTION_KEY, currentUser.reflection);
+                saveCurrentUser();
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    window.saveEcosystemReflection = async function (silent = false) {
         const textarea = document.getElementById("ecosystemReflectionText");
         if (!textarea) return;
         localStorage.setItem(ECOSYSTEM_REFLECTION_KEY, textarea.value.trim());
         currentUser.reflection = textarea.value.trim();
         currentUser.reflectionUpdatedAt = new Date().toISOString();
         saveCurrentUser();
-        saveUserSnapshot();
+        await saveReflectionToBackend(textarea.value.trim());
         renderEcosystem();
         if (!silent) showCustomAlert("บันทึก Reflection และหลักฐาน Portfolio เบื้องต้นแล้ว", "success");
     };
@@ -437,7 +476,39 @@
         window.saveEcosystemReflection(true);
         renderPortfolio();
         showCustomAlert("เพิ่ม Reflection เข้า Portfolio แล้ว", "success");
+        if (gasUrl) {
+            fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                    action: "savePortfolioItem",
+                    item: {
+                        ...items[0],
+                        username: currentUser.username,
+                        name: currentUser.name,
+                        department: currentUser.department
+                    }
+                })
+            }).catch(console.error);
+        }
     };
+
+    async function loadCommunityFromBackend() {
+        if (!gasUrl) return;
+        try {
+            const response = await fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({ action: "getCommunityPosts" })
+            });
+            const data = await response.json();
+            if (data.status === "success" && Array.isArray(data.posts)) {
+                writeJsonList(COMMUNITY_POSTS_KEY, data.posts);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     function renderCommunity() {
         const list = document.getElementById("communityPostList");
@@ -468,7 +539,7 @@
         `).join("");
     }
 
-    window.saveCommunityPost = function () {
+    window.saveCommunityPost = async function () {
         const title = document.getElementById("communityPostTitle")?.value.trim();
         const body = document.getElementById("communityPostBody")?.value.trim();
         if (!title || !body) {
@@ -485,12 +556,46 @@
             createdAt: new Date().toISOString()
         });
         writeJsonList(COMMUNITY_POSTS_KEY, posts);
+        if (gasUrl) {
+            try {
+                await fetch(gasUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: "saveCommunityPost",
+                        post: posts[0]
+                    })
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
         document.getElementById("communityPostTitle").value = "";
         document.getElementById("communityPostBody").value = "";
         renderCommunity();
         renderEcosystem();
         showCustomAlert("โพสต์ในชุมชนเรียบร้อยแล้ว", "success");
     };
+
+    async function loadPortfolioFromBackend() {
+        if (!gasUrl || !currentUser?.username) return;
+        try {
+            const response = await fetch(gasUrl, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain;charset=utf-8" },
+                body: JSON.stringify({
+                    action: "getPortfolioItems",
+                    username: currentUser.username
+                })
+            });
+            const data = await response.json();
+            if (data.status === "success" && Array.isArray(data.items)) {
+                writeJsonList(PORTFOLIO_ITEMS_KEY, data.items);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     function renderPortfolio() {
         const list = document.getElementById("portfolioItemList");
@@ -520,7 +625,7 @@
         `).join("");
     }
 
-    window.savePortfolioItem = function () {
+    window.savePortfolioItem = async function () {
         const title = document.getElementById("portfolioTitle")?.value.trim();
         const competency = document.getElementById("portfolioCompetency")?.value;
         const description = document.getElementById("portfolioDescription")?.value.trim();
@@ -539,6 +644,25 @@
             createdAt: new Date().toISOString()
         });
         writeJsonList(PORTFOLIO_ITEMS_KEY, items);
+        if (gasUrl) {
+            try {
+                await fetch(gasUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain;charset=utf-8" },
+                    body: JSON.stringify({
+                        action: "savePortfolioItem",
+                        item: {
+                            ...items[0],
+                            username: currentUser.username,
+                            name: currentUser.name,
+                            department: currentUser.department
+                        }
+                    })
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }
         document.getElementById("portfolioTitle").value = "";
         document.getElementById("portfolioDescription").value = "";
         document.getElementById("portfolioLink").value = "";
@@ -1234,16 +1358,17 @@
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ action: "getLessons" })
-            });
+            }).catch((error) => ({ ok: false, error }));
 
             const quizRequest = fetch(gasUrl, {
                 method: "POST",
                 headers: { "Content-Type": "text/plain;charset=utf-8" },
                 body: JSON.stringify({ action: "getQuizzes" })
-            });
+            }).catch((error) => ({ ok: false, error }));
 
             const [lessonResponse, quizResponse] = await Promise.all([lessonRequest, quizRequest]);
-            const [lessonData, quizData] = await Promise.all([lessonResponse.json(), quizResponse.json()]);
+            const lessonData = lessonResponse.ok ? await lessonResponse.json() : { status: "error" };
+            const quizData = quizResponse.ok ? await quizResponse.json() : { status: "error" };
 
             if (lessonData.status === "success") {
                 lessonsList = lessonData.lessons || [];
@@ -1254,6 +1379,11 @@
                 sessionStorage.setItem(QUIZZES_CACHE_KEY, JSON.stringify(allQuizzes));
             }
 
+            await Promise.all([
+                loadReflectionFromBackend(),
+                loadCommunityFromBackend(),
+                loadPortfolioFromBackend()
+            ]);
             hydrateLessonStateFromUser();
             updateVisuals();
 
