@@ -1,10 +1,10 @@
 # scinu-ecosystem
 
-เว็บระบบ NU Smart Admin Ecosystem สำหรับผู้ใช้งาน 3 กลุ่มหลัก:
+เว็บระบบ NU Smart Admin Ecosystem สำหรับผู้ใช้งาน 3 กลุ่มหลัก และต่อยอดเป็นระบบนิเวศการเรียนรู้ดิจิทัลของบุคลากรสายสนับสนุน:
 
-- Staff: เรียนบทเรียน ทำแบบทดสอบ และติดตามความคืบหน้า
-- Admin: จัดการผู้ใช้งาน บทเรียน และแบบทดสอบ
-- Management: ดูภาพรวมข้อมูลและผลการใช้งาน
+- Staff: เรียนบทเรียน ทำแบบทดสอบ ติดตามความคืบหน้า วิเคราะห์ช่องว่างสมรรถนะ และบันทึก Reflection/Portfolio
+- Admin: จัดการผู้ใช้งาน บทเรียน แบบทดสอบ และ metadata ของระบบนิเวศ เช่น สมรรถนะ ผลลัพธ์การเรียนรู้ และหลักฐานผลงาน
+- Management: ดูภาพรวมข้อมูล ผลการใช้งาน Ecosystem Readiness กลุ่มเสี่ยง และข้อเสนอเชิงระบบนิเวศรายหน่วยงาน
 
 ## Files
 
@@ -15,6 +15,13 @@
 - `management.html` - หน้าสรุปสำหรับผู้บริหาร
 - `config.js` - ตั้งค่า URL ของ Google Apps Script สำหรับ GitHub Pages/local static hosting
 - `api/config.js` - Vercel serverless function สำหรับอ่าน `GAS_WEB_APP_URL` จาก Environment Variable
+
+## Learning Ecosystem Additions
+
+- Staff portal มีแท็บ `นิเวศ` สำหรับแสดงแผนที่องค์ประกอบระบบนิเวศ, competency gap, learning journey และ Reflection/Portfolio
+- Admin content manager เพิ่มช่อง `สมรรถนะเป้าหมาย`, `ผลลัพธ์การเรียนรู้`, `หลักฐาน/Portfolio`, และ `เวลาเรียนโดยประมาณ`
+- Management dashboard เพิ่ม `Ecosystem Readiness`, จำนวนผู้เรียนที่ควรติดตาม และ insight รายหน่วยงาน
+- รายงานประกอบโครงการอยู่ในโฟลเดอร์ `reports/`
 
 ## Setup
 

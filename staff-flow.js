@@ -1,8 +1,31 @@
 (function () {
     const MIN_STUDY_SECONDS = 60;
     const COURSE_PROGRESS_KEY = `scinuLessonProgress:${currentUser?.username || "guest"}`;
+    const ECOSYSTEM_REFLECTION_KEY = `scinuEcosystemReflection:${currentUser?.username || "guest"}`;
     const LESSONS_CACHE_KEY = "scinuLessonsCache";
     const QUIZZES_CACHE_KEY = "scinuQuizzesCache";
+    const ECOSYSTEM_COMPETENCIES = [
+        { key: "digital", label: "Digital Literacy", icon: "fa-laptop-code", hint: "ใช้เครื่องมือดิจิทัลและระบบงานออนไลน์ได้มั่นใจ" },
+        { key: "workflow", label: "Workflow Automation", icon: "fa-diagram-project", hint: "ออกแบบและลดขั้นตอนงานประจำด้วยกระบวนการอัตโนมัติ" },
+        { key: "analytics", label: "Learning/Data Analytics", icon: "fa-chart-simple", hint: "อ่านข้อมูลผลลัพธ์เพื่อปรับปรุงงานและการเรียนรู้" },
+        { key: "ai", label: "AI Literacy", icon: "fa-robot", hint: "ใช้ AI อย่างรับผิดชอบเพื่อสนับสนุนงานมหาวิทยาลัย" },
+        { key: "collaboration", label: "Community & Collaboration", icon: "fa-people-group", hint: "เรียนรู้ร่วมกับเพื่อนร่วมงาน โค้ช และชุมชนนักปฏิบัติ" },
+        { key: "lifelong", label: "Lifelong Learning", icon: "fa-seedling", hint: "ต่อยอดจากบทเรียนสู่ผลงานจริงและแผนพัฒนารายบุคคล" }
+    ];
+    const ECOSYSTEM_COMPONENTS = [
+        { title: "Learners", icon: "fa-user-graduate", desc: "บุคลากรสายสนับสนุนเรียนรู้ตามบทบาท หน่วยงาน และระดับสมรรถนะ" },
+        { title: "Learning Facilitator", icon: "fa-chalkboard-user", desc: "ผู้ดูแลระบบ/วิทยากรช่วยกำกับเส้นทาง แนะนำกิจกรรม และสะท้อนผล" },
+        { title: "Technology & AI", icon: "fa-microchip", desc: "LMS, วิดีโอ, แบบทดสอบ, AI assistant และระบบติดตามความก้าวหน้า" },
+        { title: "Community", icon: "fa-comments", desc: "พื้นที่แลกเปลี่ยนความรู้ คู่พี่เลี้ยง และชุมชนนักปฏิบัติระหว่างหน่วยงาน" },
+        { title: "Workplace", icon: "fa-briefcase", desc: "โจทย์จริงจากงานธุรการ การเงิน พัสดุ แผน ห้องปฏิบัติการ และบริการการศึกษา" },
+        { title: "Assessment & Analytics", icon: "fa-clipboard-check", desc: "Pre-test, Post-test, Reflection, Portfolio และข้อมูลสำหรับผู้บริหาร" }
+    ];
+    const ECOSYSTEM_JOURNEY = [
+        { title: "ก่อนเรียน", icon: "fa-magnifying-glass-chart", desc: "วิเคราะห์พื้นฐานและช่องว่างด้วย Pre-test" },
+        { title: "ระหว่างเรียน", icon: "fa-play", desc: "เรียนบทสั้น ทำกิจกรรม และรับคำแนะนำตามลำดับ" },
+        { title: "หลังเรียน", icon: "fa-award", desc: "วัดผลด้วย Post-test พร้อมสรุปคะแนนรายบท" },
+        { title: "ต่อยอดหน้างาน", icon: "fa-infinity", desc: "บันทึก Reflection สร้าง Portfolio และแชร์ในชุมชน" }
+    ];
     let youtubeApiPromise = null;
     let youtubePlayer = null;
     let youtubeGuardTimer = null;
@@ -162,6 +185,161 @@
         const unfinishedLessons = lessonsList.length - completedLessonCount();
         return unfinishedLessons;
     }
+
+    function clampScore(value) {
+        return Math.max(0, Math.min(100, Math.round(Number(value || 0))));
+    }
+
+    function percentFromAverage(type) {
+        const avg = averageScore(type);
+        if (!avg || !Number(avg.total)) return 0;
+        return clampScore((Number(avg.score) / Number(avg.total)) * 100);
+    }
+
+    function lessonCoverageScore(keywordPattern) {
+        const lessons = sortedLessons();
+        if (!lessons.length) return 0;
+        const matched = lessons.filter((lesson) => keywordPattern.test(`${lesson.title || ""} ${lesson.desc || ""} ${lesson.competency || ""}`));
+        if (!matched.length) return 0;
+        const done = matched.filter((lesson) => stateFor(lesson).postDone).length;
+        return clampScore((done / matched.length) * 100);
+    }
+
+    function competencyScores() {
+        const progress = courseProgress();
+        const pre = percentFromAverage("pre");
+        const post = percentFromAverage("post");
+        const evidenceBonus = localStorage.getItem(ECOSYSTEM_REFLECTION_KEY) ? 12 : 0;
+        const startedBonus = Object.values(getLessonState()).some((state) => state.started || state.preDone) ? 10 : 0;
+
+        return {
+            digital: clampScore(Math.max(progress, post, pre + startedBonus)),
+            workflow: clampScore(Math.max(progress, lessonCoverageScore(/workflow|automation|กระบวนการ|อัตโนมัติ|เวิร์กโฟลว์/i))),
+            analytics: clampScore(Math.max(post, lessonCoverageScore(/analytics|data|dashboard|ข้อมูล|วิเคราะห์/i), progress * 0.7)),
+            ai: clampScore(Math.max(lessonCoverageScore(/ai|artificial|ปัญญาประดิษฐ์|เอไอ/i), post * 0.65)),
+            collaboration: clampScore(Math.max(progress * 0.65, evidenceBonus + startedBonus + completedLessonCount() * 8)),
+            lifelong: clampScore(Math.max(progress, evidenceBonus + completedLessonCount() * 12))
+        };
+    }
+
+    function readinessLabel(score) {
+        if (score >= 85) return "พร้อมเป็นต้นแบบและพี่เลี้ยงให้หน่วยงานอื่น";
+        if (score >= 70) return "พร้อมนำไปใช้จริงและต่อยอดเป็นผลงานหน้างาน";
+        if (score >= 45) return "กำลังพัฒนา ควรเติมกิจกรรมและหลักฐานการประยุกต์ใช้";
+        return "เริ่มต้นระบบ ควรทำ Pre-test และเลือกบทเรียนแรก";
+    }
+
+    function renderEcosystemMap() {
+        const container = document.getElementById("ecosystemMapCards");
+        if (!container) return;
+
+        container.innerHTML = ECOSYSTEM_COMPONENTS.map((item) => `
+            <div class="rounded-2xl border border-gray-100 bg-slate-50 p-4 flex gap-4">
+                <div class="w-11 h-11 rounded-2xl bg-white text-earth-clay border border-earth-100 flex items-center justify-center shrink-0">
+                    <i class="fas ${item.icon}"></i>
+                </div>
+                <div>
+                    <h5 class="text-sm font-bold text-gray-900">${item.title}</h5>
+                    <p class="text-xs text-gray-500 leading-relaxed mt-1">${item.desc}</p>
+                </div>
+            </div>
+        `).join("");
+    }
+
+    function renderEcosystemJourney() {
+        const container = document.getElementById("ecosystemJourneySteps");
+        if (!container) return;
+
+        container.innerHTML = ECOSYSTEM_JOURNEY.map((step, index) => `
+            <div class="rounded-2xl border border-gray-100 bg-slate-50 p-4">
+                <div class="w-10 h-10 rounded-2xl bg-earth-clay text-white flex items-center justify-center mb-3">
+                    <i class="fas ${step.icon}"></i>
+                </div>
+                <p class="text-[11px] font-bold text-earth-clay">STEP ${index + 1}</p>
+                <h5 class="text-sm font-bold text-gray-900 mt-1">${step.title}</h5>
+                <p class="text-xs text-gray-500 leading-relaxed mt-2">${step.desc}</p>
+            </div>
+        `).join("");
+    }
+
+    function renderEcosystemReflection() {
+        const textarea = document.getElementById("ecosystemReflectionText");
+        const status = document.getElementById("ecosystemReflectionStatus");
+        if (!textarea || !status) return;
+
+        const saved = localStorage.getItem(ECOSYSTEM_REFLECTION_KEY) || "";
+        if (document.activeElement !== textarea) textarea.value = saved;
+        status.innerText = saved ? "มีบันทึก Reflection แล้ว ระบบใช้เป็นหลักฐาน Portfolio เบื้องต้น" : "ยังไม่มีบันทึก";
+    }
+
+    function renderEcosystem() {
+        if (!document.getElementById("view-ecosystem")) return;
+
+        renderEcosystemMap();
+        renderEcosystemJourney();
+        renderEcosystemReflection();
+
+        const scores = competencyScores();
+        const readiness = clampScore(Object.values(scores).reduce((sum, score) => sum + score, 0) / ECOSYSTEM_COMPETENCIES.length);
+        const bars = document.getElementById("ecosystemCompetencyBars");
+        const gaps = document.getElementById("ecosystemGapList");
+
+        setText("ecosystemReadinessScore", `${readiness}%`);
+        setText("ecosystemReadinessLabel", readinessLabel(readiness));
+        setText("ecosystemCompletedMini", `${completedLessonCount()}/${lessonsList.length || 0}`);
+        setText("ecosystemGapMini", ECOSYSTEM_COMPETENCIES.filter((item) => scores[item.key] < 70).length);
+        const readinessBar = document.getElementById("ecosystemReadinessBar");
+        if (readinessBar) readinessBar.style.width = `${readiness}%`;
+
+        if (bars) {
+            bars.innerHTML = ECOSYSTEM_COMPETENCIES.map((item) => {
+                const score = scores[item.key];
+                const tone = score >= 70 ? "bg-emerald-500" : score >= 45 ? "bg-amber-500" : "bg-red-500";
+                return `
+                    <div>
+                        <div class="flex items-center justify-between gap-3 mb-2">
+                            <div class="flex items-center gap-3">
+                                <span class="w-9 h-9 rounded-xl bg-gray-50 border border-gray-100 text-earth-clay flex items-center justify-center"><i class="fas ${item.icon}"></i></span>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-900">${item.label}</p>
+                                    <p class="text-[11px] text-gray-400">${item.hint}</p>
+                                </div>
+                            </div>
+                            <span class="text-sm font-bold text-gray-700">${score}%</span>
+                        </div>
+                        <div class="h-2 bg-gray-100 rounded-full overflow-hidden"><div class="${tone} h-full rounded-full transition-all duration-500" style="width:${score}%"></div></div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        if (gaps) {
+            const low = ECOSYSTEM_COMPETENCIES
+                .map((item) => ({ ...item, score: scores[item.key] }))
+                .sort((a, b) => a.score - b.score)
+                .slice(0, 3);
+
+            gaps.innerHTML = low.map((item) => `
+                <div class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+                    <div class="flex items-start gap-3">
+                        <span class="w-9 h-9 rounded-xl bg-white text-amber-600 flex items-center justify-center shrink-0"><i class="fas ${item.icon}"></i></span>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900">${item.label} ยังอยู่ที่ ${item.score}%</p>
+                            <p class="text-xs text-gray-600 leading-relaxed mt-1">${item.hint} ควรเติมบทเรียน/กิจกรรมชุมชน และบันทึกหลักฐานการนำไปใช้กับงานจริง</p>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+    }
+
+    window.saveEcosystemReflection = function () {
+        const textarea = document.getElementById("ecosystemReflectionText");
+        if (!textarea) return;
+        localStorage.setItem(ECOSYSTEM_REFLECTION_KEY, textarea.value.trim());
+        renderEcosystem();
+        showCustomAlert("บันทึก Reflection และหลักฐาน Portfolio เบื้องต้นแล้ว", "success");
+    };
 
     function isLessonUnlocked(lesson, index) {
         if (index === 0) return true;
@@ -402,6 +580,7 @@
         renderJourney();
         renderSummaryChart();
         renderSummaryList();
+        renderEcosystem();
 
         document.getElementById("lessonsGridWrapper").classList.remove("hidden");
         if (lessonsList.length > 0) renderLessons();
@@ -556,6 +735,12 @@
                     ? `<span class="bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1 rounded-lg text-[11px] font-bold">พร้อม Post-test</span>`
                     : `<span class="bg-gray-50 text-gray-500 border border-gray-100 px-3 py-1 rounded-lg text-[11px] font-bold">Post-test ยังล็อก</span>`;
             const lockBadge = locked ? `<span class="bg-gray-100 text-gray-500 border border-gray-200 px-3 py-1 rounded-lg text-[11px] font-bold"><i class="fas fa-lock mr-1"></i>ล็อก</span>` : "";
+            const competencyBadge = lesson.competency
+                ? `<span class="bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1 rounded-lg text-[11px] font-bold">${lesson.competency}</span>`
+                : "";
+            const evidenceText = lesson.evidence
+                ? `<p class="text-xs text-gray-500 leading-relaxed mt-3"><i class="fas fa-folder-open text-earth-clay mr-1"></i>หลักฐานผลงาน: ${lesson.evidence}</p>`
+                : "";
 
             grid.innerHTML += `
                 <div class="bg-white rounded-2xl border ${isActive ? "border-earth-clay ring-2 ring-earth-clay/20" : "border-gray-100"} ${locked ? "opacity-60" : ""} shadow-sm hover:shadow-lg transition-all overflow-hidden flex flex-col">
@@ -567,7 +752,9 @@
                             </div>
                             <h4 class="text-lg font-bold text-gray-900 leading-tight mb-3">${lesson.title}</h4>
                             <p class="text-sm text-gray-500 leading-relaxed">${lesson.desc || ""}</p>
-                            <div class="flex flex-wrap gap-2 mt-5">${preBadge}${lessonBadge}${postBadge}${lockBadge}</div>
+                            ${lesson.outcome ? `<p class="text-xs text-earth-700 bg-earth-50 border border-earth-100 rounded-2xl p-3 leading-relaxed mt-4">${lesson.outcome}</p>` : ""}
+                            ${evidenceText}
+                            <div class="flex flex-wrap gap-2 mt-5">${competencyBadge}${preBadge}${lessonBadge}${postBadge}${lockBadge}</div>
                         </div>
                         <button data-lesson-id="${lesson.id}" ${locked ? "disabled" : ""} class="${lessonButtonClass(locked, state)} mt-6 w-full font-bold py-3 rounded-2xl text-sm transition-all shadow-sm">
                             ${lessonButtonLabel(locked, state)}
@@ -874,7 +1061,7 @@
     };
 
     switchTab = function (tabId) {
-        ["dashboard", "lessons", "tests"].forEach((id) => {
+        ["dashboard", "lessons", "ecosystem", "tests"].forEach((id) => {
             const view = document.getElementById(`view-${id}`);
             if (view) view.classList.add("hidden");
         });
@@ -890,6 +1077,8 @@
         if (activeButton) {
             activeButton.className = "tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-xs lg:text-sm transition-all";
         }
+
+        if (tabId === "ecosystem") renderEcosystem();
     };
 
     initConfig = async function () {

@@ -82,6 +82,24 @@
                 </div>
             </div>
 
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">Ecosystem Readiness</p>
+                    <h3 class="text-3xl font-bold text-earth-900 mt-1" id="kpiEcosystemReadiness">0%</h3>
+                    <p class="text-xs text-earth-700/70 mt-2" id="kpiEcosystemLabel">รอข้อมูลการเรียนรู้</p>
+                </div>
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">กลุ่มที่ควรติดตาม</p>
+                    <h3 class="text-3xl font-bold text-red-500 mt-1" id="kpiAtRisk">0 คน</h3>
+                    <p class="text-xs text-earth-700/70 mt-2">ความก้าวหน้าต่ำกว่า 40% หรือยังไม่มี Post-test</p>
+                </div>
+                <div class="glass-card p-5 rounded-2xl shadow-sm">
+                    <p class="text-xs font-semibold text-earth-600">หน่วยงานที่ครอบคลุม</p>
+                    <h3 class="text-3xl font-bold text-earth-700 mt-1" id="kpiDeptCoverage">0 หน่วยงาน</h3>
+                    <p class="text-xs text-earth-700/70 mt-2">ใช้วางแผนชุมชนนักปฏิบัติและพี่เลี้ยงข้ามหน่วยงาน</p>
+                </div>
+            </div>
+
             <div class="glass-card p-6 rounded-2xl border border-earth-100">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -112,6 +130,16 @@
                         <tr><td colspan="6" class="p-8 text-center text-gray-400">กำลังดาวน์โหลดข้อมูลผู้เรียน...</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="glass-card p-6 rounded-2xl border border-earth-100">
+                <div class="flex items-center justify-between mb-5">
+                    <div>
+                        <h3 class="text-base font-bold text-earth-900"><i class="fas fa-network-wired text-earth-clay mr-2"></i>ข้อเสนอเชิงระบบนิเวศรายหน่วยงาน</h3>
+                        <p class="text-xs text-earth-700/70 mt-1">ระบบสรุปจากความก้าวหน้า คะแนน และสถานะ completion เพื่อชี้จุดที่ควรเติมกิจกรรม/พี่เลี้ยง</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="ecosystemInsightCards"></div>
             </div>
         </div>
     </main>
@@ -190,15 +218,91 @@
             });
         }
 
+        function scorePercent(user, type) {
+            const score = Number(user[type + 'Score'] || 0);
+            const total = Number(user[type + 'Total'] || 0);
+            if (total > 0) return Math.round((score / total) * 100);
+            return Math.min(100, score);
+        }
+
+        function readinessLabel(score) {
+            if (score >= 80) return "ระบบพร้อมขยายผลเป็นชุมชนนักปฏิบัติและพี่เลี้ยง";
+            if (score >= 60) return "ระบบเริ่มนิ่ง ควรเพิ่ม Portfolio และกิจกรรมหน้างาน";
+            if (score >= 40) return "ควรเร่งเติมบทเรียน/แรงจูงใจให้เรียนต่อเนื่อง";
+            return "ควรเริ่มจาก orientation, Pre-test และการสื่อสารเป้าหมาย";
+        }
+
+        function renderEcosystemInsights(data) {
+            const container = document.getElementById('ecosystemInsightCards');
+            if(!container) return;
+            if(data.length === 0) {
+                container.innerHTML = '<div class="text-sm text-gray-400">ยังไม่มีข้อมูลสำหรับวิเคราะห์ระบบนิเวศ</div>';
+                return;
+            }
+
+            const deptMap = new Map();
+            data.forEach(user => {
+                const dept = user.department || "ไม่ระบุหน่วยงาน";
+                if(!deptMap.has(dept)) deptMap.set(dept, []);
+                deptMap.get(dept).push(user);
+            });
+
+            container.innerHTML = '';
+            Array.from(deptMap.entries()).forEach(([dept, users]) => {
+                const avgProgress = users.reduce((sum, u) => sum + Number(u.progress || 0), 0) / users.length;
+                const avgPost = users.reduce((sum, u) => sum + scorePercent(u, 'post'), 0) / users.length;
+                const completed = users.filter(u => Number(u.progress || 0) >= 100).length;
+                const risk = users.filter(u => Number(u.progress || 0) < 40 || !scorePercent(u, 'post')).length;
+                const readiness = Math.round((avgProgress * 0.6) + (avgPost * 0.4));
+                const advice = risk > 0
+                    ? "ควรจัดพี่เลี้ยง/กิจกรรมติดตาม และเปิดวงแลกเปลี่ยนปัญหาหน้างาน"
+                    : completed === users.length
+                        ? "พร้อมต่อยอดเป็นชุมชนต้นแบบและรวบรวมผลงาน Portfolio"
+                        : "ควรเติม Assignment จากงานจริงและ Reflection หลังเรียน";
+
+                container.innerHTML += `
+                    <div class="bg-white/80 border border-earth-100 rounded-2xl p-5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <h4 class="text-sm font-bold text-earth-900">${dept}</h4>
+                                <p class="text-xs text-earth-700/70 mt-1">${users.length} คน · เรียนครบ ${completed} คน · ติดตาม ${risk} คน</p>
+                            </div>
+                            <span class="text-xs font-bold ${readiness >= 70 ? 'text-green-600 bg-green-50' : readiness >= 45 ? 'text-amber-600 bg-amber-50' : 'text-red-600 bg-red-50'} px-3 py-1 rounded-lg">${readiness}%</span>
+                        </div>
+                        <div class="mt-4 h-2 bg-earth-100 rounded-full overflow-hidden"><div class="h-full bg-earth-clay rounded-full" style="width:${Math.min(100, readiness)}%"></div></div>
+                        <p class="text-xs text-earth-800 leading-relaxed mt-4">${advice}</p>
+                    </div>
+                `;
+            });
+        }
+
         function calculateKPIs(data) {
             document.getElementById('kpiTotalUsers').innerText = data.length + " คน";
-            if(data.length === 0) { document.getElementById('kpiAvgAccess').innerText = "0 ครั้ง"; document.getElementById('kpiProgress').innerText = "0%"; document.getElementById('kpiCompleted').innerText = "0 คน"; return; }
+            if(data.length === 0) {
+                document.getElementById('kpiAvgAccess').innerText = "0 ครั้ง";
+                document.getElementById('kpiProgress').innerText = "0%";
+                document.getElementById('kpiCompleted').innerText = "0 คน";
+                document.getElementById('kpiEcosystemReadiness').innerText = "0%";
+                document.getElementById('kpiAtRisk').innerText = "0 คน";
+                document.getElementById('kpiDeptCoverage').innerText = "0 หน่วยงาน";
+                renderEcosystemInsights([]);
+                return;
+            }
             let totalAccess = data.reduce((sum, u) => sum + Number(u.accessCount || 0), 0);
             let totalProg = data.reduce((sum, u) => sum + Number(u.progress || 0), 0);
             let compCount = data.filter(u => u.progress == 100).length;
+            let totalPost = data.reduce((sum, u) => sum + scorePercent(u, 'post'), 0);
+            let readiness = Math.round(((totalProg / data.length) * 0.6) + ((totalPost / data.length) * 0.4));
+            let atRisk = data.filter(u => Number(u.progress || 0) < 40 || !scorePercent(u, 'post')).length;
+            let deptCount = new Set(data.map(u => u.department || "ไม่ระบุหน่วยงาน")).size;
             document.getElementById('kpiAvgAccess').innerText = (totalAccess / data.length).toFixed(1) + " ครั้ง/คน";
             document.getElementById('kpiProgress').innerText = (totalProg / data.length).toFixed(0) + "%";
             document.getElementById('kpiCompleted').innerText = compCount + " คน";
+            document.getElementById('kpiEcosystemReadiness').innerText = readiness + "%";
+            document.getElementById('kpiEcosystemLabel').innerText = readinessLabel(readiness);
+            document.getElementById('kpiAtRisk').innerText = atRisk + " คน";
+            document.getElementById('kpiDeptCoverage').innerText = deptCount + " หน่วยงาน";
+            renderEcosystemInsights(data);
         }
 
         // --- Custom Alert System ---

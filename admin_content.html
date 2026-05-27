@@ -56,6 +56,22 @@
                 <button onclick="switchTab('quizzes')" id="tab-quizzes" class="py-3 px-6 border-b-2 border-transparent text-gray-500 hover:text-earth-clay focus:outline-none transition-all">จัดการคลังข้อสอบ</button>
             </div>
 
+            <div class="bg-earth-navy text-white p-6 rounded-3xl shadow-sm border border-white/10">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div>
+                        <p class="text-[11px] uppercase tracking-widest text-earth-sand font-bold">Learning Ecosystem Checklist</p>
+                        <h3 class="text-lg font-bold mt-1">เติมบทเรียนให้ครบทั้งความรู้ ทักษะ ชุมชน หน้างาน และหลักฐานผลงาน</h3>
+                        <p class="text-sm text-white/70 mt-2">บทเรียนที่ดีควรระบุสมรรถนะเป้าหมาย ผลลัพธ์ที่คาดหวัง และหลักฐานที่ผู้เรียนต้องสร้าง เพื่อให้ Dashboard วิเคราะห์ช่องว่างได้ชัดเจน</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-center text-xs font-bold">
+                        <div class="bg-white/10 rounded-2xl p-3"><i class="fas fa-laptop-code block text-earth-sand mb-2"></i>Digital</div>
+                        <div class="bg-white/10 rounded-2xl p-3"><i class="fas fa-robot block text-earth-sand mb-2"></i>AI</div>
+                        <div class="bg-white/10 rounded-2xl p-3"><i class="fas fa-people-group block text-earth-sand mb-2"></i>Community</div>
+                        <div class="bg-white/10 rounded-2xl p-3"><i class="fas fa-briefcase block text-earth-sand mb-2"></i>Workplace</div>
+                    </div>
+                </div>
+            </div>
+
             <div id="section-lessons" class="space-y-6 animate-fadeIn">
                 <div class="flex justify-between items-center bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
                     <div>
@@ -68,7 +84,7 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-50 border-b border-gray-200 text-sm font-bold text-earth-navy">
-                                <th class="p-5 text-center w-20">ลำดับ</th><th class="p-5">ชื่อบทเรียน</th><th class="p-5">คำอธิบาย</th><th class="p-5 text-center w-32">จัดการ</th>
+                                <th class="p-5 text-center w-20">ลำดับ</th><th class="p-5">ชื่อบทเรียน</th><th class="p-5">คำอธิบาย</th><th class="p-5">สมรรถนะ/หลักฐาน</th><th class="p-5 text-center w-32">จัดการ</th>
                             </tr>
                         </thead>
                         <tbody class="text-sm text-gray-800 divide-y divide-gray-100" id="lessonTableBody"></tbody>
@@ -108,6 +124,22 @@
                 <div><label class="block font-bold mb-2 text-gray-700">ชื่อบทเรียน</label><input type="text" id="lessonTitle" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none"></div>
                 <div><label class="block font-bold mb-2 text-gray-700">คำอธิบายย่อ</label><textarea id="lessonDesc" rows="3" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none"></textarea></div>
                 <div><label class="block font-bold mb-2 text-gray-700">ลิงก์เนื้อหา/วิดีโอ</label><input type="text" id="lessonUrl" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold mb-2 text-gray-700">สมรรถนะเป้าหมาย</label>
+                        <select id="lessonCompetency" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none">
+                            <option value="Digital Literacy">Digital Literacy</option>
+                            <option value="Workflow Automation">Workflow Automation</option>
+                            <option value="Learning/Data Analytics">Learning/Data Analytics</option>
+                            <option value="AI Literacy">AI Literacy</option>
+                            <option value="Community & Collaboration">Community & Collaboration</option>
+                            <option value="Lifelong Learning">Lifelong Learning</option>
+                        </select>
+                    </div>
+                    <div><label class="block font-bold mb-2 text-gray-700">เวลาเรียนโดยประมาณ (วินาที)</label><input type="number" id="lessonDuration" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none" placeholder="เช่น 600"></div>
+                </div>
+                <div><label class="block font-bold mb-2 text-gray-700">ผลลัพธ์การเรียนรู้ที่คาดหวัง</label><textarea id="lessonOutcome" rows="2" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none" placeholder="ผู้เรียนสามารถ..."></textarea></div>
+                <div><label class="block font-bold mb-2 text-gray-700">หลักฐาน/Portfolio ที่ต้องส่ง</label><input type="text" id="lessonEvidence" class="w-full border border-gray-300 rounded-xl p-3 bg-gray-50 focus:border-earth-clay focus:outline-none" placeholder="เช่น Flowchart, checklist, dashboard screenshot"></div>
             </div>
             <div class="flex justify-end gap-3 mt-8">
                 <button onclick="closeLessonModal()" class="px-6 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-all">ยกเลิก</button>
@@ -212,11 +244,17 @@
             const tbody = document.getElementById('lessonTableBody');
             tbody.innerHTML = '';
             getUniqueLessons(lessons).forEach(l => {
+                const competency = l.competency || "ยังไม่ระบุ";
+                const evidence = l.evidence || "ควรเพิ่มหลักฐานผลงาน";
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-5 text-center font-bold text-earth-navy">${l.order}</td>
                         <td class="p-5 font-bold text-gray-900">${l.title}</td>
                         <td class="p-5 text-gray-500">${l.desc}</td>
+                        <td class="p-5">
+                            <span class="inline-block bg-earth-50 text-earth-clay border border-earth-100 px-3 py-1 rounded-lg text-[11px] font-bold mb-2">${competency}</span>
+                            <p class="text-xs text-gray-500 leading-relaxed">${evidence}</p>
+                        </td>
                         <td class="p-5 text-center">
                             <button onclick='openLessonModal(${JSON.stringify(l).replace(/'/g, "&apos;")})' class="text-blue-500 bg-blue-50 hover:bg-blue-100 p-2 rounded-lg mr-2 transition-all"><i class="fas fa-edit"></i></button>
                             <button onclick="deleteLesson('${l.id}')" class="text-red-500 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-all"><i class="fas fa-trash-alt"></i></button>
@@ -242,7 +280,12 @@
                 order: document.getElementById('lessonOrder').value.trim(),
                 title: document.getElementById('lessonTitle').value.trim(),
                 desc: document.getElementById('lessonDesc').value.trim(),
-                url: document.getElementById('lessonUrl').value.trim()
+                url: document.getElementById('lessonUrl').value.trim(),
+                competency: document.getElementById('lessonCompetency').value,
+                outcome: document.getElementById('lessonOutcome').value.trim(),
+                evidence: document.getElementById('lessonEvidence').value.trim(),
+                duration: document.getElementById('lessonDuration').value.trim(),
+                durationSeconds: document.getElementById('lessonDuration').value.trim()
             };
 
             if (!lesson.order || !lesson.title) {
@@ -391,11 +434,19 @@
                 document.getElementById('lessonTitle').value = lesson.title;
                 document.getElementById('lessonDesc').value = lesson.desc;
                 document.getElementById('lessonUrl').value = lesson.url;
+                document.getElementById('lessonCompetency').value = lesson.competency || "Digital Literacy";
+                document.getElementById('lessonOutcome').value = lesson.outcome || "";
+                document.getElementById('lessonEvidence').value = lesson.evidence || "";
+                document.getElementById('lessonDuration').value = lesson.durationSeconds || lesson.duration || "";
             } else {
                 document.getElementById('lessonModalTitle').innerText = "เพิ่มบทเรียนใหม่";
                 document.getElementById('lessonId').value = ""; document.getElementById('lessonOrder').value = "";
                 document.getElementById('lessonTitle').value = ""; document.getElementById('lessonDesc').value = "";
                 document.getElementById('lessonUrl').value = "";
+                document.getElementById('lessonCompetency').value = "Digital Literacy";
+                document.getElementById('lessonOutcome').value = "";
+                document.getElementById('lessonEvidence').value = "";
+                document.getElementById('lessonDuration').value = "";
             }
             document.getElementById('lessonModal').classList.remove('hidden');
         }
