@@ -48,7 +48,7 @@
                 </div>
             </div>
             
-            <nav class="p-4 grid grid-cols-4 lg:block lg:space-y-2 gap-2" id="navigationTabs">
+            <nav class="p-4 grid grid-cols-3 sm:grid-cols-6 lg:block lg:space-y-2 gap-2" id="navigationTabs">
                 <a href="#" onclick="switchTab('dashboard')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 bg-earth-clay text-white rounded-xl shadow-sm font-bold text-xs lg:text-sm transition-all">
                     <i class="fas fa-home w-5 text-center text-base lg:text-lg"></i> หน้าแรก
                 </a>
@@ -57,6 +57,12 @@
                 </a>
                 <a href="#" onclick="switchTab('ecosystem')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all">
                     <i class="fas fa-network-wired w-5 text-center text-base lg:text-lg"></i> นิเวศ
+                </a>
+                <a href="#" onclick="switchTab('community')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all">
+                    <i class="fas fa-comments w-5 text-center text-base lg:text-lg"></i> ชุมชน
+                </a>
+                <a href="#" onclick="switchTab('portfolio')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all">
+                    <i class="fas fa-folder-open w-5 text-center text-base lg:text-lg"></i> ผลงาน
                 </a>
                 <a href="#" onclick="switchTab('tests')" class="tab-btn flex flex-col lg:flex-row items-center gap-1 lg:gap-4 p-2.5 lg:p-3.5 hover:bg-white/10 text-gray-300 hover:text-white rounded-xl font-medium text-xs lg:text-sm transition-all">
                     <i class="fas fa-chart-line w-5 text-center text-base lg:text-lg"></i> สรุปผล
@@ -215,7 +221,68 @@
                         <button onclick="saveEcosystemReflection()" class="mt-4 w-full bg-earth-900 hover:bg-earth-800 text-white py-3 rounded-2xl text-sm font-bold transition-all">
                             <i class="fas fa-save mr-2"></i>บันทึก Reflection
                         </button>
+                        <button onclick="saveReflectionAsPortfolio()" class="mt-3 w-full bg-earth-clay hover:bg-earth-700 text-white py-3 rounded-2xl text-sm font-bold transition-all">
+                            <i class="fas fa-folder-plus mr-2"></i>บันทึกเป็น Portfolio
+                        </button>
                         <p class="text-[11px] text-gray-400 mt-3" id="ecosystemReflectionStatus">ยังไม่มีบันทึก</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-community" class="hidden space-y-6 animate-fadeIn">
+                <div class="border-b pb-4 border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-comments text-earth-clay mr-3"></i> ชุมชนแลกเปลี่ยนเรียนรู้</h3>
+                    <p class="text-sm text-gray-500 mt-2">พื้นที่ถามตอบ แบ่งปันแนวปฏิบัติ และเชื่อมผู้เรียนกับพี่เลี้ยง/เพื่อนร่วมงาน</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-5">
+                            <h4 class="text-base font-bold text-gray-900"><i class="fas fa-list text-earth-clay mr-2"></i> กระดานชุมชน</h4>
+                            <span class="text-[11px] font-bold text-gray-400" id="communityPostCount">0 โพสต์</span>
+                        </div>
+                        <div id="communityPostList" class="space-y-4"></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                        <h4 class="text-base font-bold text-gray-900 mb-4"><i class="fas fa-pen-to-square text-earth-clay mr-2"></i> เพิ่มโพสต์/คำถาม</h4>
+                        <input id="communityPostTitle" class="w-full border border-gray-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-earth-clay bg-gray-50" placeholder="หัวข้อ เช่น ใช้ AI ช่วยงานสารบรรณอย่างไร">
+                        <textarea id="communityPostBody" rows="6" class="mt-3 w-full border border-gray-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-earth-clay bg-gray-50" placeholder="เขียนคำถาม ปัญหาหน้างาน หรือแนวปฏิบัติที่อยากแบ่งปัน..."></textarea>
+                        <button onclick="saveCommunityPost()" class="mt-4 w-full bg-earth-900 hover:bg-earth-800 text-white py-3 rounded-2xl text-sm font-bold transition-all">
+                            <i class="fas fa-paper-plane mr-2"></i>โพสต์ในชุมชน
+                        </button>
+                        <p class="text-xs text-gray-500 leading-relaxed mt-4">ข้อมูลส่วนนี้เก็บในระบบผู้ใช้และพร้อมต่อยอดให้บันทึกกลับฐานข้อมูลกลางเมื่อเพิ่ม action ใน Google Apps Script</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-portfolio" class="hidden space-y-6 animate-fadeIn">
+                <div class="border-b pb-4 border-gray-200">
+                    <h3 class="text-2xl font-bold text-gray-900"><i class="fas fa-folder-open text-earth-clay mr-3"></i> Portfolio ผลงานจากงานจริง</h3>
+                    <p class="text-sm text-gray-500 mt-2">รวบรวมหลักฐานการนำความรู้ไปใช้ เช่น workflow, checklist, dashboard, reflection และผลลัพธ์จากหน่วยงาน</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-5">
+                            <h4 class="text-base font-bold text-gray-900"><i class="fas fa-briefcase text-earth-clay mr-2"></i> หลักฐานผลงานของฉัน</h4>
+                            <span class="text-[11px] font-bold text-gray-400" id="portfolioItemCount">0 รายการ</span>
+                        </div>
+                        <div id="portfolioItemList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm">
+                        <h4 class="text-base font-bold text-gray-900 mb-4"><i class="fas fa-folder-plus text-earth-clay mr-2"></i> เพิ่มหลักฐานใหม่</h4>
+                        <input id="portfolioTitle" class="w-full border border-gray-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-earth-clay bg-gray-50" placeholder="ชื่อผลงาน/หลักฐาน">
+                        <select id="portfolioCompetency" class="mt-3 w-full border border-gray-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-earth-clay bg-gray-50">
+                            <option value="Digital Literacy">Digital Literacy</option>
+                            <option value="Workflow Automation">Workflow Automation</option>
+                            <option value="Learning/Data Analytics">Learning/Data Analytics</option>
+                            <option value="AI Literacy">AI Literacy</option>
+                            <option value="Community & Collaboration">Community & Collaboration</option>
+                            <option value="Lifelong Learning">Lifelong Learning</option>
+                        </select>
+                        <textarea id="portfolioDescription" rows="5" class="mt-3 w-full border border-gray-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-earth-clay bg-gray-50" placeholder="อธิบายว่าได้นำไปใช้กับงานจริงอย่างไร มีผลลัพธ์อะไร"></textarea>
+                        <input id="portfolioLink" class="mt-3 w-full border border-gray-200 rounded-2xl p-3 text-sm focus:outline-none focus:border-earth-clay bg-gray-50" placeholder="ลิงก์หลักฐาน ถ้ามี เช่น Google Drive">
+                        <button onclick="savePortfolioItem()" class="mt-4 w-full bg-earth-900 hover:bg-earth-800 text-white py-3 rounded-2xl text-sm font-bold transition-all">
+                            <i class="fas fa-save mr-2"></i>บันทึก Portfolio
+                        </button>
                     </div>
                 </div>
             </div>

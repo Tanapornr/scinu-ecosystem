@@ -2,6 +2,8 @@
     const MIN_STUDY_SECONDS = 60;
     const COURSE_PROGRESS_KEY = `scinuLessonProgress:${currentUser?.username || "guest"}`;
     const ECOSYSTEM_REFLECTION_KEY = `scinuEcosystemReflection:${currentUser?.username || "guest"}`;
+    const COMMUNITY_POSTS_KEY = `scinuCommunityPosts:${currentUser?.username || "guest"}`;
+    const PORTFOLIO_ITEMS_KEY = `scinuPortfolioItems:${currentUser?.username || "guest"}`;
     const LESSONS_CACHE_KEY = "scinuLessonsCache";
     const QUIZZES_CACHE_KEY = "scinuQuizzesCache";
     const ECOSYSTEM_COMPETENCIES = [
@@ -13,18 +15,18 @@
         { key: "lifelong", label: "Lifelong Learning", icon: "fa-seedling", hint: "ต่อยอดจากบทเรียนสู่ผลงานจริงและแผนพัฒนารายบุคคล" }
     ];
     const ECOSYSTEM_COMPONENTS = [
-        { title: "Learners", icon: "fa-user-graduate", desc: "บุคลากรสายสนับสนุนเรียนรู้ตามบทบาท หน่วยงาน และระดับสมรรถนะ" },
-        { title: "Learning Facilitator", icon: "fa-chalkboard-user", desc: "ผู้ดูแลระบบ/วิทยากรช่วยกำกับเส้นทาง แนะนำกิจกรรม และสะท้อนผล" },
-        { title: "Technology & AI", icon: "fa-microchip", desc: "LMS, วิดีโอ, แบบทดสอบ, AI assistant และระบบติดตามความก้าวหน้า" },
-        { title: "Community", icon: "fa-comments", desc: "พื้นที่แลกเปลี่ยนความรู้ คู่พี่เลี้ยง และชุมชนนักปฏิบัติระหว่างหน่วยงาน" },
-        { title: "Workplace", icon: "fa-briefcase", desc: "โจทย์จริงจากงานธุรการ การเงิน พัสดุ แผน ห้องปฏิบัติการ และบริการการศึกษา" },
-        { title: "Assessment & Analytics", icon: "fa-clipboard-check", desc: "Pre-test, Post-test, Reflection, Portfolio และข้อมูลสำหรับผู้บริหาร" }
+        { title: "Learners", icon: "fa-user-graduate", desc: "ดูเส้นทาง บทเรียน และสถานะรายบทของผู้เรียน", action: "lessons", cta: "ไปบทเรียน" },
+        { title: "Learning Facilitator", icon: "fa-chalkboard-user", desc: "ใช้ข้อมูลช่องว่างสมรรถนะเพื่อรับคำแนะนำและติดตามตนเอง", action: "ecosystem", cta: "ดูช่องว่าง" },
+        { title: "Technology & AI", icon: "fa-microchip", desc: "เข้าเรียนบทที่เกี่ยวกับเครื่องมือดิจิทัล AI และ workflow", action: "recommend:AI Literacy", cta: "หาเนื้อหา AI" },
+        { title: "Community", icon: "fa-comments", desc: "ถามตอบและแลกเปลี่ยนแนวปฏิบัติกับเพื่อนร่วมงาน", action: "community", cta: "เข้าชุมชน" },
+        { title: "Workplace", icon: "fa-briefcase", desc: "บันทึกหลักฐานการนำความรู้ไปใช้กับงานจริง", action: "portfolio", cta: "เปิด Portfolio" },
+        { title: "Assessment & Analytics", icon: "fa-clipboard-check", desc: "ดูคะแนน Pre/Post ความก้าวหน้า และผลประเมินรายบท", action: "tests", cta: "ดูสรุปผล" }
     ];
     const ECOSYSTEM_JOURNEY = [
-        { title: "ก่อนเรียน", icon: "fa-magnifying-glass-chart", desc: "วิเคราะห์พื้นฐานและช่องว่างด้วย Pre-test" },
-        { title: "ระหว่างเรียน", icon: "fa-play", desc: "เรียนบทสั้น ทำกิจกรรม และรับคำแนะนำตามลำดับ" },
-        { title: "หลังเรียน", icon: "fa-award", desc: "วัดผลด้วย Post-test พร้อมสรุปคะแนนรายบท" },
-        { title: "ต่อยอดหน้างาน", icon: "fa-infinity", desc: "บันทึก Reflection สร้าง Portfolio และแชร์ในชุมชน" }
+        { title: "ก่อนเรียน", icon: "fa-magnifying-glass-chart", desc: "วิเคราะห์พื้นฐานและช่องว่างด้วย Pre-test", action: "lessons" },
+        { title: "ระหว่างเรียน", icon: "fa-play", desc: "เรียนบทสั้น ทำกิจกรรม และรับคำแนะนำตามลำดับ", action: "lessons" },
+        { title: "หลังเรียน", icon: "fa-award", desc: "วัดผลด้วย Post-test พร้อมสรุปคะแนนรายบท", action: "tests" },
+        { title: "ต่อยอดหน้างาน", icon: "fa-infinity", desc: "บันทึก Reflection สร้าง Portfolio และแชร์ในชุมชน", action: "portfolio" }
     ];
     let youtubeApiPromise = null;
     let youtubePlayer = null;
@@ -157,7 +159,10 @@
             order: lesson.order,
             title: lesson.title,
             url: lesson.url,
-            desc: lesson.desc
+            desc: lesson.desc,
+            competency: lesson.competency,
+            outcome: lesson.outcome,
+            evidence: lesson.evidence
         };
 
         sessionStorage.setItem("activeLesson", JSON.stringify(activeLesson));
@@ -186,6 +191,62 @@
         return unfinishedLessons;
     }
 
+    function readJsonList(key) {
+        try {
+            const value = JSON.parse(localStorage.getItem(key) || "[]");
+            return Array.isArray(value) ? value : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function writeJsonList(key, list) {
+        localStorage.setItem(key, JSON.stringify(list));
+    }
+
+    function competencyPattern(label = "") {
+        const text = String(label).toLowerCase();
+        if (text.includes("ai")) return /ai|artificial|ปัญญาประดิษฐ์|เอไอ/i;
+        if (text.includes("workflow")) return /workflow|automation|กระบวนการ|อัตโนมัติ|เวิร์กโฟลว์/i;
+        if (text.includes("analytics") || text.includes("data")) return /analytics|data|dashboard|ข้อมูล|วิเคราะห์/i;
+        if (text.includes("community") || text.includes("collaboration")) return /community|collaboration|ชุมชน|แลกเปลี่ยน|ทำงานร่วม/i;
+        if (text.includes("lifelong")) return /lifelong|reflection|portfolio|เรียนรู้ตลอดชีวิต|ต่อยอด/i;
+        return /digital|technology|เทคโนโลยี|ดิจิทัล|online/i;
+    }
+
+    function lessonMatchesCompetency(lesson, competency) {
+        const pattern = competencyPattern(competency);
+        return pattern.test(`${lesson.title || ""} ${lesson.desc || ""} ${lesson.competency || ""} ${lesson.outcome || ""}`);
+    }
+
+    function findRecommendedLesson(competency) {
+        const lessons = sortedLessons();
+        return lessons.find((lesson, index) => isLessonUnlocked(lesson, index) && !stateFor(lesson).postDone && lessonMatchesCompetency(lesson, competency))
+            || lessons.find((lesson, index) => isLessonUnlocked(lesson, index) && !stateFor(lesson).postDone)
+            || lessons.find((lesson) => lessonMatchesCompetency(lesson, competency))
+            || lessons[0]
+            || null;
+    }
+
+    window.openEcosystemTarget = function (action) {
+        if (!action) return;
+        if (action.startsWith("recommend:")) {
+            window.startRecommendedForCompetency(action.replace("recommend:", ""));
+            return;
+        }
+        switchTab(action);
+    };
+
+    window.startRecommendedForCompetency = function (competency) {
+        const lesson = findRecommendedLesson(competency);
+        if (!lesson) {
+            showCustomAlert("ยังไม่มีบทเรียนที่ผูกกับสมรรถนะนี้ กรุณาให้ผู้ดูแลระบบเพิ่ม metadata บทเรียนก่อน", "error");
+            return;
+        }
+        switchTab("lessons");
+        setTimeout(() => startLesson(lesson.id), 250);
+    };
+
     function clampScore(value) {
         return Math.max(0, Math.min(100, Math.round(Number(value || 0))));
     }
@@ -210,6 +271,8 @@
         const pre = percentFromAverage("pre");
         const post = percentFromAverage("post");
         const evidenceBonus = localStorage.getItem(ECOSYSTEM_REFLECTION_KEY) ? 12 : 0;
+        const portfolioCount = readJsonList(PORTFOLIO_ITEMS_KEY).length;
+        const communityCount = readJsonList(COMMUNITY_POSTS_KEY).length;
         const startedBonus = Object.values(getLessonState()).some((state) => state.started || state.preDone) ? 10 : 0;
 
         return {
@@ -217,8 +280,8 @@
             workflow: clampScore(Math.max(progress, lessonCoverageScore(/workflow|automation|กระบวนการ|อัตโนมัติ|เวิร์กโฟลว์/i))),
             analytics: clampScore(Math.max(post, lessonCoverageScore(/analytics|data|dashboard|ข้อมูล|วิเคราะห์/i), progress * 0.7)),
             ai: clampScore(Math.max(lessonCoverageScore(/ai|artificial|ปัญญาประดิษฐ์|เอไอ/i), post * 0.65)),
-            collaboration: clampScore(Math.max(progress * 0.65, evidenceBonus + startedBonus + completedLessonCount() * 8)),
-            lifelong: clampScore(Math.max(progress, evidenceBonus + completedLessonCount() * 12))
+            collaboration: clampScore(Math.max(progress * 0.65, evidenceBonus + startedBonus + completedLessonCount() * 8 + communityCount * 12)),
+            lifelong: clampScore(Math.max(progress, evidenceBonus + completedLessonCount() * 12 + portfolioCount * 10))
         };
     }
 
@@ -234,15 +297,16 @@
         if (!container) return;
 
         container.innerHTML = ECOSYSTEM_COMPONENTS.map((item) => `
-            <div class="rounded-2xl border border-gray-100 bg-slate-50 p-4 flex gap-4">
+            <button type="button" onclick="openEcosystemTarget('${item.action}')" class="text-left rounded-2xl border border-gray-100 bg-slate-50 hover:bg-white hover:border-earth-clay/40 hover:shadow-sm p-4 flex gap-4 transition-all">
                 <div class="w-11 h-11 rounded-2xl bg-white text-earth-clay border border-earth-100 flex items-center justify-center shrink-0">
                     <i class="fas ${item.icon}"></i>
                 </div>
                 <div>
-                    <h5 class="text-sm font-bold text-gray-900">${item.title}</h5>
+                    <h5 class="text-sm font-bold text-gray-900 flex items-center gap-2">${item.title}<i class="fas fa-arrow-right text-[10px] text-earth-clay"></i></h5>
                     <p class="text-xs text-gray-500 leading-relaxed mt-1">${item.desc}</p>
+                    <span class="inline-block mt-3 text-[11px] font-bold text-earth-clay">${item.cta}</span>
                 </div>
-            </div>
+            </button>
         `).join("");
     }
 
@@ -251,14 +315,14 @@
         if (!container) return;
 
         container.innerHTML = ECOSYSTEM_JOURNEY.map((step, index) => `
-            <div class="rounded-2xl border border-gray-100 bg-slate-50 p-4">
+            <button type="button" onclick="openEcosystemTarget('${step.action}')" class="text-left rounded-2xl border border-gray-100 bg-slate-50 hover:bg-white hover:border-earth-clay/40 p-4 transition-all">
                 <div class="w-10 h-10 rounded-2xl bg-earth-clay text-white flex items-center justify-center mb-3">
                     <i class="fas ${step.icon}"></i>
                 </div>
                 <p class="text-[11px] font-bold text-earth-clay">STEP ${index + 1}</p>
                 <h5 class="text-sm font-bold text-gray-900 mt-1">${step.title}</h5>
                 <p class="text-xs text-gray-500 leading-relaxed mt-2">${step.desc}</p>
-            </div>
+            </button>
         `).join("");
     }
 
@@ -326,6 +390,14 @@
                         <div>
                             <p class="text-sm font-bold text-gray-900">${item.label} ยังอยู่ที่ ${item.score}%</p>
                             <p class="text-xs text-gray-600 leading-relaxed mt-1">${item.hint} ควรเติมบทเรียน/กิจกรรมชุมชน และบันทึกหลักฐานการนำไปใช้กับงานจริง</p>
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <button onclick="startRecommendedForCompetency('${item.label}')" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-2 rounded-xl text-[11px] font-bold transition-all">
+                                    <i class="fas fa-play mr-1"></i>ไปเรียนบทที่เกี่ยวข้อง
+                                </button>
+                                <button onclick="switchTab('portfolio')" class="bg-white hover:bg-amber-100 text-amber-700 border border-amber-200 px-3 py-2 rounded-xl text-[11px] font-bold transition-all">
+                                    <i class="fas fa-folder-plus mr-1"></i>เพิ่มหลักฐาน
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -333,12 +405,146 @@
         }
     }
 
-    window.saveEcosystemReflection = function () {
+    window.saveEcosystemReflection = function (silent = false) {
         const textarea = document.getElementById("ecosystemReflectionText");
         if (!textarea) return;
         localStorage.setItem(ECOSYSTEM_REFLECTION_KEY, textarea.value.trim());
+        currentUser.reflection = textarea.value.trim();
+        currentUser.reflectionUpdatedAt = new Date().toISOString();
+        saveCurrentUser();
+        saveUserSnapshot();
         renderEcosystem();
-        showCustomAlert("บันทึก Reflection และหลักฐาน Portfolio เบื้องต้นแล้ว", "success");
+        if (!silent) showCustomAlert("บันทึก Reflection และหลักฐาน Portfolio เบื้องต้นแล้ว", "success");
+    };
+
+    window.saveReflectionAsPortfolio = function () {
+        const textarea = document.getElementById("ecosystemReflectionText");
+        const text = textarea?.value.trim();
+        if (!text) {
+            showCustomAlert("กรุณาเขียน Reflection ก่อนบันทึกเป็น Portfolio", "error");
+            return;
+        }
+        const items = readJsonList(PORTFOLIO_ITEMS_KEY);
+        items.unshift({
+            id: `pf-${Date.now()}`,
+            title: "Reflection จากการเรียนรู้และนำไปใช้จริง",
+            competency: "Lifelong Learning",
+            description: text,
+            link: "",
+            createdAt: new Date().toISOString()
+        });
+        writeJsonList(PORTFOLIO_ITEMS_KEY, items);
+        window.saveEcosystemReflection(true);
+        renderPortfolio();
+        showCustomAlert("เพิ่ม Reflection เข้า Portfolio แล้ว", "success");
+    };
+
+    function renderCommunity() {
+        const list = document.getElementById("communityPostList");
+        const count = document.getElementById("communityPostCount");
+        if (!list) return;
+        const posts = readJsonList(COMMUNITY_POSTS_KEY);
+        if (count) count.innerText = `${posts.length} โพสต์`;
+        if (!posts.length) {
+            list.innerHTML = `
+                <div class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                    <i class="fas fa-comments text-4xl text-earth-clay/50 mb-3"></i>
+                    <p class="text-sm font-bold text-gray-600">ยังไม่มีโพสต์ในชุมชน</p>
+                    <p class="text-xs text-gray-400 mt-2">เริ่มจากการถามปัญหาหน้างานหรือแบ่งปันวิธีทำงานที่ช่วยลดขั้นตอน</p>
+                </div>`;
+            return;
+        }
+        list.innerHTML = posts.map((post) => `
+            <div class="rounded-2xl border border-gray-100 bg-slate-50 p-5">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <h5 class="text-sm font-bold text-gray-900">${post.title}</h5>
+                        <p class="text-[11px] text-gray-400 mt-1">${post.author || currentUser.name || "ผู้เรียน"} · ${new Date(post.createdAt).toLocaleString("th-TH")}</p>
+                    </div>
+                    <span class="bg-earth-50 text-earth-clay px-3 py-1 rounded-lg text-[10px] font-bold">Community</span>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mt-3 whitespace-pre-line">${post.body}</p>
+            </div>
+        `).join("");
+    }
+
+    window.saveCommunityPost = function () {
+        const title = document.getElementById("communityPostTitle")?.value.trim();
+        const body = document.getElementById("communityPostBody")?.value.trim();
+        if (!title || !body) {
+            showCustomAlert("กรุณากรอกหัวข้อและรายละเอียดโพสต์ให้ครบ", "error");
+            return;
+        }
+        const posts = readJsonList(COMMUNITY_POSTS_KEY);
+        posts.unshift({
+            id: `cm-${Date.now()}`,
+            title,
+            body,
+            author: currentUser.name,
+            department: currentUser.department,
+            createdAt: new Date().toISOString()
+        });
+        writeJsonList(COMMUNITY_POSTS_KEY, posts);
+        document.getElementById("communityPostTitle").value = "";
+        document.getElementById("communityPostBody").value = "";
+        renderCommunity();
+        renderEcosystem();
+        showCustomAlert("โพสต์ในชุมชนเรียบร้อยแล้ว", "success");
+    };
+
+    function renderPortfolio() {
+        const list = document.getElementById("portfolioItemList");
+        const count = document.getElementById("portfolioItemCount");
+        if (!list) return;
+        const items = readJsonList(PORTFOLIO_ITEMS_KEY);
+        if (count) count.innerText = `${items.length} รายการ`;
+        if (!items.length) {
+            list.innerHTML = `
+                <div class="md:col-span-2 rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+                    <i class="fas fa-folder-open text-4xl text-earth-clay/50 mb-3"></i>
+                    <p class="text-sm font-bold text-gray-600">ยังไม่มีหลักฐานผลงาน</p>
+                    <p class="text-xs text-gray-400 mt-2">เพิ่ม workflow, checklist, dashboard, reflection หรือ link หลักฐานจากงานจริง</p>
+                </div>`;
+            return;
+        }
+        list.innerHTML = items.map((item) => `
+            <div class="rounded-2xl border border-gray-100 bg-slate-50 p-5">
+                <div class="flex items-start justify-between gap-3">
+                    <h5 class="text-sm font-bold text-gray-900">${item.title}</h5>
+                    <span class="bg-earth-50 text-earth-clay px-3 py-1 rounded-lg text-[10px] font-bold">${item.competency}</span>
+                </div>
+                <p class="text-sm text-gray-600 leading-relaxed mt-3 whitespace-pre-line">${item.description}</p>
+                ${item.link ? `<a href="${item.link}" target="_blank" class="inline-flex items-center gap-2 mt-4 text-xs font-bold text-blue-600 hover:text-blue-800"><i class="fas fa-up-right-from-square"></i>เปิดหลักฐาน</a>` : ""}
+                <p class="text-[11px] text-gray-400 mt-4">${new Date(item.createdAt).toLocaleString("th-TH")}</p>
+            </div>
+        `).join("");
+    }
+
+    window.savePortfolioItem = function () {
+        const title = document.getElementById("portfolioTitle")?.value.trim();
+        const competency = document.getElementById("portfolioCompetency")?.value;
+        const description = document.getElementById("portfolioDescription")?.value.trim();
+        const link = document.getElementById("portfolioLink")?.value.trim();
+        if (!title || !description) {
+            showCustomAlert("กรุณากรอกชื่อผลงานและคำอธิบายให้ครบ", "error");
+            return;
+        }
+        const items = readJsonList(PORTFOLIO_ITEMS_KEY);
+        items.unshift({
+            id: `pf-${Date.now()}`,
+            title,
+            competency,
+            description,
+            link,
+            createdAt: new Date().toISOString()
+        });
+        writeJsonList(PORTFOLIO_ITEMS_KEY, items);
+        document.getElementById("portfolioTitle").value = "";
+        document.getElementById("portfolioDescription").value = "";
+        document.getElementById("portfolioLink").value = "";
+        renderPortfolio();
+        renderEcosystem();
+        showCustomAlert("บันทึก Portfolio เรียบร้อยแล้ว", "success");
     };
 
     function isLessonUnlocked(lesson, index) {
@@ -581,6 +787,8 @@
         renderSummaryChart();
         renderSummaryList();
         renderEcosystem();
+        renderCommunity();
+        renderPortfolio();
 
         document.getElementById("lessonsGridWrapper").classList.remove("hidden");
         if (lessonsList.length > 0) renderLessons();
@@ -1061,7 +1269,7 @@
     };
 
     switchTab = function (tabId) {
-        ["dashboard", "lessons", "ecosystem", "tests"].forEach((id) => {
+        ["dashboard", "lessons", "ecosystem", "community", "portfolio", "tests"].forEach((id) => {
             const view = document.getElementById(`view-${id}`);
             if (view) view.classList.add("hidden");
         });
@@ -1079,6 +1287,8 @@
         }
 
         if (tabId === "ecosystem") renderEcosystem();
+        if (tabId === "community") renderCommunity();
+        if (tabId === "portfolio") renderPortfolio();
     };
 
     initConfig = async function () {
