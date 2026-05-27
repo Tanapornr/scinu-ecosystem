@@ -7,7 +7,7 @@ window.SCINU_CONFIG = window.SCINU_CONFIG || {
 window.loadScinuConfig = async function loadScinuConfig() {
     const fallbackUrl = window.SCINU_CONFIG?.GAS_WEB_APP_URL || "";
 
-    try {
+    try { 
         if (window.location.protocol !== "file:") {
             const response = await fetch("/api/config", { cache: "no-store" });
             if (response.ok) {
