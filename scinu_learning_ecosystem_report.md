@@ -19,6 +19,64 @@
 | หน้า 1-55 | ใช้สรุปกรอบคิดเรื่องระบบนิเวศการเรียนรู้ดิจิทัล, affordance, ADDIE, Design Thinking, AI-TPACK, Learning Analytics และ Continuous Innovation Loop |
 | หน้า 57-74 | ใช้เป็นแม่แบบหัวข้อรายงานระดับปริญญาโท ได้แก่ Course Information, Learner Analysis, Learning Goals, Ecosystem Design, Pedagogy, Technology, Learning Flow, Assessment, Prototype, Ethics, Sustainability, Reflection และ Summary |
 
+## สรุปหัวข้อจากหน้า 54-74 และการนำมาใช้ในรายงาน
+
+ช่วงหน้า 54-74 เป็นส่วนที่เชื่อมจาก “กรอบคิดการออกแบบระบบนิเวศ” ไปสู่ “แบบฟอร์มรายงานโครงการ” ดังนั้นรายงานฉบับนี้จึงนำทุกหัวข้อในช่วงดังกล่าวมาใช้ครบ โดยหน้า 54-55 ใช้เป็นกรอบตรวจสอบคุณภาพและทิศทางพัฒนาต่อ ส่วนหน้า 57-74 ใช้เป็นโครงรายงานหลักตามที่อาจารย์กำหนด
+
+| หน้า | หัวข้อจากไฟล์อาจารย์ | ความหมาย | การนำมาเขียนในรายงานระบบ NU Smart Admin Ecosystem |
+|---|---|---|---|
+| 54 | Reality Check: จุดเด่นและความท้าทายที่ต้องเผชิญ | ตรวจสอบว่าระบบมีจุดแข็ง จุดอ่อน และข้อจำกัดจริงอะไรบ้าง | วิเคราะห์จุดเด่นของระบบที่ใช้งานได้จริง และระบุข้อจำกัด เช่น AI Assistant/Community sync ที่ควรพัฒนาต่อ |
+| 55 | Provocations & The Path Forward | ตั้งคำถามเชิงอนาคตและทิศทางต่อยอดของระบบ | เสนอแนวทางพัฒนาต่อ เช่น AI Learning Assistant, Personalized Path, Portfolio Analytics และ Community of Practice |
+| 56 | หน้าคั่น/ไม่มีสาระสำคัญจาก text layer | ใช้เป็นช่วงเปลี่ยนผ่านจากบทเรียนสู่แบบรายงาน | ไม่แยกหัวข้อ แต่ใช้เชื่อมจากกรอบคิดหน้า 54-55 ไปสู่โครงรายงานหน้า 57 เป็นต้นไป |
+| 57 | ชื่อโครงการ/จัดทำโดย/รายวิชา/อาจารย์ผู้สอน | หน้าปกและข้อมูลผู้จัดทำ | ใช้เป็นปกและหัวข้อ “ชื่อโครงการ” |
+| 58 | Course Information | ข้อมูลรายวิชา รายวิชาที่เลือก คำอธิบายรายวิชา ปัญหา/ความท้าทาย | หัวข้อ 1 ข้อมูลรายวิชาและบริบทของระบบ |
+| 59 | Learner Analysis | ลักษณะผู้เรียน ความต้องการ และ Pain point | หัวข้อ 2 การวิเคราะห์ผู้เรียน |
+| 60 | Learning Goals | Knowledge, Skills, Attitude และสมรรถนะสำคัญ | หัวข้อ 3 เป้าหมายการเรียนรู้ |
+| 61 | แนวคิดระบบนิเวศการเรียนรู้ดิจิทัล | แนวคิดหลัก จุดเด่น และปรัชญาที่ใช้ | หัวข้อ 4 แนวคิดระบบนิเวศจากเอกสารหน้า 1-55 |
+| 62 | Learning Ecosystem Design | Learners, Teachers, Technology, Community, Workplace, Resources, Assessment, AI | หัวข้อ 5 การออกแบบ Learning Ecosystem และตารางองค์ประกอบ |
+| 63 | Pedagogy Design | Active Learning, PBL, Flipped, Inquiry, Collaborative, Authentic | หัวข้อ 6 การออกแบบวิธีการจัดการเรียนรู้ |
+| 64 | Technology & AI Integration | LMS, AI Tools, Social Media, Analytics, Mobile Learning | หัวข้อ 7 การบูรณาการเทคโนโลยีและ AI |
+| 65 | Learning Flow / Learning Journey | ก่อนเรียน ระหว่างเรียน หลังเรียน นอกห้องเรียน และ Lifelong Learning | หัวข้อ 8 Learning Flow / Learning Journey |
+| 66 | Assessment Design | Pre-test, Assignment, Project, Reflection, Learning Analytics | หัวข้อ 9 การประเมินผล |
+| 67 | Prototype | LMS Prototype, AI Assistant, Mobile, Smart Classroom, Community Platform | หัวข้อ 10 ระบบนวัตกรรมที่พัฒนาและการใช้งานจริง |
+| 68 | Ethics and Impact | AI Ethics, Data Privacy, Digital Divide, Accessibility | หัวข้อ 11 การวิเคราะห์เชิงจริยธรรมและผลกระทบ |
+| 69 | Feasibility and Sustainability | ความเป็นไปได้ ปัจจัยสนับสนุน ข้อจำกัด | หัวข้อ 12 ความเป็นไปได้และความยั่งยืน |
+| 70 | Reflection | สิ่งที่ได้เรียนรู้ และสิ่งที่จะพัฒนาต่อ | หัวข้อ 13 Reflection |
+| 71 | Summary | จุดเด่นและผลที่คาดว่าจะเกิดกับผู้เรียน | หัวข้อ 14 สรุปแนวคิดสำคัญ |
+| 72 | Rubric A: Ecosystem Design 20 คะแนน | เกณฑ์ประเมินการออกแบบระบบนิเวศ | หัวข้อ 15 ความสอดคล้องกับเกณฑ์การประเมิน |
+| 73 | Rubric B: Presentation 10 คะแนน | เกณฑ์การสื่อสารและตอบคำถาม | เพิ่มแนวทางอธิบายระบบให้อาจารย์เข้าใจด้วยแผนผังและตาราง |
+| 74 | Thank You / พบกันวันนำเสนอ | ปิดการนำเสนอ | ใช้เป็นข้อสรุปเพื่อเตรียมนำเสนอระบบจริง |
+
+## อินโฟสรุปจากหน้า 54-55: Reality Check และ Path Forward
+
+```text
+Reality Check ของระบบ
+   |
+   +-- จุดเด่น
+   |     +-- มีระบบจริง: Login, บทเรียน, แบบทดสอบ, Dashboard
+   |     +-- มี Ecosystem Hub เชื่อมบทเรียน ชุมชน Portfolio และสรุปผล
+   |     +-- มีข้อมูลสำหรับวิเคราะห์ readiness และ competency gap
+   |
+   +-- ความท้าทาย
+   |     +-- ต้องเชื่อมข้อมูล Community/Portfolio กับ Google Sheets ให้ครบ
+   |     +-- ต้องมีเนื้อหาบทเรียนที่ผูกกับสมรรถนะจริงทุกบท
+   |     +-- ต้องกำหนดนโยบาย AI Ethics และ Data Privacy
+   |
+   +-- แนวทางต่อยอด
+         +-- AI Learning Assistant
+         +-- Personalized Learning Path
+         +-- Portfolio Analytics
+         +-- Community of Practice
+```
+
+| มิติจากหน้า 54-55 | จุดเด่นของระบบ | ความท้าทาย | แนวทางพัฒนาต่อ |
+|---|---|---|---|
+| Human-centered | ออกแบบสำหรับบุคลากรสายสนับสนุนที่มีเวลาจำกัด | ผู้เรียนมีพื้นฐานดิจิทัลต่างกัน | เพิ่ม onboarding และคู่มือการใช้งานสั้น ๆ |
+| Ecosystem-based | มีเมนูระบบนิเวศที่เชื่อมบทเรียน ชุมชน Portfolio และสรุปผล | ต้องทำให้ทุกข้อมูลไหลเข้าฐานกลาง | เพิ่ม Code.gs v5 และชีต Reflections, CommunityPosts, Portfolio |
+| AI-enhanced | วางโครง AI Literacy และแผน AI Assistant | ยังไม่มี assistant จริงในระบบ | เพิ่ม AI Q&A จากบทเรียนและคู่มือหน่วยงาน |
+| Data-driven | มี dashboard, readiness, competency gap | คะแนนบางส่วนยังคำนวณจาก progress พื้นฐาน | เพิ่ม rubric รายสมรรถนะและ analytics รายหน่วยงาน |
+| Sustainable | ใช้เว็บ static + Google Sheets ดูแลง่าย | ต้องมีผู้ดูแลเนื้อหาและชุมชน | ตั้งรอบทบทวนบทเรียนและวงแลกเปลี่ยนทุกภาคการศึกษา |
+
 ## ชื่อโครงการ
 
 “การออกแบบระบบนิเวศการเรียนรู้ดิจิทัลสำหรับการพัฒนาสมรรถนะบุคลากรสายสนับสนุนของคณะวิทยาศาสตร์ มหาวิทยาลัยนเรศวร”
